@@ -18,7 +18,7 @@
 
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-require_once dirname(__FILE__) . '/../../core/php/jee4heat.inc.php';
+
 class jee4heat extends eqLogic {
 
   public static function pull() {
@@ -34,7 +34,7 @@ class jee4heat extends eqLogic {
 		}
 	}
 
-public static function cron() {
+  public static function cron() {
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
       if ($jee4heat->getIsEnable()) {
         if (($jeetype = $jee4heat->getConfiguration('modele')) != '') {
@@ -44,6 +44,7 @@ public static function cron() {
           log::add(__CLASS__, 'debug', "cron : modele=".$jeetype);         
           $jee4heat->getInformations();
         }
+      }
     }
   }
 
