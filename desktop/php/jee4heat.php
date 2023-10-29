@@ -129,7 +129,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 <div class="form-group">
                                     <label class="col-md-4 control-label">{{Modèle}}</label>
                                     <div class="col-md-6">
-                                    <select id="typeEq" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="type">
                                         <select id="modeleEq" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="modele">
                                             <option value="generic">{{Générique}}</option>
                                             <option value="godin_artemis">{{Godin Artemis}}</option>
