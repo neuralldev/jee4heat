@@ -120,6 +120,11 @@ public static function cron() {
 }
 
 class jee4heatCmd extends cmd {
+  /**
+   * Summary of execute
+   * @param mixed $_options
+   * @return void
+   */
   public function execute($_options = null) {
     if ($this->getLogicalId() == 'refresh') {
       $this->getEqLogic()->getInformations();
