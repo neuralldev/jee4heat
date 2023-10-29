@@ -1,7 +1,7 @@
 {
 	"id" : "jee4heat",
-	"name" : "Pilotage de Poêle via 4Heat",
-	"description" : "Ce plugin permet de se connecter à un poêle via le cloud TiEmme Elettronica",
+	"name" : "Jee4Heat",
+	"description" : "Ce plugin permet de se connecter via le cloud TiEmme Elettronica",
 	"licence" : "AGPL",
 	"author" : "neuralldev",
 	"require" : "4.0",
