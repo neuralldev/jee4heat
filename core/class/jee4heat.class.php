@@ -60,11 +60,12 @@ public static function cron() {
     log::add(__CLASS__, 'debug', 'postajax start');
 
     if (!is_file(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json')) {
+      log::add(__CLASS__, 'debug', 'postajax no file found for '.$this->getConfiguration('modele'));
       return;
     }
     $content = file_get_contents(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json');
     if (!is_json($content)) {
-      log::add(__CLASS__, 'debug', 'postajax no file found for '.$this->getConfiguration('modele'));
+      log::add(__CLASS__, 'debug', 'postajax content is not json '.$this->getConfiguration('modele'));
       return;
     }
     $device = json_decode($content, true);
