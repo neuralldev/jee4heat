@@ -49,6 +49,8 @@ class jee4heat extends eqLogic {
         if (($jeetype = $jee4heat->getConfiguration('modele')) != '') {
         /* pull depuis poele ici */
           $ip = $jee4heat->getConfiguration('ip');
+          $id = $jee4heat->getLogicalId();
+          log::add(__CLASS__, 'debug', "cron : ID".$id);
           log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
           log::add(__CLASS__, 'debug', "cron : modele=".$jeetype);         
           $jee4heat->getInformations();
@@ -188,16 +190,20 @@ class jee4heat extends eqLogic {
       $Equipement->AddCommand($item['name'], $item['logicalId'], $item['type'], $item['subtype'], 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
       $order++;
     }
-
+   
+    log::add(__CLASS__, 'debug', 'check refresh in postsave');
+   
     $createRefreshCmd = true;
     $refresh = $this->getCmd(null, 'refresh');
     if (!is_object($refresh)) {
         $refresh = cmd::byEqLogicIdCmdName($this->getId(), __('Rafraichir', __FILE__));
         if (is_object($refresh)) {
+            log::add(__CLASS__, 'debug', 'refresh already created');
             $createRefreshCmd = false;
         }
     }
     if ($createRefreshCmd) {
+        log::add(__CLASS__, 'debug', 'refresh to be created in postsave');
         if (!is_object($refresh)) {
             $refresh = new jee4heatCmd();
             $refresh->setLogicalId('refresh');
@@ -209,8 +215,8 @@ class jee4heat extends eqLogic {
         $refresh->setEqLogic_id($this->getId());
         $refresh->save();
 
-    log::add(__CLASS__, 'debug', 'postsave stop');
   }
+  log::add(__CLASS__, 'debug', 'postsave stop');
 }
 
   public function preUpdate()

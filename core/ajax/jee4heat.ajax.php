@@ -17,12 +17,12 @@
 
 try {
     require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-    require_once dirname(__FILE__) . '/../../core/php/jee4heat.inc.php';
     include_file('core', 'authentification', 'php');
 
     if (!isConnect('admin')) {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
+    log::add(__CLASS__, 'debug', ' action request =  '.init('action'));
 
     if (init('action') == 'getStove') {
         $stove = jee4heat::byId(init('id'));
