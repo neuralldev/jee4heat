@@ -239,6 +239,7 @@ public static function cron() {
   {
   }
 
+
   public function getInformations() {
     log::add(__CLASS__, 'debug', 'getinformation start');
     if (!$this->getIsEnable()) return;
