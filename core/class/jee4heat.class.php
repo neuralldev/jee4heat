@@ -40,7 +40,7 @@ class jee4heat extends eqLogic {
               }
           }
       }
-      return $return;
+      return $return; 
   }
 
   public static function cron() {
