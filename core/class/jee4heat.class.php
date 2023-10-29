@@ -49,8 +49,8 @@ class jee4heat extends eqLogic {
         if (($jeetype = $jee4heat->getConfiguration('modele')) != '') {
         /* pull depuis poele ici */
           $ip = $jee4heat->getConfiguration('ip');
-          $id = $jee4heat->getLogicalId();
-          log::add(__CLASS__, 'debug', "cron : ID".$id);
+          $id = $jee4heat->getId();
+          log::add(__CLASS__, 'debug', "cron : ID=".$id);
           log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
           log::add(__CLASS__, 'debug', "cron : modele=".$jeetype);         
           $jee4heat->getInformations();
