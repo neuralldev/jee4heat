@@ -178,11 +178,12 @@ class jee4heat extends eqLogic {
     }
     $Equipement = eqlogic::byId($this->getId());
     $order = 0;
-    log::add(__CLASS__, 'debug', 'postsave add commands');
+    log::add(__CLASS__, 'debug', 'postsave add commands on ID '.$this->getId());
     foreach ($device['commands'] as $command) {
+      log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($command));
       $cmd = null;
       foreach ($this->getCmd() as $item) {
-        log::add(__CLASS__, 'debug', 'postsave add name='.$item['name']);
+        log::add(__CLASS__, 'debug', 'postsave add info name='.$item['name']);
         $Equipement->AddCommand($item['name'], $item['logicalId'], $item['type'], $item['subtype'], 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
         $order++;
       }
