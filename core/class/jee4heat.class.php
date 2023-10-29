@@ -53,14 +53,12 @@ class jee4heat extends eqLogic {
           log::add(__CLASS__, 'debug', "cron : ID=".$id);
           log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
           log::add(__CLASS__, 'debug', "cron : modele=".$modele);         
-          
-          $_eqName = $this->getName();
-      
+                
           if ($id==0) {
-            $modele = $this->getConfiguration('modele');
-            $ip = $this->getConfiguration('ip');
+            $modele = $jee4heat->getConfiguration('modele');
+            $ip = $jee4heat->getConfiguration('ip');
           }
-          if ($this->getConfiguration('modele') != '') {
+          if ($jee4heat->getConfiguration('modele') != '') {
               /* pull depuis poele ici */
               $fp = fsockopen($ip, 80, $errno, $errstr,10);
               if (!$fp) {
@@ -68,18 +66,17 @@ class jee4heat extends eqLogic {
                 log::add(__CLASS__, 'debug', 'error ='.$errno.' / '.$errstr);
               } else {
                 // query status
-                $query ="["SEL","0"]";
+                $query ='["SEL","0"]';
                 if (fwrite($fp, $query) > 0) {
-                $stove_return = fread($pf; 4096);
+                $stove_return = fread($fp, 4096);
                 fclose($fp);
                 } else {
                   log::add(__CLASS__, 'debug', 'not able to write on socket');
                 }
                 log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
-            }
+                }
             
-            }
-      
+          }
         }
       }
     }
@@ -297,7 +294,7 @@ class jee4heatCmd extends cmd {
   {
       if ($this->getLogicalId() == 'refresh') {
           log::add(__CLASS__, 'debug', ' ─────────> ACTUALISATION MANUELLE');
-          $this->getEqLogic()->getInformations());
+          $this->getEqLogic()->getInformations();
           log::add(__CLASS__, 'debug', ' ─────────> FIN ACTUALISATION MANUELLE');
           return;
       }
