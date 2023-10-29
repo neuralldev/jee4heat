@@ -129,8 +129,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 <div class="form-group">
                                     <label class="col-md-4 control-label">{{Modèle}}</label>
                                     <div class="col-md-6">
-                                        <select id="modele" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="modele"
-                                                onchange="if(this.selectedIndex == 2) document.getElementById('generic').style.display = 'block'; else document.getElementById('generic').style.display = 'none';">
+                                        <select id="idmodele" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="modele"
+                                                onchange="if(this.selectedIndex == 2) document.getElementById('idmodele').style.display = 'block'; else document.getElementById('idmodele').style.display = 'none';">
                                             <option value="generic">{{Générique}}</option>
                                             <option value="godin_artemis">{{Godin Artemis}}</option>
                                         </select>
