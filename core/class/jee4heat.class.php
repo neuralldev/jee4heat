@@ -199,20 +199,19 @@ class jee4heat extends eqLogic {
         }
       }
 
-      utils::a2o($cmd, $command);
-        $cmd->setConfiguration('logicalId', $cmd->getLogicalId());
-        $cmd->save();
-        if (isset($command['value'])) {
-          $link_cmds[$cmd->getId()] = $command['value'];
-        }
-        if (isset($command['configuration']) && isset($command['configuration']['updateCmdId'])) {
-          $link_actions[$cmd->getId()] = $command['configuration']['updateCmdId'];
-        }
-      } catch (Exception $exc) {
-        log::add(__CLASS__, 'debug', 'postsave error' . "");
+    utils::a2o($cmd, $command);
+      $cmd->setConfiguration('logicalId', $cmd->getLogicalId());
+      $cmd->save();
+      if (isset($command['value'])) {
+        $link_cmds[$cmd->getId()] = $command['value'];
       }
-      log::add(__CLASS__, 'debug', 'postsave stop');
+      if (isset($command['configuration']) && isset($command['configuration']['updateCmdId'])) {
+        $link_actions[$cmd->getId()] = $command['configuration']['updateCmdId'];
+      }
+    } catch (Exception $exc) {
+      log::add(__CLASS__, 'debug', 'postsave error' . "");
     }
+    log::add(__CLASS__, 'debug', 'postsave stop');
   }
 
   public function preUpdate()
@@ -221,7 +220,6 @@ class jee4heat extends eqLogic {
 
       if ($this->getConfiguration('ip') == '') {
           throw new Exception(__((__('Le champ IP ne peut être vide pour l\'équipement : ', __FILE__)) . $this->getName(), __FILE__));
-          log::add(__CLASS__, 'error', '│ Configuration : adresse ip manquante pour l\'équipement : ' . $this->getName() . ' ' . $this->getConfiguration('ip'));
       }
   }
 
