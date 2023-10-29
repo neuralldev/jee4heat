@@ -54,6 +54,9 @@ public static function cron() {
 
   public function loadCmdFromConf($_update = false) {
 
+  }
+
+  public function postAjax() {
     if (!is_file(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json')) {
       return;
     }
@@ -97,10 +100,6 @@ public static function cron() {
 
       }
     }
-  }
-
-  public function postAjax() {
-    $this->loadCmdFromConf();
   }
 
   public function postUpdate() {

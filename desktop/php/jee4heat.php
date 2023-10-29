@@ -102,7 +102,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                     <div class="col-md-6">
                                         <select id="modele" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="modele"
                                                 onchange="if(this.selectedIndex == 2) document.getElementById('generic').style.display = 'block'; else document.getElementById('generic').style.display = 'none';">
-                                            <option value="generic">{{Générique)}}</option>
+                                            <option value="generic">{{Générique}}</option>
                                             <option value="godin_artemis">{{Godin Artemis}}</option>
                                         </select>
                                     </div>
@@ -111,8 +111,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                     <div class="form-group">
                                         <label class="col-md-4 control-label">{{Adresse IP}}</label>
                                         <div class="col-md-6">
-                                            <input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="ip" type="text" placeholder="{{saisir l'adresse IP du poêle}}">
-                                            <span style="font-size: 75%;">({{192.168.101.37}})</span>
+                                            <input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="ip" type="text" placeholder="{{saisir l'adresse IP de l'équipement}}">
+                                            <span style="font-size: 75%;">({{exemple : 192.168.101.37}})</span>
                                         </div>
                                     </div>
                                 </div>
