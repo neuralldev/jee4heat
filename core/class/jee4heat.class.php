@@ -21,18 +21,27 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 class jee4heat extends eqLogic {
 
-  public static function pull() {
-		foreach (eqLogic::byType('jee4heat', true) as $jee4heat) {
-			$jee4heat->getInformations();
-			$j4 = cache::byKey('jee4heatWidgetmobile' . $jee4heat->getId());
-			$j4->remove();
-			$j4 = cache::byKey('jee4heatWidgetdashboard' . $jee4heat->getId());
-			$j4->remove();
-			$jee4heat->toHtml('mobile');
-			$jee4heat->toHtml('dashboard');
-			$jee4heat->refreshWidget();
-		}
-	}
+  public static function deadCmd()
+  {
+      $return = array();
+      foreach (eqLogic::byType('jee4heat') as $jee4heat) {
+          foreach ($jee4heat->getCmd() as $cmd) {
+              preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('modele', ''), $matches);
+              foreach ($matches[1] as $cmd_id) {
+                  if (!cmd::byId(str_replace('#', '', $cmd_id))) {
+                      $return[] = array('detail' => __('jee4heat', __FILE__) . ' ' . $jee4heat->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
+                  }
+              }
+              preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('ip', ''), $matches);
+              foreach ($matches[1] as $cmd_id) {
+                  if (!cmd::byId(str_replace('#', '', $cmd_id))) {
+                      $return[] = array('detail' => __('jee4heat', __FILE__) . ' ' . $jee4heat->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('IP', __FILE__), 'who' => '#' . $cmd_id . '#');
+                  }
+              }
+          }
+      }
+      return $return;
+  }
 
   public static function cron() {
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
@@ -179,39 +188,32 @@ class jee4heat extends eqLogic {
     $Equipement = eqlogic::byId($this->getId());
     $order = 0;
     log::add(__CLASS__, 'debug', 'postsave add commands on ID '.$this->getId());
-    foreach ($device['commands'] as $command) {
-      log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($command));
-      $cmd = null;
-      foreach ($this->getCmd() as $item) {
-        log::add(__CLASS__, 'debug', 'postsave add info name='.$item['name']);
-        $Equipement->AddCommand($item['name'], $item['logicalId'], $item['type'], $item['subtype'], 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
-        $order++;
-      }
+    foreach ($device['commands'] as $item) {
+      log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
+      $Equipement->AddCommand($item['name'], $item['logicalId'], $item['type'], $item['subtype'], 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
+      $order++;
     }
 
-    try {
-      if ($cmd == null || !is_object($cmd)) {
-        $cmd = new jee4heatCmd();
-        $cmd->setEqLogic_id($this->getId());
-      } else {
-        $command['name'] = $cmd->getName();
-        if (isset($command['display'])) {
-          unset($command['display']);
+    $createRefreshCmd = true;
+    $refresh = $this->getCmd(null, 'refresh');
+    if (!is_object($refresh)) {
+        $refresh = cmd::byEqLogicIdCmdName($this->getId(), __('Rafraichir', __FILE__));
+        if (is_object($refresh)) {
+            $createRefreshCmd = false;
         }
-      }
-
-    utils::a2o($cmd, $command);
-      $cmd->setConfiguration('logicalId', $cmd->getLogicalId());
-      $cmd->save();
-      if (isset($command['value'])) {
-        $link_cmds[$cmd->getId()] = $command['value'];
-      }
-      if (isset($command['configuration']) && isset($command['configuration']['updateCmdId'])) {
-        $link_actions[$cmd->getId()] = $command['configuration']['updateCmdId'];
-      }
-    } catch (Exception $exc) {
-      log::add(__CLASS__, 'debug', 'postsave error' . "");
     }
+    if ($createRefreshCmd) {
+        if (!is_object($refresh)) {
+            $refresh = new jee4heatCmd();
+            $refresh->setLogicalId('refresh');
+            $refresh->setIsVisible(1);
+            $refresh->setName(__('Rafraichir', __FILE__));
+        }
+        $refresh->setType('action');
+        $refresh->setSubType('other');
+        $refresh->setEqLogic_id($this->getId());
+        $refresh->save();
+
     log::add(__CLASS__, 'debug', 'postsave stop');
   }
 
