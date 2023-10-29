@@ -61,7 +61,6 @@ public static function cron() {
 
       log::add(__CLASS__, 'debug', 'postajax end');
     }
-  }
 
   public function postSave() {
     log::add(__CLASS__, 'debug', 'postsave start');
@@ -112,7 +111,6 @@ public static function cron() {
         log::add(__CLASS__, 'debug', 'postsave error' . "");
       }
       log::add(__CLASS__, 'debug', 'postsave stop');
-
   }
 
   public function postUpdate() {
