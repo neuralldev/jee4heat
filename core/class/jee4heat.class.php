@@ -57,17 +57,22 @@ public static function cron() {
   }
 
   public function postAjax() {
+    log::add(__CLASS__, 'debug', 'postajax start');
+
     if (!is_file(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json')) {
       return;
     }
     $content = file_get_contents(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json');
     if (!is_json($content)) {
+      log::add(__CLASS__, 'debug', 'postajax no file found for '.$this->getConfiguration('modele'));
       return;
     }
     $device = json_decode($content, true);
     if (!is_array($device) || !isset($device['commands'])) {
+      log::add(__CLASS__, 'debug', 'postajax array cannot be decoded ');
       return true;
     }
+    log::add(__CLASS__, 'debug', 'postajax add commands');
     foreach ($device['commands'] as $command) {
       $cmd = null;
       foreach ($this->getCmd() as $liste_cmd) {
@@ -97,17 +102,18 @@ public static function cron() {
           $link_actions[$cmd->getId()] = $command['configuration']['updateCmdId'];
         }
       } catch (Exception $exc) {
-
+        log::add(__CLASS__, 'debug', 'postajax error' . "");
       }
+      log::add(__CLASS__, 'debug', 'postajax end' . "");
     }
   }
 
   public function postUpdate() {
+    log::add(__CLASS__, 'debug', 'postupdate start');
   }
 
   public function getjee4heat() {
   /* c'est là qu'on appelle les API */
-    
     log::add(__CLASS__, 'debug', 'received' . "");
     $this->checkAndUpdateCmd('jee4heat', "");
   }

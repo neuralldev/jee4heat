@@ -23,7 +23,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 				<span>{{Configuration}}</span>
 			</div>
 		</div>
-		<legend><i class="icon meteo-soleil"></i> {{Mes Poêles}}</legend>
+		<legend><i class="icon divers-thermometer31"></i> {{Mes Poêles}}</legend>
 		<input class="form-control" placeholder="{{Rechercher}}" id="in_searchEqlogic" />
 		<div class="eqLogicThumbnailContainer">
 			<?php
