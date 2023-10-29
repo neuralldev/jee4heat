@@ -107,7 +107,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                         </select>
                                     </div>
                                 </div>
-                                <div id="netautre">
+                                <div id="addrip">
                                     <div class="form-group">
                                         <label class="col-md-4 control-label">{{Adresse IP}}</label>
                                         <div class="col-md-6">

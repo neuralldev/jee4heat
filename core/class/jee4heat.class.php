@@ -36,7 +36,7 @@ public static function cron() {
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
       if (($jeetype = $jee4heat->getConfiguration('modele')) != '') {
         /* pull depuis poele ici */
-          $ip = $jee4heat->getConfiguration('modele');
+          $ip = $jee4heat->getConfiguration('ip');
           log::add(__CLASS__, 'debug', "IP du poele=".$ip);
           log::add(__CLASS__, 'debug', "modele=".$jeetype);         
           $jee4heat->refreshWidget();
@@ -46,7 +46,7 @@ public static function cron() {
 
   public function getInformations() {
       if ($this->getConfiguration('modele') != '') {
-        $this->getStove($this->getConfiguration('modele'));
+        /*$this->getStove($this->getConfiguration('modele'));*/
         /* pull depuis poele ici */
       }
       $this->refreshWidget();
@@ -115,7 +115,7 @@ public static function cron() {
 
   public function getjee4heat() {
   /* c'est là qu'on appelle les API */
-    log::add(__CLASS__, 'debug', 'received' . "");
+    log::add(__CLASS__, 'debug', 'getjee4heat' . "");
     $this->checkAndUpdateCmd('jee4heat', "");
   }
 }
