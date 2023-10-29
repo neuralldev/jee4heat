@@ -169,7 +169,7 @@ class jee4heat extends eqLogic {
     $order = 1;
 
     if (!is_file(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json')) {
-      log::add(__CLASS__, 'debug', 'postsave no file found for '.$this->getConfiguration('modele'));
+      log::add(__CLASS__, 'debug', 'postsave no file found for '._eqName.', then do nothing');
       return;
     }
     $content = file_get_contents(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json');
