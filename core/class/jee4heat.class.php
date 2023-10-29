@@ -216,6 +216,7 @@ class jee4heat extends eqLogic {
 
     log::add(__CLASS__, 'debug', 'postsave stop');
   }
+}
 
   public function preUpdate()
   {
