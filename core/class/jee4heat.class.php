@@ -59,18 +59,24 @@ public static function cron() {
   public function postAjax() {
     log::add(__CLASS__, 'debug', 'postajax start');
 
+      log::add(__CLASS__, 'debug', 'postajax end');
+    }
+  }
+
+  public function postSave() {
+    log::add(__CLASS__, 'debug', 'postsave start');
     if (!is_file(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json')) {
-      log::add(__CLASS__, 'debug', 'postajax no file found for '.$this->getConfiguration('modele'));
+      log::add(__CLASS__, 'debug', 'postsave no file found for '.$this->getConfiguration('modele'));
       return;
     }
     $content = file_get_contents(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json');
     if (!is_json($content)) {
-      log::add(__CLASS__, 'debug', 'postajax content is not json '.$this->getConfiguration('modele'));
+      log::add(__CLASS__, 'debug', 'postsave content is not json '.$this->getConfiguration('modele'));
       return;
     }
     $device = json_decode($content, true);
     if (!is_array($device) || !isset($device['commands'])) {
-      log::add(__CLASS__, 'debug', 'postajax array cannot be decoded ');
+      log::add(__CLASS__, 'debug', 'postsave array cannot be decoded ');
       return true;
     }
     log::add(__CLASS__, 'debug', 'postajax add commands');
@@ -103,10 +109,10 @@ public static function cron() {
           $link_actions[$cmd->getId()] = $command['configuration']['updateCmdId'];
         }
       } catch (Exception $exc) {
-        log::add(__CLASS__, 'debug', 'postajax error' . "");
+        log::add(__CLASS__, 'debug', 'postsave error' . "");
       }
-      log::add(__CLASS__, 'debug', 'postajax end' . "");
-    }
+      log::add(__CLASS__, 'debug', 'postsave stop');
+
   }
 
   public function postUpdate() {
