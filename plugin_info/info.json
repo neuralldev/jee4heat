@@ -11,6 +11,6 @@
 	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile","v4"],
     "display": "panel",
     "mobile": "panel",
-    "changelog" : "",
-    "documentation" : ""
+    "changelog" : "tbd",
+    "documentation" : "tbd"
 }
