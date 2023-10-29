@@ -53,7 +53,7 @@ class jee4heat extends eqLogic {
           log::add(__CLASS__, 'debug', "cron : ID=".$id);
           log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
           log::add(__CLASS__, 'debug', "cron : modele=".$jeetype);         
-          $jee4heat->getInformations();
+          $jee4heat->getInformations($id, $ip, $jeetype);
         }
       }
     }
@@ -231,7 +231,7 @@ class jee4heat extends eqLogic {
   public function postUpdate()
   {
     log::add(__CLASS__, 'debug', 'postupdate start');
-    $this->getInformations();
+   // $this->getInformations();
     log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
@@ -244,13 +244,32 @@ class jee4heat extends eqLogic {
   }
 
 
-  public function getInformations() {
+  public function getInformations($id = 0, $ip ="", $modele="") {
     log::add(__CLASS__, 'debug', 'getinformation start');
     if (!$this->getIsEnable()) return;
     $_eqName = $this->getName();
 
+    if ($id==0) {
+      $modele = $this->getConfiguration('modele');
+      $ip = $this->getConfiguration('ip');
+    }
     if ($this->getConfiguration('modele') != '') {
         /* pull depuis poele ici */
+        $fp = fsockopen($ip, 80, $errno, $errstr,10);
+        if (!$fp) {
+          log::add(__CLASS__, 'debug', 'error opening socket on '.$ip);
+        } else {
+          // query status
+          $query ="["SEL","0"]";
+          if (fwrite($fp, $query) > 0) {
+          $stove_return = fread($pf; 4096);
+          fclose($fp);
+          } else {
+            log::add(__CLASS__, 'debug', 'not able to write on socket');
+          }
+          log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
+      }
+      
       }
       log::add(__CLASS__, 'debug', 'getinformation stop');
     }
@@ -277,7 +296,7 @@ class jee4heatCmd extends cmd {
   {
       if ($this->getLogicalId() == 'refresh') {
           log::add(__CLASS__, 'debug', ' ─────────> ACTUALISATION MANUELLE');
-          $this->getEqLogic()->getInformations();
+          $this->getEqLogic()->getInformations($this->getId());
           log::add(__CLASS__, 'debug', ' ─────────> FIN ACTUALISATION MANUELLE');
           return;
       }
