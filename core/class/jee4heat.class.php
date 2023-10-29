@@ -61,7 +61,7 @@ class jee4heat extends eqLogic {
   {
       $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
-          log::add(__CLASS__, 'debug', '│ Name : ' . $Name . ' -- Type : ' . $Type . ' -- LogicalID : ' . $_logicalId . ' -- Template Widget / Ligne : ' . $Template . '/' . $forceLineB . '-- Type de générique : ' . $generic_type . ' -- Icône : ' . $icon . ' -- Min/Max : ' . $valuemin . '/' . $valuemax . ' -- Calcul/Arrondi : ' . $_calculValueOffset . '/' . $_historizeRound . ' -- Ordre : ' . $_order);
+          log::add(__CLASS__, 'debug', ' add record for '.$Name);
           $Command = new jee4heatCmd();
           $Command->setId(null);
           $Command->setLogicalId($_logicalId);
@@ -108,7 +108,6 @@ class jee4heat extends eqLogic {
 
           if ($repeatevent == true && $Type == 'info') {
               $Command->setconfiguration('repeatEventManagement', 'never');
-              log::add(__CLASS__, 'debug', '│ No Repeat pour l\'info avec le nom : ' . $Name);
           }
           if ($valuemin != 'default') {
               $Command->setconfiguration('minValue', $valuemin);
@@ -123,25 +122,20 @@ class jee4heat extends eqLogic {
           $Command->save();
       }
 
-      if ($valuemin != 'default') {
-          $Command->setconfiguration('minValue', $valuemin);
-          $Command->save();
-      }
-      if ($valuemax != 'default') {
-          $Command->setconfiguration('maxValue', $valuemax);
-          $Command->save();
-      }
+      log::add(__CLASS__, 'debug', ' check for refresh');
 
       $createRefreshCmd = true;
       $refresh = $this->getCmd(null, 'refresh');
       if (!is_object($refresh)) {
           $refresh = cmd::byEqLogicIdCmdName($this->getId(), __('Rafraichir', __FILE__));
           if (is_object($refresh)) {
-              $createRefreshCmd = false;
+            log::add(__CLASS__, 'debug', ' refresh already created');
+            $createRefreshCmd = false;
           }
       }
       if ($createRefreshCmd) {
-          if (!is_object($refresh)) {
+        log::add(__CLASS__, 'debug', ' create refresh');
+        if (!is_object($refresh)) {
               $refresh = new jee4heatCmd();
               $refresh->setLogicalId('refresh');
               $refresh->setIsVisible(1);
@@ -152,6 +146,7 @@ class jee4heat extends eqLogic {
           $refresh->setEqLogic_id($this->getId());
           $refresh->save();
       }
+      log::add(__CLASS__, 'debug', ' addcommand end');
       return $Command;
   }
 
