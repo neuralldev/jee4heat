@@ -71,11 +71,12 @@ class jee4heat extends eqLogic {
                 // query status
                 $query ='["SEL","0"]';
                 if (!socket_send($socket, $query, strlen($query), 0)) {
-                 log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
+                 log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
                 } else {
                     if(!socket_recv($socket,$stove_return,4096)) {
-                      log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
+                      log::add(__CLASS__, 'debug', ' error rceiving = '.socket_strerror(socket_last_error($socket)));
                     }
+              socket_close($socket);
               log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
               }
           }
