@@ -61,7 +61,7 @@ class jee4heat extends eqLogic {
 
   public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
   {
-      $Command = $this->getCmd(null, $_logicalId);
+    $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
           log::add(__CLASS__, 'debug', ' add record for '.$Name);
           $Command = new jee4heatCmd();
@@ -124,7 +124,7 @@ class jee4heat extends eqLogic {
           $Command->save();
       }
 
-      log::add(__CLASS__, 'debug', ' check for refresh');
+     /*  log::add(__CLASS__, 'debug', ' check for refresh');
 
       $createRefreshCmd = true;
       $refresh = $this->getCmd(null, 'refresh');
@@ -147,7 +147,7 @@ class jee4heat extends eqLogic {
           $refresh->setSubType('other');
           $refresh->setEqLogic_id($this->getId());
           $refresh->save();
-      }
+      } */
       log::add(__CLASS__, 'debug', ' addcommand end');
       return $Command;
   }
