@@ -111,7 +111,9 @@ public static function cron() {
         log::add(__CLASS__, 'debug', 'postsave error' . "");
       }
       log::add(__CLASS__, 'debug', 'postsave stop');
+    }
   }
+      
 
   public function postUpdate() {
     log::add(__CLASS__, 'debug', 'postupdate start');
