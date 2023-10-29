@@ -36,7 +36,16 @@
     {"name": "INCONNU  50046", "type": "info", "subtype": "string",  "logicalId": "50046"},
     {"name": "INCONNU  50053", "type": "info", "subtype": "string",  "logicalId": "50053"},
     {"name": "INCONNU  50139", "type": "info", "subtype": "string",  "logicalId": "50139"},
-    {"name": "INCONNU  50140", "type": "info", "subtype": "string",  "logicalId": "50140"}
+    {"name": "INCONNU  50140", "type": "info", "subtype": "string",  "logicalId": "50140"},
+    { "name": "Rafraichir",
+      "type": "action",
+      "subtype": "other",
+      "display": { "icon": "<i class=\"fas fa-refresh\"><\/i>" },
+      "configuration" : { "request" : "refresh" },
+      "isVisible": 1,
+      "logicalId": "refresh"
+    }
+
   ]
 }
 
