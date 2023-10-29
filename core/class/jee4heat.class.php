@@ -60,27 +60,30 @@ class jee4heat extends eqLogic {
           }
           if ($jee4heat->getConfiguration('modele') != '') {
               /* pull depuis poele ici */
-              $fp = fsockopen($ip, 80, $errno, $errstr,10);
-              if (!$fp) {
-                log::add(__CLASS__, 'debug', 'error opening socket on '.$ip);
-                log::add(__CLASS__, 'debug', 'error ='.$errno.' / '.$errstr);
+              $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+              if (!$socket) {
+                log::add(__CLASS__, 'debug', 'error opening socket');
               } else {
+                if (!socket_connect($socket, $ip, 80)) {
+                    log::add(__CLASS__, 'debug', 'error connecting socket on '.$ip);
+                    log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
+                }
                 // query status
                 $query ='["SEL","0"]';
-                if (fwrite($fp, $query) > 0) {
-                $stove_return = fread($fp, 4096);
-                fclose($fp);
+                if (!socket_send($socket, $query, strlen($query), 0)) {
+                 log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
                 } else {
-                  log::add(__CLASS__, 'debug', 'not able to write on socket');
-                }
-                log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
-                }
-            
+                    if(!socket_recv($socket,$stove_return,4096)) {
+                      log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
+                    }
+              log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
+              }
           }
         }
       }
     }
   }
+}
 
   public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
   {
