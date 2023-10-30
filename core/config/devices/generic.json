@@ -4,7 +4,8 @@
   "configuration" : {
       "model" : "generic",
       "type" : "stove",
-      "state" : 30001
+      "state" : 30001,
+      "error" : 30002
   },
   "commands": [
     {"name": "Heating power", "type": "info", "subtype": "string",  "logicalId": "20801"},
@@ -12,8 +13,8 @@
     {"name": "Combustion", "type": "info", "subtype": "numeric",  "logicalId": "20364"},
     {"name": "Room temperature set", "type": "info", "subtype": "numeric",  "logicalId": "20493", "unit" : "°C"},
     {"name": "Heat Power", "type": "info", "subtype": "string",  "logicalId": "20575"},
-    {"name": "Etat equipement", "type": "info", "subtype": "numeric",  "logicalId": "30001"},
-    {"name": "Erreur", "type": "info", "subtype": "numleric",  "logicalId": "30002"},
+    {"name": "Etat equipement", "type": "info", "subtype": "numeric",  "logicalId": "30001", "generictype": "THERMOSTAT_STATE_NAME"},
+    {"name": "Erreur", "type": "info", "subtype": "numeric",  "logicalId": "30002"},
     {"name": "Timer", "type": "info", "subtype": "string",  "logicalId": "30003"},
     {"name": "Allumage", "type": "info", "subtype": "string",  "logicalId": "30004"},
     {"name": "Temperature des fumées", "type": "info", "subtype": "numeric",  "logicalId": "30005", "unit" : "°C"},
@@ -22,8 +23,8 @@
     {"name": "Temperature foyer", "type": "info", "subtype": "numeric",  "logicalId": "30026", "unit" : "°C"},
     {"name": "Dépression fumées", "type": "info", "subtype": "string",  "logicalId": "30033"},
     {"name": "Contraste télécommande", "type": "info", "subtype": "numeric",  "logicalId": "30142"},
-    {"name": "Sonde température", "type": "info", "subtype": "numeric",  "logicalId": "50006", "unit" : "°C"},
-    {"name": "Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C"},
+    {"name": "Température ambiante", "type": "info", "subtype": "numeric",  "logicalId": "50006", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE"},
+    {"name": "Thermostat Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C", "generictype": "THERMOSTAT_SET_SETPOINT"},
     {"name": "INCONNU  30012", "type": "info", "subtype": "numeric",  "logicalId": "30012", "unit" : "°C"},
     {"name": "INCONNU  20119", "type": "info", "subtype": "string",  "logicalId": "20119"},
     {"name": "INCONNU  20369", "type": "info", "subtype": "string",  "logicalId": "20369"},

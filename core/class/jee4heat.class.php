@@ -20,6 +20,7 @@
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 const STATE_REGISTER = 30001;
+const ERROR_REGISTER = 30002;
 const BUFFER_SIZE = 2048;
 const SOCKET_PORT = 80;
 const DATA_QUERY = '["SEL","0"]';
@@ -44,7 +45,29 @@ const MODE_NAMES = [
   31 => "Allumage",
   32 => "Allumage",
   33 => "Allumage",
-  34 => "Allumage",
+  34 => "Allumage"
+];
+
+const ERROR_NAMES = [
+  0 => "No error",
+  1 => "Safety Thermostat HV1 => signalled also in case of Stove OFF",
+  2 => "Safety PressureSwitch HV2 => signalled with Combustion Fan ON",
+  3 => "Extinguishing for Exhausting Temperature lowering",
+  4 => "Extinguishing for water over Temperature",
+  5 => "Extinguishing for Exhausting over Temperature",
+  6 => "unknown",
+  7 => "Encoder Error => No Encoder Signal (in case of P25=1 or 2)",
+  8 => "Encoder Error => Combustion Fan regulation failed (in case of P25=1 or 2)",
+  9 => "Low pressure in to the Boiler",
+  10 => "High pressure in to the Boiler Error",
+  11 => "DAY and TIME not correct due to prolonged absence of Power Supply",
+  12 => "Failed Ignition",
+  13 => "Ignition",
+  14 => "Ignition",
+  15 => "Lack of Voltage Supply",
+  16 => "Ignition",
+  17 => "Ignition",
+  18 => "Lack of Voltage Supply"
 ];
 
 class jee4heat extends eqLogic {
@@ -141,6 +164,11 @@ public function readregisters($buffer) {
         $cmdState->event($registervalue != 0);
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
         $cmdMessage->event(MODE_NAMES[$registervalue]);
+      }
+      if (($register == ERROR_REGISTER) && ($registervalue > 0)) {
+        // update error information according to value
+        $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
+        $cmdMessage->event(ERROR_NAMES[$registervalue]);
       }
       $Command->event($registervalue);
     } else {
@@ -257,7 +285,7 @@ public function readregisters($buffer) {
       $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line',$item['unit'] , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
       $order++;
     }
-    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
+    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'line','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
     $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
