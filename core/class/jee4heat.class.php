@@ -98,16 +98,19 @@ public function readregisters($buffer) {
   log::add(__CLASS__, 'debug', 'unpack $ret0 ='.$ret[0]);
   if($ret[0]!="SEL") return false;
   $nargs = intval($ret[1]);
+  log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
   for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
     $prefix = substr($ret[$i],0, 1);
     $register = substr($ret[$i],1, 5);
     $registervalue = substr($ret[$i],-12);
     if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
     log::add(__CLASS__, 'debug', "cron : received register $register=$registervalue");
-    $Command = $this->getCmd(null, $register);
-    if (!is_object($Command)) {
-      log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in cmd='.$register);
+    $Command = $this->getCmd(null, 'jee4heat_'.$register);
+    if (is_object($Command)) {
+      log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register);
       $Command->even($registervalue);
+    } else {
+      log::add(__CLASS__, 'debug', 'could not find command '.$register);
     }
   }
   return true;
@@ -241,7 +244,7 @@ public function readregisters($buffer) {
     log::add(__CLASS__, 'debug', 'postsave add commands on ID '.$this->getId());
     foreach ($device['commands'] as $item) {
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
-      $Equipement->AddCommand($item['name'], $item['logicalId'], $item['type'], $item['subtype'], 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
+      $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
       $order++;
     }
    
