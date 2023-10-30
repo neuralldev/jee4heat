@@ -80,7 +80,7 @@ class jee4heat extends eqLogic {
               if ($jee4heat->readregisters($stove_return))
                 log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
               else
-                log::add(__CLASS__, 'debug', 'socket has returned which is not unopackable ='.$stove_return);
+                log::add(__CLASS__, 'debug', 'socket has returned which is not unpackable ='.$stove_return);
             }
           }
         }
@@ -94,6 +94,8 @@ public function readregisters($buffer) {
   // remove leading and trailing []
   $message = substr($buffer,1, strlen($buffer) -2);
   $ret = explode(',', $message);
+  log::add(__CLASS__, 'debug', 'unpack $message ='.$message);
+  log::add(__CLASS__, 'debug', 'unpack $ret0 ='.$ret[0]);
   if($ret[0]!="SEL") return false;
   $nargs = intval($ret[1]);
   for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
