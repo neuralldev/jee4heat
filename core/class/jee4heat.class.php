@@ -94,6 +94,29 @@ class jee4heat extends eqLogic {
       return $return; 
   }
 
+  private function readStoveInformation($ip, $port, $command) {
+      /* pull depuis poele ici */
+      $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+      if (!$socket) {
+        log::add(__CLASS__, 'debug', 'error opening socket');
+      } else {
+        if (!socket_connect($socket, $ip, $port)) {
+            log::add(__CLASS__, 'debug', 'error connecting socket on '.$ip);
+            log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
+        }
+        // query status
+        
+        if (!socket_send($socket, $command, strlen($command), 0)) {
+          log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
+        } else {
+            if(($bytereceived = socket_recv($socket,$stove_return,BUFFER_SIZE, 0)) == false) {
+              log::add(__CLASS__, 'debug', ' error rceiving = '.socket_strerror(socket_last_error($socket)));
+            }
+          socket_close($socket);
+          return $stove_return;
+        }
+    }
+  }
   public static function cron() {
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
       if ($jee4heat->getIsEnable()) {
@@ -110,35 +133,16 @@ class jee4heat extends eqLogic {
             $ip = $jee4heat->getConfiguration('ip');
           }
           if ($jee4heat->getConfiguration('modele') != '') {
-              /* pull depuis poele ici */
-              $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-              if (!$socket) {
-                log::add(__CLASS__, 'debug', 'error opening socket');
-              } else {
-                if (!socket_connect($socket, $ip, SOCKET_PORT)) {
-                    log::add(__CLASS__, 'debug', 'error connecting socket on '.$ip);
-                    log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
-                }
-                // query status
-                
-                if (!socket_send($socket, DATA_QUERY, strlen(DATA_QUERY), 0)) {
-                 log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
-                } else {
-                    if(($bytereceived = socket_recv($socket,$stove_return,BUFFER_SIZE, 0)) == false) {
-                      log::add(__CLASS__, 'debug', ' error rceiving = '.socket_strerror(socket_last_error($socket)));
-                    }
-              socket_close($socket);
-              if ($jee4heat->readregisters($stove_return))
+             $stove_return = $jee4heat->readStoveInformation($ip,SOCKET_PORT, DATA_QUERY);
+             if ($jee4heat->readregisters($stove_return))
                 log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
               else
                 log::add(__CLASS__, 'debug', 'socket has returned which is not unpackable ='.$stove_return);
             }
           }
         }
-      }
     }
   }
-}
 
 public function readregisters($buffer) {
   $message = substr($buffer,2, strlen($buffer) -4);
