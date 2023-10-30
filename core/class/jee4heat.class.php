@@ -129,8 +129,8 @@ public function readregisters($buffer) {
   for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
     $prefix = substr($ret[$i],0, 1);
     $register = substr($ret[$i],1, 5);
-    $registervalue = substr($ret[$i],-12);
-    if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
+    $registervalue = intval(substr($ret[$i],-12));
+   // if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
     log::add(__CLASS__, 'debug', "cron : received register $register=$registervalue");
     $Command = $this->getCmd(null, 'jee4heat_'.$register);
     if (is_object($Command)) {
