@@ -19,6 +19,14 @@
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
+const STATE_REGISTER = 30001;
+const BUFFER_SIZE = 2048;
+const SOCKET_PORT = 80;
+const DATA_QUERY = '["SEL","0"]';
+const ERROR_QUERY = '["SEC","3","I30001000000000000","I30002000000000000","I30017000000000000"]';
+const UNBLOCK_CMD = '["SEC","1","J30255000000000001"]'; // Unblock
+const OFF_CMD = '["SEC","1","J30254000000000001"]'; // OFF
+const ON_CMD = '["SEC","1","J30253000000000001"]'; // O
 const MODE_NAMES = [
   "0" => "OFF",
   "1" => "Vérification",
@@ -84,16 +92,16 @@ class jee4heat extends eqLogic {
               if (!$socket) {
                 log::add(__CLASS__, 'debug', 'error opening socket');
               } else {
-                if (!socket_connect($socket, $ip, 80)) {
+                if (!socket_connect($socket, $ip, SOCKET_PORT)) {
                     log::add(__CLASS__, 'debug', 'error connecting socket on '.$ip);
                     log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
                 }
                 // query status
-                $query ='["SEL","0"]';
-                if (!socket_send($socket, $query, strlen($query), 0)) {
+                
+                if (!socket_send($socket, DATA_QUERY, strlen(DATA_QUERY), 0)) {
                  log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
                 } else {
-                    if(($bytereceived = socket_recv($socket,$stove_return,4096, 0)) == false) {
+                    if(($bytereceived = socket_recv($socket,$stove_return,BUFFER_SIZE, 0)) == false) {
                       log::add(__CLASS__, 'debug', ' error rceiving = '.socket_strerror(socket_last_error($socket)));
                     }
               socket_close($socket);
@@ -110,8 +118,6 @@ class jee4heat extends eqLogic {
 }
 
 public function readregisters($buffer) {
-  //["SEL","28","J30001000000000000","J30002000000000000","J30005000000000022","J50006000000001790","B20364000000000003","B20575000000000007","J30026000000000199","J50046000000000000","B20614000000000001","J30011000000000110","J20118000000001969","J20119000000000000","J50138000000001800","J50139000000000000","J50140000000000000","J30143000000000040","J50053000000000000","B20638000000000001","J30142000000000010","J30144000000000040","B20369000000000006","B20570000000000001","B20369000000000006","B20369000000000006","B20369000000000006","J30142000000000010","J30143000000000040","J30144000000000040"]
-  // remove leading and trailing []
   $message = substr($buffer,2, strlen($buffer) -4);
   $ret = explode('","', $message);
   log::add(__CLASS__, 'debug', 'unpack $message ='.$message);
@@ -128,12 +134,6 @@ public function readregisters($buffer) {
     $Command = $this->getCmd(null, 'jee4heat_'.$register);
     if (is_object($Command)) {
       log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register);
-      if ($Command->getConfiguration('isStatevalue') == true) {
-        // map numeric state to string
-        $registervalue = MODE_NAMES[$registervalue];
-        log::add(__CLASS__, 'debug', 'state value found, translated state to ['.$registervalue.']');
-      }
-      
       $Command->event($registervalue);
     } else {
       log::add(__CLASS__, 'debug', 'could not find command '.$register);
@@ -142,7 +142,7 @@ public function readregisters($buffer) {
   return true;
 }
 
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_isState = null)
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
   {
     $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
@@ -166,10 +166,6 @@ public function readregisters($buffer) {
 
           $Command->setIsVisible($IsVisible);
           $Command->setIsHistorized($IsHistorized);
-
-          if ($_isState != null) {
-            $Command->setConfiguration('isStatevalue', $_isState);
-          }
 
         if ($icon != 'default') {
               $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
@@ -211,30 +207,6 @@ public function readregisters($buffer) {
           $Command->save();
       }
 
-     /*  log::add(__CLASS__, 'debug', ' check for refresh');
-
-      $createRefreshCmd = true;
-      $refresh = $this->getCmd(null, 'refresh');
-      if (!is_object($refresh)) {
-          $refresh = cmd::byEqLogicIdCmdName($this->getId(), __('Rafraichir', __FILE__));
-          if (is_object($refresh)) {
-            log::add(__CLASS__, 'debug', ' refresh already created');
-            $createRefreshCmd = false;
-          }
-      }
-      if ($createRefreshCmd) {
-        log::add(__CLASS__, 'debug', ' create refresh');
-        if (!is_object($refresh)) {
-              $refresh = new jee4heatCmd();
-              $refresh->setLogicalId('refresh');
-              $refresh->setIsVisible(1);
-              $refresh->setName(__('Rafraichir', __FILE__));
-          }
-          $refresh->setType('action');
-          $refresh->setSubType('other');
-          $refresh->setEqLogic_id($this->getId());
-          $refresh->save();
-      } */
       log::add(__CLASS__, 'debug', ' addcommand end');
       return $Command;
   }
@@ -301,31 +273,54 @@ public function readregisters($buffer) {
     }
    
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
-   
+
+  /* create or update refresh button */
     $createRefreshCmd = true;
     $refresh = $this->getCmd(null, 'refresh');
     if (!is_object($refresh)) {
         $refresh = cmd::byEqLogicIdCmdName($this->getId(), __('Rafraichir', __FILE__));
         if (is_object($refresh)) {
-            log::add(__CLASS__, 'debug', 'refresh already created');
+            log::add(__CLASS__, 'debug', 'refresh already exists');
             $createRefreshCmd = false;
         }
     }
     if ($createRefreshCmd) {
-        log::add(__CLASS__, 'debug', 'refresh to be created in postsave');
         if (!is_object($refresh)) {
-            $refresh = new jee4heatCmd();
-            $refresh->setLogicalId('refresh');
-            $refresh->setIsVisible(1);
-            $refresh->setName(__('Rafraichir', __FILE__));
+          log::add(__CLASS__, 'debug', 'refresh to be created in postsave');
+          $refresh = new jee4heatCmd();
+          $refresh->setLogicalId('refresh');
+          $refresh->setIsVisible(1);
+          $refresh->setName(__('Rafraichir', __FILE__));
         }
         $refresh->setType('action');
         $refresh->setSubType('other');
         $refresh->setEqLogic_id($this->getId());
         $refresh->save();
-
+    }
+  /* create or update state button */
+  $createStateCmd = true;
+  $state = $this->getCmd(null, 'state');
+  if (!is_object($state)) {
+      $state = cmd::byEqLogicIdCmdName($this->getId(), __('Etat', __FILE__));
+      if (is_object($state)) {
+          log::add(__CLASS__, 'debug', 'state already exists');
+          $creatStateCmd = false;
+      }
   }
-  log::add(__CLASS__, 'debug', 'postsave stop');
+  if ($createStateCmd) {
+      if (!is_object($state)) {
+        log::add(__CLASS__, 'debug', 'state to be created in postsave');
+        $state = new jee4heatCmd();
+        $state->setLogicalId('state');
+        $state->setIsVisible(1);
+        $state->setName(__('Etat', __FILE__));
+      }
+      $state->setType('info');
+      $state->setSubType('string');
+      $state->setEqLogic_id($this->getId());
+      $state->save();
+  }
+log::add(__CLASS__, 'debug', 'postsave stop');
 }
 
   public function preUpdate()

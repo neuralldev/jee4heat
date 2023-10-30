@@ -3,7 +3,8 @@
   "name": "generic",
   "configuration" : {
       "model" : "generic",
-      "type" : "stove"
+      "type" : "stove",
+      "state" : 30001
   },
   "commands": [
     {"name": "Heating power", "type": "info", "subtype": "string",  "logicalId": "20801"},
@@ -11,7 +12,7 @@
     {"name": "Combustion", "type": "info", "subtype": "numeric",  "logicalId": "20364"},
     {"name": "Room temperature set", "type": "info", "subtype": "numeric",  "logicalId": "20493", "unit" : "°C"},
     {"name": "Heat Power", "type": "info", "subtype": "string",  "logicalId": "20575"},
-    {"name": "Message", "type": "info", "subtype": "string",  "logicalId": "30001","state": true},
+    {"name": "Etat", "type": "info", "subtype": "numeric",  "logicalId": "30001"},
     {"name": "Erreur", "type": "info", "subtype": "string",  "logicalId": "30002"},
     {"name": "Timer", "type": "info", "subtype": "string",  "logicalId": "30003"},
     {"name": "Allumage", "type": "info", "subtype": "string",  "logicalId": "30004"},

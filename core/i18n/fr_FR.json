@@ -1,47 +1,12 @@
 {
-    "plugins\/vigilancemeteo\/desktop\/php\/vigilancemeteo.php": {
-        "Ajouter un équipement": "Ajouter un équipement",
-        "Rechercher": "Rechercher",
-        "Mes Vigilances Météo": "Mes Vigilances Météo",
-        "Sauvegarder": "Sauvegarder",
-        "Supprimer": "Supprimer",
-        "Configuration avancée": "Configuration avancée",
-        "Equipement": "Equipement",
-        "Commandes": "Commandes",
-        "Nom": "Nom",
-        "Nom de l'équipement Vigilances Météo": "Nom de l'équipement Vigilances Météo",
-        "Objet parent": "Objet parent",
+    "plugins\/jee4heat\/class\/php\/jee4heat.class.php": {
+        "Etat": "Etat",
+        "Rafraichir": "Rafraichir",
         "Aucun": "Aucun",
         "Catégorie": "Catégorie",
         "Activer": "Activer",
         "Visible": "Visible",
         "Commentaire": "Commentaire",
-        "Type de Vigilance": "Type de Vigilance",
-        "Vigilance Météo France": "Vigilance Météo France",
-        "Pluie à 1h Météo France": "Pluie à 1h Météo France",
-        "Vigicrues": "Vigicrues",
-        "Marées": "Marées",
-        "Qualité d'Air": "Qualité d'Air",
-        "Séisme": "Séisme",
-        "Ville": "Ville",
-        "ID Ville": "ID Ville",
-        "Trouver la ville": "Trouver la ville",
-        "Port": "Port",
-        "Station": "Station",
-        "Département": "Département",
-        "Commande Alerte": "Commande Alerte",
-        "Geolocolisation à utiliser": "Geolocolisation à utiliser",
-        "Clef Breezometer": "Clef Breezometer",
-        "Ville OpenHazards": "Ville OpenHazards",
         "Options": "Options"
-    },
-    "plugins\/vigilancemeteo\/desktop\/js\/vigilancemeteo.js": {
-        "Trouver la ville": "Trouver la ville",
-        "Nom de la commande": "Nom de la commande",
-        "Historiser": "Historiser",
-        "Tester": "Tester"
-    },
-    "plugins\/jee4heat\/core\/class\/jee4heat.class.php": {
-        "unable to decode json": "impossible de décoder le fichier json"
     }
 }
