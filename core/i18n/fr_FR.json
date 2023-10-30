@@ -1,6 +1,8 @@
 {
     "plugins\/jee4heat\/class\/php\/jee4heat.class.php": {
         "Etat": "Etat",
+        "Message": "Message",
+        "Etat Equipement": "Etat Equipement",
         "Rafraichir": "Rafraichir",
         "Aucun": "Aucun",
         "Catégorie": "Catégorie",

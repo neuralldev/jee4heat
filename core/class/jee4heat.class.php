@@ -125,6 +125,7 @@ public function readregisters($buffer) {
   if($ret[0]!="SEL") return false;
   $nargs = intval($ret[1]);
   log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
+  
   for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
     $prefix = substr($ret[$i],0, 1);
     $register = substr($ret[$i],1, 5);
@@ -133,7 +134,14 @@ public function readregisters($buffer) {
     log::add(__CLASS__, 'debug', "cron : received register $register=$registervalue");
     $Command = $this->getCmd(null, 'jee4heat_'.$register);
     if (is_object($Command)) {
-      log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register);
+      log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register); 
+      if ($register == STATE_REGISTER) {
+        // update state information according to value
+        $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
+        $cmdState->event($registervalue == 0);
+        $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
+        $cmdMessage->event(MODE_NAMES[$registervalue]);
+      }
       $Command->event($registervalue);
     } else {
       log::add(__CLASS__, 'debug', 'could not find command '.$register);
@@ -246,32 +254,12 @@ public function readregisters($buffer) {
     log::add(__CLASS__, 'debug', 'postsave add commands on ID '.$this->getId());
     foreach ($device['commands'] as $item) {
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
-      /*
-      AddCommand(
-        $Name, 
-        $_logicalId, 
-        $Type = 'info', 
-        $SubType = 'binary', 
-        $Template = null, 
-        $unite = null, 
-        $generic_type = null, 
-        $IsVisible = 1, 
-        $icon = 'default', 
-        $forceLineB = 'default', 
-        $valuemin = 'default', 
-        $valuemax = 'default', 
-        $_order = null, 
-        $IsHistorized = '0', 
-        $repeatevent = false, 
-        $_iconname = null, 
-        $_calculValueOffset = null, 
-        $_historizeRound = null, 
-  $_noiconname = null)
-      */
       $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line',$item['unit'] , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
       $order++;
     }
-   
+    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
+    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
+    $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
   /* create or update refresh button */
@@ -280,7 +268,6 @@ public function readregisters($buffer) {
     if (!is_object($refresh)) {
         $refresh = cmd::byEqLogicIdCmdName($this->getId(), __('Rafraichir', __FILE__));
         if (is_object($refresh)) {
-            log::add(__CLASS__, 'debug', 'refresh already exists');
             $createRefreshCmd = false;
         }
     }
@@ -297,29 +284,7 @@ public function readregisters($buffer) {
         $refresh->setEqLogic_id($this->getId());
         $refresh->save();
     }
-  /* create or update state button */
-  $createStateCmd = true;
-  $state = $this->getCmd(null, 'state');
-  if (!is_object($state)) {
-      $state = cmd::byEqLogicIdCmdName($this->getId(), __('Etat', __FILE__));
-      if (is_object($state)) {
-          log::add(__CLASS__, 'debug', 'state already exists');
-          $creatStateCmd = false;
-      }
-  }
-  if ($createStateCmd) {
-      if (!is_object($state)) {
-        log::add(__CLASS__, 'debug', 'state to be created in postsave');
-        $state = new jee4heatCmd();
-        $state->setLogicalId('state');
-        $state->setIsVisible(1);
-        $state->setName(__('Etat', __FILE__));
-      }
-      $state->setType('info');
-      $state->setSubType('string');
-      $state->setEqLogic_id($this->getId());
-      $state->save();
-  }
+
 log::add(__CLASS__, 'debug', 'postsave stop');
 }
 
