@@ -19,6 +19,26 @@
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
+const MODE_NAMES = [
+  "0" => "OFF",
+  "1" => "Vérification",
+  "2" => "Allumage",
+  "3" => "Stabilisation",
+  "4" => "Allumage",
+  "5" => "Chauffage",
+  "6" => "Modulation",
+  "7" => "Extinction",
+  "8" => "Sécurité",
+  "9" => "Bloqué",
+  "10" => "Récupération",
+  "11" => "Standby",
+  "30" => "Allumage",
+  "31" => "Allumage",
+  "32" => "Allumage",
+  "33" => "Allumage",
+  "34" => "Allumage",
+]
+
 class jee4heat extends eqLogic {
 
   public static function deadCmd()
@@ -108,6 +128,12 @@ public function readregisters($buffer) {
     $Command = $this->getCmd(null, 'jee4heat_'.$register);
     if (is_object($Command)) {
       log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register);
+      if ($Command->getConfiguration('isStatevalue') == true) {
+        // map numeric state to string
+        $registervalue = MODE_NAMES[$registervalue];
+        log::add(__CLASS__, 'debug', 'state value found, translated state to ['.$registervalue.']');
+      }
+      
       $Command->event($registervalue);
     } else {
       log::add(__CLASS__, 'debug', 'could not find command '.$register);
@@ -116,7 +142,7 @@ public function readregisters($buffer) {
   return true;
 }
 
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $-isState = null)
   {
     $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
@@ -141,7 +167,11 @@ public function readregisters($buffer) {
           $Command->setIsVisible($IsVisible);
           $Command->setIsHistorized($IsHistorized);
 
-          if ($icon != 'default') {
+          if ($_isState != null) {
+            $Command->setConfiguration('isStatevalue', $_isState);
+          }
+
+        if ($icon != 'default') {
               $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
           }
           if ($forceLineB != 'default') {
@@ -244,7 +274,29 @@ public function readregisters($buffer) {
     log::add(__CLASS__, 'debug', 'postsave add commands on ID '.$this->getId());
     foreach ($device['commands'] as $item) {
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
-      $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
+      /*
+      AddCommand(
+        $Name, 
+        $_logicalId, 
+        $Type = 'info', 
+        $SubType = 'binary', 
+        $Template = null, 
+        $unite = null, 
+        $generic_type = null, 
+        $IsVisible = 1, 
+        $icon = 'default', 
+        $forceLineB = 'default', 
+        $valuemin = 'default', 
+        $valuemax = 'default', 
+        $_order = null, 
+        $IsHistorized = '0', 
+        $repeatevent = false, 
+        $_iconname = null, 
+        $_calculValueOffset = null, 
+        $_historizeRound = null, 
+  $_noiconname = null)
+      */
+      $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line',$item['unit'] , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
       $order++;
     }
    
