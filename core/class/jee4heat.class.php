@@ -415,11 +415,20 @@ class jee4heatCmd extends cmd {
   
   public function execute($_options = null)
   {
-      if ($this->getLogicalId() == 'refresh') {
-          log::add(__CLASS__, 'debug', ' ─────────> ACTUALISATION MANUELLE');
-          $this->getEqLogic()->getInformations();
-          log::add(__CLASS__, 'debug', ' ─────────> FIN ACTUALISATION MANUELLE');
-          return;
+    $action = $this->getLogicalId() ;
+    log::add(__CLASS__, 'debug', 'execute action ' . $action);
+    switch ($action) {
+      case 'refresh':
+        $this->getEqLogic()->getInformations();
+        break;
+      case 'jee4heat_on':
+        $this->getEqLogic()->state_on();
+        break;
+      case 'jee4heat_off':
+        $this->getEqLogic()->state_off();
+        break;
+        default:
       }
+    return;
   }
 }
