@@ -77,13 +77,38 @@ class jee4heat extends eqLogic {
                       log::add(__CLASS__, 'debug', ' error rceiving = '.socket_strerror(socket_last_error($socket)));
                     }
               socket_close($socket);
-              log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
-              }
+              if ($jee4heat->readregisters($stove_return))
+                log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
+              else
+                log::add(__CLASS__, 'debug', 'socket has returned which is not unopackable ='.$stove_return);
+            }
           }
         }
       }
     }
   }
+}
+
+public function readregisters($buffer) {
+  //["SEL","28","J30001000000000000","J30002000000000000","J30005000000000022","J50006000000001790","B20364000000000003","B20575000000000007","J30026000000000199","J50046000000000000","B20614000000000001","J30011000000000110","J20118000000001969","J20119000000000000","J50138000000001800","J50139000000000000","J50140000000000000","J30143000000000040","J50053000000000000","B20638000000000001","J30142000000000010","J30144000000000040","B20369000000000006","B20570000000000001","B20369000000000006","B20369000000000006","B20369000000000006","J30142000000000010","J30143000000000040","J30144000000000040"]
+  // remove leading and trailing []
+  $message = substr($buffer,1, strlen($buffer) -2);
+  $ret = explode(',', $message);
+  if($ret[0]!="SEL") return false;
+  $nargs = intval($ret[1]);
+  for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
+    $prefix = substr($ret[$i],0, 1);
+    $register = substr($ret[$i],1, 5);
+    $registervalue = substr($ret[$i],-12);
+    if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
+    log::add(__CLASS__, 'debug', "cron : received register $register=$registervalue");
+    $Command = $this->getCmd(null, $register);
+    if (!is_object($Command)) {
+      log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in cmd='.$register);
+      $Command->even($registervalue);
+    }
+  }
+  return true;
 }
 
   public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
