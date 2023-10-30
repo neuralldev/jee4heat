@@ -108,7 +108,7 @@ public function readregisters($buffer) {
     $Command = $this->getCmd(null, 'jee4heat_'.$register);
     if (is_object($Command)) {
       log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register);
-      $Command->even($registervalue);
+      $Command->event($registervalue);
     } else {
       log::add(__CLASS__, 'debug', 'could not find command '.$register);
     }
