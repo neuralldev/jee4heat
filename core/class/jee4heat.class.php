@@ -37,7 +37,7 @@ const MODE_NAMES = [
   "32" => "Allumage",
   "33" => "Allumage",
   "34" => "Allumage",
-]
+];
 
 class jee4heat extends eqLogic {
 
@@ -142,7 +142,7 @@ public function readregisters($buffer) {
   return true;
 }
 
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $-isState = null)
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_isState = null)
   {
     $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
