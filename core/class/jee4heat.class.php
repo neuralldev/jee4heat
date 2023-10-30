@@ -28,23 +28,23 @@ const UNBLOCK_CMD = '["SEC","1","J30255000000000001"]'; // Unblock
 const OFF_CMD = '["SEC","1","J30254000000000001"]'; // OFF
 const ON_CMD = '["SEC","1","J30253000000000001"]'; // O
 const MODE_NAMES = [
-  "0" => "OFF",
-  "1" => "Vérification",
-  "2" => "Allumage",
-  "3" => "Stabilisation",
-  "4" => "Allumage",
-  "5" => "Chauffage",
-  "6" => "Modulation",
-  "7" => "Extinction",
-  "8" => "Sécurité",
-  "9" => "Bloqué",
-  "10" => "Récupération",
-  "11" => "Standby",
-  "30" => "Allumage",
-  "31" => "Allumage",
-  "32" => "Allumage",
-  "33" => "Allumage",
-  "34" => "Allumage",
+  0 => "OFF",
+  1 => "Vérification",
+  2 => "Allumage",
+  3 => "Stabilisation",
+  4 => "Allumage",
+  5 => "Chauffage",
+  6 => "Modulation",
+  7 => "Extinction",
+  8 => "Sécurité",
+  9 => "Bloqué",
+  10 => "Récupération",
+  11 => "Standby",
+  30 => "Allumage",
+  31 => "Allumage",
+  32 => "Allumage",
+  33 => "Allumage",
+  34 => "Allumage",
 ];
 
 class jee4heat extends eqLogic {
@@ -138,7 +138,7 @@ public function readregisters($buffer) {
       if ($register == STATE_REGISTER) {
         // update state information according to value
         $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
-        $cmdState->event($registervalue == 0);
+        $cmdState->event($registervalue != 0);
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
         $cmdMessage->event(MODE_NAMES[$registervalue]);
       }
