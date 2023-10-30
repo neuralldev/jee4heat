@@ -94,7 +94,7 @@ class jee4heat extends eqLogic {
       return $return; 
   }
 
-  private function readStoveInformation($ip, $port, $command) {
+  private function talktoStove($ip, $port, $command) {
       /* pull depuis poele ici */
       $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
       if (!$socket) {
@@ -133,7 +133,7 @@ class jee4heat extends eqLogic {
             $ip = $jee4heat->getConfiguration('ip');
           }
           if ($jee4heat->getConfiguration('modele') != '') {
-             $stove_return = $jee4heat->readStoveInformation($ip,SOCKET_PORT, DATA_QUERY);
+             $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY);
              if ($jee4heat->readregisters($stove_return))
                 log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
               else
@@ -181,6 +181,29 @@ public function readregisters($buffer) {
   }
   return true;
 }
+
+public function AddAction($actionName, $actionTitle) {
+  $createCmd = true;
+  $command = $this->getCmd(null, $actionName);
+  if (!is_object($command)) {
+      $command = cmd::byEqLogicIdCmdName($this->getId(), $actionTitle);
+      if (is_object($command)) {
+          $createCmd = false;
+      }
+  }
+  if ($createCmd) {
+      if (!is_object($command)) {
+        $command = new jee4heatCmd();
+        $command->setLogicalId($actionName);
+        $command->setIsVisible(1);
+        $command->setName($actionTitle);
+      }
+      $command->setType('action');
+      $command->setSubType('other');
+      $command->setEqLogic_id($this->getId());
+      $command->save();
+  }
+}  
 
   public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
   {
@@ -251,6 +274,45 @@ public function readregisters($buffer) {
       return $Command;
   }
 
+  public function state_on()
+  {
+    $id = $this->getId();
+    $ip = $this->getConfiguration('ip');
+    log::add(__CLASS__, 'debug', "cron : ID=".$id);
+    log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
+          
+    if ($ip !='') {
+       $stove_return = $this->talktoStove($ip,SOCKET_PORT, ON_CMD);
+          log::add(__CLASS__, 'debug', 'on socket has returned ='.$stove_return);
+      }
+    }
+
+  public function state_off()
+  {
+    $id = $this->getId();
+    $ip = $this->getConfiguration('ip');
+    log::add(__CLASS__, 'debug', "cron : ID=".$id);
+    log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
+          
+    if ($ip !='') {
+       $stove_return = $this->talktoStove($ip,SOCKET_PORT, OFF_CMD);
+          log::add(__CLASS__, 'debug', 'off socket has returned ='.$stove_return);
+      }
+  }
+
+  public function unblock()
+  {
+    $id = $this->getId();
+    $ip = $this->getConfiguration('ip');
+    log::add(__CLASS__, 'debug', "cron : ID=".$id);
+    log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
+          
+    if ($ip !='') {
+       $stove_return = $this->talktoStove($ip,SOCKET_PORT, UNBLOCK_CMD);
+          log::add(__CLASS__, 'debug', 'unblock socket has returned ='.$stove_return);
+      }
+  }
+
   public function refresh()
   {
       foreach ($this->getCmd() as $cmd) {
@@ -294,28 +356,11 @@ public function readregisters($buffer) {
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
-  /* create or update refresh button */
-    $createRefreshCmd = true;
-    $refresh = $this->getCmd(null, 'refresh');
-    if (!is_object($refresh)) {
-        $refresh = cmd::byEqLogicIdCmdName($this->getId(), __('Rafraichir', __FILE__));
-        if (is_object($refresh)) {
-            $createRefreshCmd = false;
-        }
-    }
-    if ($createRefreshCmd) {
-        if (!is_object($refresh)) {
-          log::add(__CLASS__, 'debug', 'refresh to be created in postsave');
-          $refresh = new jee4heatCmd();
-          $refresh->setLogicalId('refresh');
-          $refresh->setIsVisible(1);
-          $refresh->setName(__('Rafraichir', __FILE__));
-        }
-        $refresh->setType('action');
-        $refresh->setSubType('other');
-        $refresh->setEqLogic_id($this->getId());
-        $refresh->save();
-    }
+    /* create on and off button */
+  $Equipement->AddAction("jee4heat_on", "ON");
+  $Equipement->AddAction("jee4heat_off", "OFF");
+  $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__));
+  $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
 
 log::add(__CLASS__, 'debug', 'postsave stop');
 }
