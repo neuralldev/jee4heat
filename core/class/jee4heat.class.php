@@ -194,7 +194,7 @@ public function readregisters($buffer) {
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
         if ($cmdMessage != null) $cmdMessage->event(MODE_NAMES[$registervalue]);
         // if state == 9, the stove is in blocked mode, so we set the binary indicator to TRUE else FALSE
-        $cmdBlocked = $this->getCmd(null, 'jee4heat_blocked');
+        $cmdBlocked = $this->getCmd(null, 'jee4heat_stoveblocked');
         $cmdBlocked->event(($registervalue == 9));
       }
       if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
