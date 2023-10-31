@@ -379,9 +379,9 @@ if you need to set an attribute for a register, change json depending on stove r
         $order++;
       }
     }
-    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null), null;
+    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, null);
     $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'alert','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, '1');
-    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null), null;
+    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, null);
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
