@@ -190,14 +190,14 @@ public function readregisters($buffer) {
       if ($register == STATE_REGISTER) { // regular stove state feedback storage
         // update state information according to value
         $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
-        $cmdState->event($registervalue != 0);
+        if ($cmdState != null) $cmdState->event($registervalue != 0);
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-        $cmdMessage->event(MODE_NAMES[$registervalue]);
+        if ($cmdMessage != null) $cmdMessage->event(MODE_NAMES[$registervalue]);
       }
       if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
         // update error information according to value
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-        $cmdMessage->event(ERROR_NAMES[$registervalue]);
+        if ($cmdMessage != null) $cmdMessage->event(ERROR_NAMES[$registervalue]);
       }
       $Command->event($registervalue);
     } else {
