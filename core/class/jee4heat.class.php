@@ -102,6 +102,37 @@ class jee4heat extends eqLogic {
       return $return; 
   }
 
+  /*
+  Temperature set point function, used to ask the stove to modulate up to this value
+  */
+  private function setStoveValue($ip, $port, $register, $value)
+  {
+    $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+    if (!$socket) {
+      log::add(__CLASS__, 'debug', 'error opening socket');
+    } else {
+      if (!socket_connect($socket, $ip, $port)) {
+          log::add(__CLASS__, 'debug', 'error connecting socket on '.$ip);
+          log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
+      }
+      // prepare value; this is necessary for register set point to multiply the value because it expects temperature this way (4 digits)
+      $v = $value * 100;
+      $szV = strval($v);
+      str_pad($szV,12,'0', STR_PAD_LEFT);
+      // format write command as ["SEC","1","BRRRRRVVVVVVVVVVVV"]
+      $command = '["SEC","1","B'.$register.$szV.'"]';
+      if (!socket_send($socket, $command, strlen($command), 0)) {
+        log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
+      } else {
+          if(($bytereceived = socket_recv($socket,$stove_return,BUFFER_SIZE, 0)) == false) {
+            log::add(__CLASS__, 'debug', ' error rceiving = '.socket_strerror(socket_last_error($socket)));
+          }
+        socket_close($socket);
+        return $stove_return;
+      }
+    }
+  }
+
   private function talktoStove($ip, $port, $command) {
       /* interroge depuis ici 
         le principe est d'échanger des messages ASCII avec un format propriétaire à base de registres de taille fixe
@@ -298,8 +329,9 @@ if you need to set an attribute for a register, change json depending on stove r
           
     if ($ip !='') {
        $stove_return = $this->talktoStove($ip,SOCKET_PORT, ON_CMD);
-          log::add(__CLASS__, 'debug', 'on socket has returned ='.$stove_return);
-      }
+          log::add(__CLASS__, 'debug', 'command on sent, socket has returned ='.$stove_return);
+          // expected return "I" ["SEC","1","I30253000000000000"]
+        }
     }
 
   /**
@@ -315,7 +347,8 @@ if you need to set an attribute for a register, change json depending on stove r
           
     if ($ip !='') {
        $stove_return = $this->talktoStove($ip,SOCKET_PORT, OFF_CMD);
-          log::add(__CLASS__, 'debug', 'off socket has returned ='.$stove_return);
+          log::add(__CLASS__, 'debug', 'command off sent, socket has returned ='.$stove_return);
+          // expected return "I" ["SEC","1","I30254000000000000"]
       }
   }
 
@@ -334,7 +367,9 @@ if you need to set an attribute for a register, change json depending on stove r
           
     if ($ip !='') {
        $stove_return = $this->talktoStove($ip,SOCKET_PORT, UNBLOCK_CMD);
-          log::add(__CLASS__, 'debug', 'unblock socket has returned ='.$stove_return);
+          log::add(__CLASS__, 'debug', 'unblock called, socket has returned ='.$stove_return);
+           // expected return "I" ["SEC","1","I30255000000000000"]
+
       }
   }
 
