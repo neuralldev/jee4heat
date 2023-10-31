@@ -193,6 +193,9 @@ public function readregisters($buffer) {
         if ($cmdState != null) $cmdState->event($registervalue != 0);
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
         if ($cmdMessage != null) $cmdMessage->event(MODE_NAMES[$registervalue]);
+        // if state == 9, the stove is in blocked mode, so we set the binary indicator to TRUE else FALSE
+        $cmdBlocked = $this->getCmd(null, 'jee4heat_blocked');
+        $cmdBlocked->event(($registervalue == 9));
       }
       if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
         // update error information according to value
@@ -376,7 +379,7 @@ if you need to set an attribute for a register, change json depending on stove r
       }
     }
     $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
-    $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stovestate', "info", "binary", 'alert','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
+    $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'alert','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
     $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
