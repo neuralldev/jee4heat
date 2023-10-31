@@ -103,7 +103,22 @@ class jee4heat extends eqLogic {
   }
 
   private function talktoStove($ip, $port, $command) {
-      /* pull depuis poele ici */
+      /* interroge depuis ici 
+        le principe est d'échanger des messages ASCII avec un format propriétaire à base de registres de taille fixe
+        le retour renvoie toujours ["SEL","N=nb d'items", "ITEM 1", ..."ITEM N" ]
+        la chaine est numérique et doit être convertie en entiers pour certains registres et pas d'autres
+        à noter que les températures de la sonde déportée et de consigne sont envoyés sur 4 chiffes et doivent être divisés par 100 pour avoir la température à afficher
+
+        le flux est 
+        DATA_QUERY -> STOVE, STOVE -> jeedomm,renvoie la liste des registres au format 
+        "JRRRRRVVVVVVVVVVVV", J=préfixe, RRRRR=no du registre VVVVVVVVVVVV=Valeur sur 12 chiffres
+        ERROR QUERY -> STOVE, STOVE -> jeedomm, renvoie le registre avec le code d'erreur à afficher (voir constante ERROR_NAMES)
+        en cas d'erreur 9, le poele est bloqué (manque de granule ? trappe ouverte ? ), dans ce cas, il faut :
+        - envoyer une alerte jeedom pour révenir et éventuellement mettre un scénario
+        - envoyer une commande de déblocage UNBLOCK_CMD une fois l'erreur corrigée, il n'y a aucun retour particulier, soit l'erreur est à soit ça se débloque
+        pour allumer le système il faut envoyer la commande ON_CMD, il n'y a aucun retour particulier
+        pour demander l'extinction du système il faut envoyer la commande OFF_CMD, il n'y a aucun retour particulier   
+        */
       $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
       if (!$socket) {
         log::add(__CLASS__, 'debug', 'error opening socket');
@@ -125,24 +140,24 @@ class jee4heat extends eqLogic {
         }
     }
   }
+/*
+la fonction CRON permet d'interroger les registres toutes les minutes. 
+le temps de mise à jour du poele peut aller de 1 à 5 minutes selon la source qui a déclenché le réglage
+depuis l'application cloud c'est plus long à être pris en compte
+ */
   public static function cron() {
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
       if ($jee4heat->getIsEnable()) {
         if (($modele = $jee4heat->getConfiguration('modele')) != '') {
-        /* pull depuis poele ici */
+        /* lire les infos de l'équipement ici */
           $ip = $jee4heat->getConfiguration('ip');
           $id = $jee4heat->getId();
           log::add(__CLASS__, 'debug', "cron : ID=".$id);
           log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
-          log::add(__CLASS__, 'debug', "cron : modele=".$modele);         
-                
-          if ($id==0) {
-            $modele = $jee4heat->getConfiguration('modele');
-            $ip = $jee4heat->getConfiguration('ip');
-          }
+          log::add(__CLASS__, 'debug', "cron : modele=".$modele);
           if ($jee4heat->getConfiguration('modele') != '') {
-             $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY);
-             if ($jee4heat->readregisters($stove_return))
+             $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY); // send query
+             if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
                 log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
               else
                 log::add(__CLASS__, 'debug', 'socket has returned which is not unpackable ='.$stove_return);
@@ -153,31 +168,33 @@ class jee4heat extends eqLogic {
   }
 
 public function readregisters($buffer) {
-  $message = substr($buffer,2, strlen($buffer) -4);
-  $ret = explode('","', $message);
+  if ($buffer=='') return false; // check if buffer is empty, if yes, then do nothing 
+  $message = substr($buffer,2, strlen($buffer) -4); // trim leading and trailing characters
+  $ret = explode('","', $message); // translate string to array
   log::add(__CLASS__, 'debug', 'unpack $message ='.$message);
-  log::add(__CLASS__, 'debug', 'unpack $ret0 ='.$ret[0]);
-  if($ret[0]!="SEL") return false;
+//  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
+  if($ret[0] != "SEL") return false; // check for message consistency
   $nargs = intval($ret[1]);
   log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
+  if($nargs <= 2) return false; // check for message consistency
   
   for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
-    $prefix = substr($ret[$i],0, 1);
-    $register = substr($ret[$i],1, 5);
-    $registervalue = intval(substr($ret[$i],-12));
+//    $prefix = substr($ret[$i],0, 1);
+    $register = substr($ret[$i],1, 5); // extract register number from value
+    $registervalue = intval(substr($ret[$i],-12)); // convert string to int to remove leading 'O'
    // if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
     log::add(__CLASS__, 'debug', "cron : received register $register=$registervalue");
-    $Command = $this->getCmd(null, 'jee4heat_'.$register);
+    $Command = $this->getCmd(null, 'jee4heat_'.$register); // now set value of jeedom object
     if (is_object($Command)) {
       log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register); 
-      if ($register == STATE_REGISTER) {
+      if ($register == STATE_REGISTER) { // regular stove state feedback storage
         // update state information according to value
         $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
         $cmdState->event($registervalue != 0);
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
         $cmdMessage->event(MODE_NAMES[$registervalue]);
       }
-      if (($register == ERROR_REGISTER) && ($registervalue > 0)) {
+      if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
         // update error information according to value
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
         $cmdMessage->event(ERROR_NAMES[$registervalue]);
@@ -189,17 +206,21 @@ public function readregisters($buffer) {
   }
   return true;
 }
-
+/*
+This function is defined to create the action buttons of equipment
+the actions will be called by desktop through execute function by their logical ID
+this function is called by postsave
+*/
 public function AddAction($actionName, $actionTitle) {
   $createCmd = true;
   $command = $this->getCmd(null, $actionName);
-  if (!is_object($command)) {
+  if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
       $command = cmd::byEqLogicIdCmdName($this->getId(), $actionTitle);
       if (is_object($command)) {
           $createCmd = false;
       }
   }
-  if ($createCmd) {
+  if ($createCmd) { // only if action is not yet defined
       if (!is_object($command)) {
         $command = new jee4heatCmd();
         $command->setLogicalId($actionName);
@@ -212,20 +233,28 @@ public function AddAction($actionName, $actionTitle) {
       $command->save();
   }
 }  
-
+/*
+this function create an information based on stove registers
+it can set most of the useful paramters based on the json array defined by stove, such as :
+  subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
+if you need to set an attribute for a register, change json depending on stove registers
+  */
   public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
   {
     $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
           log::add(__CLASS__, 'debug', ' add record for '.$Name);
-          $Command = new jee4heatCmd();
+          // basic settings
+          $Command = new jee4heatCmd();  
           $Command->setId(null);
           $Command->setLogicalId($_logicalId);
           $Command->setEqLogic_id($this->getId());
           $Command->setName($Name);
           $Command->setType($Type);
           $Command->setSubType($SubType);
-
+          $Command->setIsVisible($IsVisible);
+          $Command->setIsHistorized($IsHistorized);
+        // add parameters if defined
           if ($Template != null) {
               $Command->setTemplate('dashboard', $Template);
               $Command->setTemplate('mobile', $Template);
@@ -234,9 +263,6 @@ public function AddAction($actionName, $actionTitle) {
           if ($unite != null && $SubType == 'numeric') {
               $Command->setUnite($unite);
           }
-
-          $Command->setIsVisible($IsVisible);
-          $Command->setIsHistorized($IsHistorized);
 
         if ($icon != 'default') {
               $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
@@ -282,6 +308,10 @@ public function AddAction($actionName, $actionTitle) {
       return $Command;
   }
 
+  /**
+   * this command toggles state of the stove to ON
+   * if must be called only when the stove is in OFF mode (Etat=0)
+   */
   public function state_on()
   {
     $id = $this->getId();
@@ -295,6 +325,10 @@ public function AddAction($actionName, $actionTitle) {
       }
     }
 
+  /**
+   * this command toggles state of the stove to OFF
+   * if must be called only when the stove is in ON mode (run state) and cannot be called if an error is raised
+   */
   public function state_off()
   {
     $id = $this->getId();
@@ -308,6 +342,12 @@ public function AddAction($actionName, $actionTitle) {
       }
   }
 
+    /**
+   * this command allows to unblock the stove if an error is raised
+   * if must be called only when the error is cleared (e.g. add pellets, etc)
+   * the stove will the attempt to recover from the blocking state 
+   * if it succeeds it lights the stove again, if not it will stay as is
+   */
   public function unblock()
   {
     $id = $this->getId();
@@ -364,7 +404,7 @@ public function AddAction($actionName, $actionTitle) {
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
-    /* create on and off button */
+    /* create on, off, unblock and refresh actions */
   $Equipement->AddAction("jee4heat_on", "ON");
   $Equipement->AddAction("jee4heat_off", "OFF");
   $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__));
@@ -375,7 +415,8 @@ log::add(__CLASS__, 'debug', 'postsave stop');
 
   public function preUpdate()
   {
-      if (!$this->getIsEnable()) return;
+      if (!$this->getIsEnable()) 
+        throw new Exception(__((__("L'équipement est désactivé, impossible de régler : ", __FILE__)) . $this->getName(), __FILE__));
 
       if ($this->getConfiguration('ip') == '') {
           throw new Exception(__((__('Le champ IP ne peut être vide pour l\'équipement : ', __FILE__)) . $this->getName(), __FILE__));
@@ -396,8 +437,6 @@ log::add(__CLASS__, 'debug', 'postsave stop');
   public function postRemove()
   {
   }
-
-
   public function getInformations() {
     log::add(__CLASS__, 'debug', 'getinformation start');
     log::add(__CLASS__, 'debug', 'getinformation stop');
@@ -405,12 +444,10 @@ log::add(__CLASS__, 'debug', 'postsave stop');
 
 
   public function getjee4heat() {
-  /* c'est là qu'on appelle les API */
     log::add(__CLASS__, 'debug', 'getjee4heat' . "");
     $this->checkAndUpdateCmd('jee4heat', "");
   }
 }
-
 class jee4heatCmd extends cmd {
   public function dontRemoveCmd()
   {
