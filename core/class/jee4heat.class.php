@@ -216,9 +216,7 @@ public function AddAction($actionName, $actionTitle) {
   $command = $this->getCmd(null, $actionName);
   if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
       $command = cmd::byEqLogicIdCmdName($this->getId(), $actionTitle);
-      if (is_object($command)) {
-          $createCmd = false;
-      }
+      if (is_object($command)) $createCmd = false;
   }
   if ($createCmd) { // only if action is not yet defined
       if (!is_object($command)) {
@@ -239,7 +237,7 @@ it can set most of the useful paramters based on the json array defined by stove
   subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
 if you need to set an attribute for a register, change json depending on stove registers
   */
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null)
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null)
   {
     $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
@@ -254,56 +252,27 @@ if you need to set an attribute for a register, change json depending on stove r
           $Command->setSubType($SubType);
           $Command->setIsVisible($IsVisible);
           $Command->setIsHistorized($IsHistorized);
-        // add parameters if defined
+          // add parameters if defined
           if ($Template != null) {
               $Command->setTemplate('dashboard', $Template);
               $Command->setTemplate('mobile', $Template);
           }
-
-          if ($unite != null && $SubType == 'numeric') {
-              $Command->setUnite($unite);
-          }
-
-        if ($icon != 'default') {
-              $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
-          }
-          if ($forceLineB != 'default') {
-              $Command->setdisplay('forceReturnLineBefore', 1);
-          }
-          if ($_iconname != 'default') {
-              $Command->setdisplay('showIconAndNamedashboard', 1);
-          }
-          if ($_noiconname != null) {
-              $Command->setdisplay('showNameOndashboard', 0);
-          }
-
-          if ($_calculValueOffset != null) {
-              $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
-          }
-
-          if ($_historizeRound != null) {
-              $Command->setConfiguration('historizeRound', $_historizeRound);
-          }
-          if ($generic_type != null) {
-              $Command->setGeneric_type($generic_type);
-          }
-
-          if ($repeatevent == true && $Type == 'info') {
-              $Command->setconfiguration('repeatEventManagement', 'never');
-          }
-          if ($valuemin != 'default') {
-              $Command->setconfiguration('minValue', $valuemin);
-          }
-          if ($valuemax != 'default') {
-              $Command->setconfiguration('maxValue', $valuemax);
-          }
-
-          if ($_order != null) {
-              $Command->setOrder($_order);
-          }
+          if ($unite != null && $SubType == 'numeric') $Command->setUnite($unite);
+          if ($icon != 'default') $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
+          if ($forceLineB != 'default') $Command->setdisplay('forceReturnLineBefore', 1);
+          if ($_iconname != 'default') $Command->setdisplay('showIconAndNamedashboard', 1);
+          if ($_noiconname != null) $Command->setdisplay('showNameOndashboard', 0);
+          if ($_calculValueOffset != null) $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+          if ($_historizeRound != null) $Command->setConfiguration('historizeRound', $_historizeRound);
+          if ($generic_type != null) $Command->setGeneric_type($generic_type);
+          if ($repeatevent == true && $Type == 'info') $Command->setconfiguration('repeatEventManagement', 'never');
+          if ($valuemin != 'default') $Command->setconfiguration('minValue', $valuemin);
+          if ($valuemax != 'default') $Command->setconfiguration('maxValue', $valuemax);
+          if ($_order != null) $Command->setOrder($_order);
+          if ($_warning != null) $Command->setDisplay("warningif", $_warning);
+          if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
           $Command->save();
       }
-
       log::add(__CLASS__, 'debug', ' addcommand end');
       return $Command;
   }
@@ -396,8 +365,11 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', 'postsave add commands on ID '.$this->getId());
     foreach ($device['commands'] as $item) {
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
-      $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line',$item['unit'] , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null);
-      $order++;
+      // item name must match to json structure table items names, if not it takes null
+      if ($item['name'] != '' && $item['logicalId'] != '') {
+        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line',$item['unit'] , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif']);
+        $order++;
+      }
     }
     $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'line','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
     $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
@@ -405,13 +377,13 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
     /* create on, off, unblock and refresh actions */
-  $Equipement->AddAction("jee4heat_on", "ON");
-  $Equipement->AddAction("jee4heat_off", "OFF");
-  $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__));
-  $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
+    $Equipement->AddAction("jee4heat_on", "ON");
+    $Equipement->AddAction("jee4heat_off", "OFF");
+    $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__));
+    $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
 
-log::add(__CLASS__, 'debug', 'postsave stop');
-}
+    log::add(__CLASS__, 'debug', 'postsave stop');
+  }
 
   public function preUpdate()
   {
