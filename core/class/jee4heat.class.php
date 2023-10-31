@@ -72,6 +72,16 @@ const ERROR_NAMES = [
 
 class jee4heat extends eqLogic {
 
+  public static function pull($_options) {
+    $jee4heat = thermostat::byId($_options['jee4heat']);
+	
+    $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
+    if (is_object($cron)) {
+      $cron->remove();
+    }
+    return;
+  }
+
   public static function deadCmd()
   {
       $return = array();
