@@ -244,7 +244,7 @@ it can set most of the useful paramters based on the json array defined by stove
   subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
 if you need to set an attribute for a register, change json depending on stove registers
   */
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null)
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = null)
   {
     $Command = $this->getCmd(null, $_logicalId);
       if (!is_object($Command)) {
@@ -278,6 +278,7 @@ if you need to set an attribute for a register, change json depending on stove r
           if ($_order != null) $Command->setOrder($_order);
           if ($_warning != null) $Command->setDisplay("warningif", $_warning);
           if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
+          if ($_invert != null) $Command->setConfiguration('invertBinary', $_invert);
           $Command->save();
       }
       log::add(__CLASS__, 'debug', ' addcommand end');
@@ -374,13 +375,13 @@ if you need to set an attribute for a register, change json depending on stove r
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
       // item name must match to json structure table items names, if not it takes null
       if ($item['name'] != '' && $item['logicalId'] != '') {
-        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'tile',$item['unit'] , '', ($item['visible']!=''?$item['visible']:'1'), 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif']);
+        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'tile',$item['unit'] , '', ($item['visible']!=''?$item['visible']:'1'), 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif'], $item['invert']);
         $order++;
       }
     }
-    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
-    $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'alert','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
-    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
+    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null), null;
+    $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'alert','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, '1');
+    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null), null;
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
