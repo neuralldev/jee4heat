@@ -41,11 +41,11 @@ const MODE_NAMES = [
   9 => "Bloqué",
   10 => "Récupération",
   11 => "Standby",
-  30 => "Allumage",
-  31 => "Allumage",
-  32 => "Allumage",
-  33 => "Allumage",
-  34 => "Allumage"
+  30 => "-",
+  31 => "-",
+  32 => "-",
+  33 => "-",
+  34 => "-"
 ];
 
 const ERROR_NAMES = [
@@ -211,7 +211,7 @@ This function is defined to create the action buttons of equipment
 the actions will be called by desktop through execute function by their logical ID
 this function is called by postsave
 */
-public function AddAction($actionName, $actionTitle) {
+public function AddAction($actionName, $actionTitle, $template = null) {
   $createCmd = true;
   $command = $this->getCmd(null, $actionName);
   if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
@@ -224,6 +224,10 @@ public function AddAction($actionName, $actionTitle) {
         $command->setLogicalId($actionName);
         $command->setIsVisible(1);
         $command->setName($actionTitle);
+      }
+      if ($template != null) {
+        $command->setTemplate('dashboard', $template);
+        $command->setTemplate('mobile', $template);
       }
       $command->setType('action');
       $command->setSubType('other');
@@ -367,19 +371,20 @@ if you need to set an attribute for a register, change json depending on stove r
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
       // item name must match to json structure table items names, if not it takes null
       if ($item['name'] != '' && $item['logicalId'] != '') {
-        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'line',$item['unit'] , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif']);
+        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'tile',$item['unit'] , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif']);
         $order++;
       }
     }
-    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'line','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
-    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null);
+    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null);
+    $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stovestate', "info", "binary", 'alert','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null));
+    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null));
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
     /* create on, off, unblock and refresh actions */
     $Equipement->AddAction("jee4heat_on", "ON");
     $Equipement->AddAction("jee4heat_off", "OFF");
-    $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__));
+    $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), 'lock');
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
 
     log::add(__CLASS__, 'debug', 'postsave stop');
