@@ -457,7 +457,19 @@ class jee4heatCmd extends cmd {
       return false;
   }
 
-  
+  private function toggleVisible($_logicalId, $state)
+  {
+    $Command = $this->getCmd(null, $_logicalId);
+    if (is_object($Command)) {
+        log::add(__CLASS__, 'debug', 'toggle visible state of '.$_logicalId." to ".$state);
+        // basic settings
+        $Command->setIsVisible($state);
+        $Command->save();
+        return true;
+    }
+    return false;
+  }
+
   public function execute($_options = null)
   {
     $action = $this->getLogicalId() ;
@@ -468,9 +480,13 @@ class jee4heatCmd extends cmd {
         break;
       case 'jee4heat_on':
         $this->getEqLogic()->state_on();
+        $this->toggleVisible('jee4heat_state_on', 0);
+        $this->toggleVisible('jee4heat_state_off', 1);
         break;
       case 'jee4heat_off':
         $this->getEqLogic()->state_off();
+        $this->toggleVisible('jee4heat_state_on', 1);
+        $this->toggleVisible('jee4heat_state_off', 0);
         break;
         default:
       }
