@@ -378,12 +378,15 @@ if you need to set an attribute for a register, change json depending on stove r
     $id = $this->getId();
     $ip = $this->getConfiguration('ip');
     // identify set point
-    $cmds = cmd::byGenericType('THERMOSTAT_SET_SETPOINT',$id, true);
+    $cmds = cmd::byEqLogicIdAndGenericType(getLogicalId(), 'THERMOSTAT_SET_SETPOINT', null, $null, $this);
+ //   $cmds = $this->getCmdByGenericType('THERMOSTAT_SET_SETPOINT',$id, true);
+    $n =0;
     foreach ($cmds as $cmd) {
       $name = $cmd->getName();
       $setpoint = $cmd->getLogicalId();
       log::add(__CLASS__, 'debug', "setpoint : name found=".$name);
       log::add(__CLASS__, 'debug', "setpoint : logicalID found=".$setpoint);
+      $n++
     }
 /*     log::add(__CLASS__, 'debug', "setpoint : setpoint=".$setpoint);
     log::add(__CLASS__, 'debug', "setpoint : ID=".$id);
@@ -393,7 +396,10 @@ if you need to set an attribute for a register, change json depending on stove r
           log::add(__CLASS__, 'debug', 'unblock called, socket has returned ='.$stove_return);
       }
  */          
-  }
+log::add(__CLASS__, 'debug', "setpoint : n=".$n);
+log::add(__CLASS__, 'debug', "setpoint : ID=".$id);
+log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
+}
 
 
   public function refresh()
