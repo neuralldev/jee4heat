@@ -171,6 +171,27 @@ class jee4heat extends eqLogic {
         }
     }
   }
+
+  private function getInformationFomStove($jee4heat) {
+    if ($jee4heat->getIsEnable()) {
+      if (($modele = $jee4heat->getConfiguration('modele')) != '') {
+      /* lire les infos de l'équipement ici */
+        $ip = $jee4heat->getConfiguration('ip');
+        $id = $jee4heat->getId();
+        log::add(__CLASS__, 'debug', "cron : ID=".$id);
+        log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
+        log::add(__CLASS__, 'debug', "cron : modele=".$modele);
+        if ($jee4heat->getConfiguration('modele') != '') {
+           $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY); // send query
+           if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
+              log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
+            else
+              log::add(__CLASS__, 'debug', 'socket has returned which is not unpackable ='.$stove_return);
+          }
+        }
+      }
+}
+
 /*
 la fonction CRON permet d'interroger les registres toutes les minutes. 
 le temps de mise à jour du poele peut aller de 1 à 5 minutes selon la source qui a déclenché le réglage
@@ -178,23 +199,7 @@ depuis l'application cloud c'est plus long à être pris en compte
  */
   public static function cron() {
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
-      if ($jee4heat->getIsEnable()) {
-        if (($modele = $jee4heat->getConfiguration('modele')) != '') {
-        /* lire les infos de l'équipement ici */
-          $ip = $jee4heat->getConfiguration('ip');
-          $id = $jee4heat->getId();
-          log::add(__CLASS__, 'debug', "cron : ID=".$id);
-          log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
-          log::add(__CLASS__, 'debug', "cron : modele=".$modele);
-          if ($jee4heat->getConfiguration('modele') != '') {
-             $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY); // send query
-             if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
-              else
-                log::add(__CLASS__, 'debug', 'socket has returned which is not unpackable ='.$stove_return);
-            }
-          }
-        }
+      $$jee4heat->getInformationFomStove($jee4heat);
     }
   }
 
