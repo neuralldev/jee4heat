@@ -131,17 +131,7 @@ class jee4heat extends eqLogic {
           }
         socket_close($socket);
         // unpack answer
-        if ($stove_return=='') return false; // check if buffer is empty, if yes, then do nothing 
-        $message = substr($stove_return,2, strlen($stove_return) -4); // trim leading and trailing characters
-        $ret = explode('","', $message); // translate string to array
-      //  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
-            // format write command returned as ["SEC","1","IRRRRRVVVVVVVVVVVV"]
-
-        if($ret[0] != "SEC") return false; // check for message consistency
-        if($ret[1] != "1") return false; // check for message consistency
-        $stove_return = $ret[2];
-      
-        return $stove_return;
+        return  $this->readregisters($stove_return);         
       }
     }
   }
@@ -445,11 +435,8 @@ if you need to set an attribute for a register, change json depending on stove r
         $prefix = $cmd->getConfiguration("jee4heat_prefix");
         log::add(__CLASS__, 'debug', "setpoint : trim logical ID".$setpoint.' to '.$register);
         $r=$this->setStoveValue($ip, $register, $v, $prefix);
-        log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);
-        
-//        $cmd->event($v*100);
+        log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);        
       }
-//      $this->getInformations();
     }
   }
 
