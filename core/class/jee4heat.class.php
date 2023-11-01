@@ -120,8 +120,8 @@ class jee4heat extends eqLogic {
       $v = $value * 100;
       $szV = strval($v);
       $padded = str_pad($szV,12,'0', STR_PAD_LEFT);
-      // format write command as ["SEC","1","BRRRRRVVVVVVVVVVVV"]
-      $command = '["SEC","1","B'.$register.$padded.'"]';
+      // format write command as ["SEC","1","JRRRRRVVVVVVVVVVVV"]
+      $command = '["SEC","1","J'.$register.$padded.'"]';
       log::add(__CLASS__, 'debug', 'command='.$command);
       if (!socket_send($socket, $command, strlen($command), 0)) {
         log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
@@ -135,7 +135,9 @@ class jee4heat extends eqLogic {
         $message = substr($stove_return,2, strlen($stove_return) -4); // trim leading and trailing characters
         $ret = explode('","', $message); // translate string to array
       //  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
-        if($ret[0] != "SEL") return false; // check for message consistency
+            // format write command returned as ["SEC","1","IRRRRRVVVVVVVVVVVV"]
+
+        if($ret[0] != "SEC") return false; // check for message consistency
         if($ret[1] != "1") return false; // check for message consistency
         $stove_return = $ret[2];
       
