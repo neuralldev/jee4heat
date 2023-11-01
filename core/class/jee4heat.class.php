@@ -228,7 +228,7 @@ public function readregisters($buffer) {
   $ret = explode('","', $message); // translate string to array
   log::add(__CLASS__, 'debug', 'unpack $message ='.$message);
 //  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
-  if(($ret[0] != "SEL") || ($ret[0] != "SEC")) return false; // check for message consistency
+  if(($ret[0] != "SEL") && ($ret[0] != "SEC")) return false; // check for message consistency
   $nargs = intval($ret[1]);
   log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
   if($nargs <= 2) return false; // check for message consistency
