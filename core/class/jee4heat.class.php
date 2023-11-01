@@ -431,7 +431,7 @@ if you need to set an attribute for a register, change json depending on stove r
       if ($v > 0) {
         $register = substr($setpoint,-5);
         log::add(__CLASS__, 'debug', "setpoint : trim logical ID".$setpoint.' to '.$register);
-        $r=$this->setStoveValue($ip, $$register, $v);
+        $r=$this->setStoveValue($ip, $register, $v);
         log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);
 //        $cmd->event($v*100);
       }
