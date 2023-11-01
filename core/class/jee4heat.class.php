@@ -384,8 +384,8 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
           
     if ($ip !='') {
-       $stove_return = setStoveValue($ip, $setpoint, $value);
-          log::add(__CLASS__, 'debug', 'unblock called, socket has returned ='.$stove_return);
+//       $stove_return = setStoveValue($ip, $setpoint, $value);
+//          log::add(__CLASS__, 'debug', 'unblock called, socket has returned ='.$stove_return);
       }
   }
 
