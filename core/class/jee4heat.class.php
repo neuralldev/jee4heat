@@ -233,7 +233,7 @@ public function readregisters($buffer) {
   log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
   if($nargs <= 2) return false; // check for message consistency
   
-  for ($i = 2; $i < $nargs; $i++) { // extract all parameters
+  for ($i = 2; $i < $nargs+2; $i++) { // extract all parameters
     $prefix = substr($ret[$i],0, 1);
     $register = substr($ret[$i],1, 5); // extract register number from value
     $registervalue = intval(substr($ret[$i],-12)); // convert string to int to remove leading 'O'
