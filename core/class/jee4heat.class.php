@@ -404,11 +404,11 @@ if you need to set an attribute for a register, change json depending on stove r
     $_generic_type = 'THERMOSTAT_SETPOINT';
     $_type = '';
     $_multiple = '';
-    // identify set point
+    // identify set pointby parsing commands
  // $cmds = cmd::byEqLogicIdAndGenericType($this->getLogicalId(), 'THERMOSTAT_SETPOINT', null, null, $this);
-    $cmds = $this->getCmdByGenericType('THERMOSTAT_SETPOINT',$id, true);
+    $cmds = $this->getCmdByGenericType(null,'THERMOSTAT_SETPOINT');
   //  $cmds = 			$cmds = cmd::byEqLogicIdAndGenericType($logicalid, $_generic_type, $_multiple, $_type, $this);
-
+ 
     //cmd::byEqLogicId($$this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', 1, $this);
  
    $n =0;
@@ -432,6 +432,8 @@ if you need to set an attribute for a register, change json depending on stove r
  */          
 log::add(__CLASS__, 'debug', "setpoint : n=".$n);
 log::add(__CLASS__, 'debug', "setpoint : ID=".$id);
+log::add(__CLASS__, 'debug', "setpoint : logicalID=".$logicalid);
+
 log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
 }
 
