@@ -107,7 +107,7 @@ class jee4heat extends eqLogic {
   */
   private function setStoveValue($ip, $register, $value)
   {
-    log::add(__CLASS__, 'debug', 'set value '.$register.' '.$value);
+    log::add(__CLASS__, 'debug', 'set value '.$register.'='.$value);
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
       log::add(__CLASS__, 'debug', 'error opening socket');
@@ -429,7 +429,7 @@ if you need to set an attribute for a register, change json depending on stove r
       $v=($cmd->execCmd()+$step);
       log::add(__CLASS__, 'debug', "setpoint : new set point set to ".$v);
       if ($v > 0) {
-        $register = substr($setpoint,-1, 5);
+        $register = substr($setpoint,-5);
         $r=$this->setStoveValue($ip, $$register, $v);
         log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);
 //        $cmd->event($v*100);
