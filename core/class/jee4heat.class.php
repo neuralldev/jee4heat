@@ -245,7 +245,7 @@ This function is defined to create the action buttons of equipment
 the actions will be called by desktop through execute function by their logical ID
 this function is called by postsave
 */
-public function AddAction($actionName, $actionTitle, $template = null) {
+public function AddAction($actionName, $actionTitle, $template = null, $generic_type=null) {
   $createCmd = true;
   $command = $this->getCmd(null, $actionName);
   if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
@@ -266,6 +266,8 @@ public function AddAction($actionName, $actionTitle, $template = null) {
       $command->setType('action');
       $command->setSubType('other');
       $command->setEqLogic_id($this->getId());
+      if ($generic_type != null) $Command->setGeneric_type($generic_type);
+
       $command->save();
   }
 }  
@@ -464,8 +466,8 @@ log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
     $Equipement->AddAction("jee4heat_off", "OFF");
     $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), 'lock');
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
-    $Equipement->AddAction("jee4heat_stepup", "+");
-    $Equipement->AddAction("jee4heat_stepdown", "-");
+    $Equipement->AddAction("jee4heat_stepup", "+", null, 'THERMOST_SET_SETPOINT');
+    $Equipement->AddAction("jee4heat_stepdown", "-", null, 'THERMOST_SET_SETPOINT');
 
     log::add(__CLASS__, 'debug', 'postsave stop');
   }
