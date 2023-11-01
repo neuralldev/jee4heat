@@ -24,7 +24,7 @@
     {"name": "Dépression fumées", "type": "info", "subtype": "string",  "logicalId": "30033"},
     {"name": "Contraste télécommande", "type": "info", "subtype": "numeric",  "logicalId": "30142"},
     {"name": "Température ambiante", "type": "info", "subtype": "numeric",  "logicalId": "50006", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE"},
-    {"name": "Thermostat Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C", "generictype": "THERMOSTAT_SET_SETPOINT"},
+    {"name": "Thermostat Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT"},
     {"name": "INCONNU  30012", "type": "info", "subtype": "numeric",  "logicalId": "30012", "unit" : "°C"},
     {"name": "INCONNU  20119", "type": "info", "subtype": "string",  "logicalId": "20119"},
     {"name": "INCONNU  20369", "type": "info", "subtype": "string",  "logicalId": "20369"},

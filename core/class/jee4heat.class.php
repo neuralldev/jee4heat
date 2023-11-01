@@ -449,7 +449,7 @@ log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
       // item name must match to json structure table items names, if not it takes null
       if ($item['name'] != '' && $item['logicalId'] != '') {
-        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'tile',$item['unit'] , '', ($item['visible']!=''?$item['visible']:'1'), 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif'], $item['invert']);
+        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'tile',$item['unit'] , $item['generictype'], ($item['visible']!=''?$item['visible']:'1'), 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif'], $item['invert']);
         $order++;
       }
     }
