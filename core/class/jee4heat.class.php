@@ -406,7 +406,7 @@ if you need to set an attribute for a register, change json depending on stove r
     $_multiple = '';
     // identify set pointby parsing commands
  // $cmds = cmd::byEqLogicIdAndGenericType($this->getLogicalId(), 'THERMOSTAT_SETPOINT', null, null, $this);
-    $cmds = $this->getCmdByGenericType(null,'THERMOSTAT_SETPOINT');
+    $cmds = $this->getCmdByGenericType('info','THERMOSTAT_SETPOINT');
   //  $cmds = 			$cmds = cmd::byEqLogicIdAndGenericType($logicalid, $_generic_type, $_multiple, $_type, $this);
  
     //cmd::byEqLogicId($$this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', 1, $this);
