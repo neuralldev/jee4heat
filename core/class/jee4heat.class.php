@@ -413,6 +413,7 @@ if you need to set an attribute for a register, change json depending on stove r
       $name = $cmd->getName();
       $setpoint = $cmd->getLogicalId();
       $eqID = $cmd->getEqLogic_id();
+      $ip = $this->getConfiguration('ip');
       log::add(__CLASS__, 'debug', "setpoint : name found=".$name);
       log::add(__CLASS__, 'debug', "setpoint : logicalID found=".$setpoint);
       log::add(__CLASS__, 'debug', "setpoint : parent ID found=".$eqID);
@@ -425,8 +426,11 @@ if you need to set an attribute for a register, change json depending on stove r
       log::add(__CLASS__, 'debug', "setpoint : command found!");
       $v=$cmd->execCmd()+$step;
       log::add(__CLASS__, 'debug', "setpoint : new set point set to ".$v);
-      if ($v > 0)
-        $cmd->event($v*100);
+      if ($v > 0) {
+        $r=$this->setStoveValue($ip, $setpoint, $v);
+        log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);
+//        $cmd->event($v*100);
+      }
 //      $this->getInformations();
     }
   }
