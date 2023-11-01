@@ -380,7 +380,7 @@ if you need to set an attribute for a register, change json depending on stove r
     // identify set point
 //    $cmds = cmd::byEqLogicIdAndGenericType($this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', null, null, $this);
  //   $cmds = $this->getCmdByGenericType('THERMOSTAT_SET_SETPOINT',$id, true);
-  $cmds = cmd::byEqLogicId($id, 'THERMOSTAT_SET_SETPOINT', 1, $this);
+    $cmds = cmd::byEqLogicId($$this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', 1, $this);
  
    $n =0;
     foreach ($cmds as $cmd) {
