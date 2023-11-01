@@ -105,7 +105,7 @@ class jee4heat extends eqLogic {
   /*
   Temperature set point function, used to ask the stove to modulate up to this value
   */
-  private function setStoveValue($ip, $register, $value)
+  private function setStoveValue($ip, $register, $value, $prefix = null)
   {
     log::add(__CLASS__, 'debug', 'set value '.$register.'='.$value);
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -120,8 +120,8 @@ class jee4heat extends eqLogic {
       $v = $value * 100;
       $szV = strval($v);
       $padded = str_pad($szV,12,'0', STR_PAD_LEFT);
-      // format write command as ["SEC","1","JRRRRRVVVVVVVVVVVV"]
-      $command = '["SEC","1","J'.$register.$padded.'"]';
+      // format write command as ["SEC","1","<prefix>RRRRRVVVVVVVVVVVV"]
+      $command = '["SEC","1","'.($prefix==null?'J':$prefix).$register.$padded.'"]';
       log::add(__CLASS__, 'debug', 'command='.$command);
       if (!socket_send($socket, $command, strlen($command), 0)) {
         log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
@@ -267,6 +267,7 @@ public function readregisters($buffer) {
         $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
         if ($cmdMessage != null) $cmdMessage->event(ERROR_NAMES[$registervalue]);
       }
+      $Command->setConfiguration('jee4heat_prefix',$prefix);
       $Command->event($registervalue);
     } else {
       log::add(__CLASS__, 'debug', 'could not find command '.$register);
@@ -441,8 +442,9 @@ if you need to set an attribute for a register, change json depending on stove r
       log::add(__CLASS__, 'debug', "setpoint : new set point set to ".$v);
       if ($v > 0) {
         $register = substr($setpoint,-5);
+        $prefix = $cmd->getConfiguration("jee4heat_prefix");
         log::add(__CLASS__, 'debug', "setpoint : trim logical ID".$setpoint.' to '.$register);
-        $r=$this->setStoveValue($ip, $register, $v);
+        $r=$this->setStoveValue($ip, $register, $v, $prefix);
         log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);
         
 //        $cmd->event($v*100);
