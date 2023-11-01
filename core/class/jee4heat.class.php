@@ -178,15 +178,15 @@ class jee4heat extends eqLogic {
       /* lire les infos de l'équipement ici */
         $ip = $jee4heat->getConfiguration('ip');
         $id = $jee4heat->getId();
-        log::add(__CLASS__, 'debug', "cron : ID=".$id);
-        log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
-        log::add(__CLASS__, 'debug', "cron : modele=".$modele);
+        log::add(__CLASS__, 'debug', "refresh : ID=".$id);
+        log::add(__CLASS__, 'debug', "refresh : IP du poele=".$ip);
+        log::add(__CLASS__, 'debug', "refresh : modele=".$modele);
         if ($jee4heat->getConfiguration('modele') != '') {
            $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY); // send query
            if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
-              log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
+              log::add(__CLASS__, 'debug', 'refresh socket has returned ='.$stove_return);
             else
-              log::add(__CLASS__, 'debug', 'socket has returned which is not unpackable ='.$stove_return);
+              log::add(__CLASS__, 'debug', 'refresh socket has returned which is not unpackable ='.$stove_return);
           }
         }
       }
@@ -210,9 +210,9 @@ depuis l'application cloud c'est plus long à être pris en compte
           if ($jee4heat->getConfiguration('modele') != '') {
              $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY); // send query
              if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'socket has returned ='.$stove_return);
+                log::add(__CLASS__, 'debug', 'cron socket has returned ='.$stove_return);
               else
-                log::add(__CLASS__, 'debug', 'socket has returned which is not unpackable ='.$stove_return);
+                log::add(__CLASS__, 'debug', 'cron socket has returned which is not unpackable ='.$stove_return);
             }
           }
         }
