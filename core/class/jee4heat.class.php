@@ -121,7 +121,7 @@ class jee4heat extends eqLogic {
       $szV = strval($v);
       $padded = str_pad($szV,12,'0', STR_PAD_LEFT);
       // format write command as ["SEC","1","BRRRRRVVVVVVVVVVVV"]
-      $command = '["SEC","1","B'.$register.$$padded.'"]';
+      $command = '["SEC","1","B'.$register.$padded.'"]';
       log::add(__CLASS__, 'debug', 'command='.$command);
       if (!socket_send($socket, $command, strlen($command), 0)) {
         log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
