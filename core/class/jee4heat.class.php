@@ -429,6 +429,7 @@ if you need to set an attribute for a register, change json depending on stove r
       $v=($cmd->execCmd()+$step)*100;
       log::add(__CLASS__, 'debug', "setpoint : new set point set to ".$v);
       if ($v > 0) {
+        $register = substr($setpoint,-1, 5);
         $r=$this->setStoveValue($ip, $setpoint, $v);
         log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);
 //        $cmd->event($v*100);
