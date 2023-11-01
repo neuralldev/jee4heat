@@ -240,7 +240,7 @@ public function readregisters($buffer) {
    // if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
     log::add(__CLASS__, 'debug', "cron : register (prefix $prefix) $register=$registervalue");
     $Command = $this->getCmd(null, 'jee4heat_'.$register); // now set value of jeedom object
-    if (is_object($Command)) {
+    if (is_object($Command)) { 
       //log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register); 
       if ($register == STATE_REGISTER) { // regular stove state feedback storage
         // update state information according to value
