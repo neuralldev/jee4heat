@@ -405,13 +405,14 @@ if you need to set an attribute for a register, change json depending on stove r
     $_type = '';
     $_multiple = '';
     // identify set point
-//    $cmds = cmd::byEqLogicIdAndGenericType($this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', null, null, $this);
+  $cmds = cmd::byEqLogicIdAndGenericType($this->getLogicalId(), 'THERMOSTAT_SETPOINT', null, null, $this);
  //   $cmds = $this->getCmdByGenericType('THERMOSTAT_SET_SETPOINT',$id, true);
-    $cmds = 			$cmds = cmd::byEqLogicIdAndGenericType($logicalid, $_generic_type, $_multiple, $_type, $this);
+  //  $cmds = 			$cmds = cmd::byEqLogicIdAndGenericType($logicalid, $_generic_type, $_multiple, $_type, $this);
 
     //cmd::byEqLogicId($$this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', 1, $this);
  
    $n =0;
+   
     foreach ($cmds as $cmd) {
       $name = $cmd->getName();
       $setpoint = $cmd->getLogicalId();
@@ -506,7 +507,7 @@ log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
   public function postUpdate()
   {
     log::add(__CLASS__, 'debug', 'postupdate start');
-   // $this->getInformations();
+    //$this->getInformations();
     log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
