@@ -503,6 +503,7 @@ log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
   }
   public function getInformations() {
     log::add(__CLASS__, 'debug', 'getinformation start');
+    $this->getInformationFomStove($this);
     log::add(__CLASS__, 'debug', 'getinformation stop');
     }
 
