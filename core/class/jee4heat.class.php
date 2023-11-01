@@ -233,7 +233,7 @@ public function readregisters($buffer) {
   log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
   if($nargs <= 2) return false; // check for message consistency
   
-  for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
+  for ($i = 2; $i < $nargs; $i++) { // extract all parameters
     $prefix = substr($ret[$i],0, 1);
     $register = substr($ret[$i],1, 5); // extract register number from value
     $registervalue = intval(substr($ret[$i],-12)); // convert string to int to remove leading 'O'
@@ -573,13 +573,9 @@ class jee4heatCmd extends cmd {
             break;
           case 'jee4heat_on':
         $this->getEqLogic()->state_on();
-//        $this->toggleVisible('jee4heat_state_on', 0);
-//        $this->toggleVisible('jee4heat_state_off', 1);
         break;
       case 'jee4heat_off':
         $this->getEqLogic()->state_off();
-//        $this->toggleVisible('jee4heat_state_on', 1);
-//        $this->toggleVisible('jee4heat_state_off', 0);
         break;
         default:
       }
