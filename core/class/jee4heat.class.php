@@ -136,7 +136,7 @@ class jee4heat extends eqLogic {
     }
   }
 
-  private function talktoStove($ip, $port, $command) {
+  private function getStoveValue($ip, $port, $command) {
       /* interroge depuis ici 
         le principe est d'échanger des messages ASCII avec un format propriétaire à base de registres de taille fixe
         le retour renvoie toujours ["SEL","N=nb d'items", "ITEM 1", ..."ITEM N" ]
@@ -185,11 +185,11 @@ class jee4heat extends eqLogic {
         log::add(__CLASS__, 'debug', "refresh : IP du poele=".$ip);
         log::add(__CLASS__, 'debug', "refresh : modele=".$modele);
         if ($jee4heat->getConfiguration('modele') != '') {
-           $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY); // send query
+           $stove_return = $jee4heat->getStoveValue($ip,SOCKET_PORT, DATA_QUERY); // send query
            if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
               log::add(__CLASS__, 'debug', 'refresh socket has returned ='.$stove_return);
             else
-              log::add(__CLASS__, 'debug', 'refresh socket has returned which is not unpackable ='.$stove_return);
+              log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable ='.$stove_return);
           }
         }
       }
@@ -211,7 +211,7 @@ depuis l'application cloud c'est plus long à être pris en compte
           log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
           log::add(__CLASS__, 'debug', "cron : modele=".$modele);
           if ($jee4heat->getConfiguration('modele') != '') {
-             $stove_return = $jee4heat->talktoStove($ip,SOCKET_PORT, DATA_QUERY); // send query
+             $stove_return = $jee4heat->getStoveValue($ip,SOCKET_PORT, DATA_QUERY); // send query
              if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
                 log::add(__CLASS__, 'debug', 'cron socket has returned ='.$stove_return);
               else
@@ -355,11 +355,11 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', "on : IP du poele=".$ip);
           
     if ($ip !='') {
-       $stove_return = $this->talktoStove($ip,SOCKET_PORT, ON_CMD);
+       $stove_return = $this->getStoveValue($ip,SOCKET_PORT, ON_CMD);
           log::add(__CLASS__, 'debug', 'command on sent, socket has returned ='.$stove_return);
           // expected return "I" ["SEC","1","I30253000000000000"]
         }
-    }
+  }
 
   /**
    * this command toggles state of the stove to OFF
@@ -373,7 +373,7 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', "off : IP du poele=".$ip);
           
     if ($ip !='') {
-       $stove_return = $this->talktoStove($ip,SOCKET_PORT, OFF_CMD);
+       $stove_return = $this->getStoveValue($ip,SOCKET_PORT, OFF_CMD);
           log::add(__CLASS__, 'debug', 'command off sent, socket has returned ='.$stove_return);
           // expected return "I" ["SEC","1","I30254000000000000"]
       }
@@ -393,7 +393,7 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', "unblock : IP du poele=".$ip);
           
     if ($ip !='') {
-       $stove_return = $this->talktoStove($ip,SOCKET_PORT, UNBLOCK_CMD);
+       $stove_return = $this->getStoveValue($ip,SOCKET_PORT, UNBLOCK_CMD);
           log::add(__CLASS__, 'debug', 'unblock called, socket has returned ='.$stove_return);
            // expected return "I" ["SEC","1","I30255000000000000"]
 
@@ -478,7 +478,7 @@ if you need to set an attribute for a register, change json depending on stove r
       log::add(__CLASS__, 'debug', 'postsave found commands array name='.json_encode($item));
       // item name must match to json structure table items names, if not it takes null
       if ($item['name'] != '' && $item['logicalId'] != '') {
-        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'tile',$item['unit'] , $item['generictype'], ($item['visible']!=''?$item['visible']:'1'), 'default', 'default', 'default', 'default', $order, '0', true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif'], $item['invert']);
+        $Equipement->AddCommand($item['name'], 'jee4heat_'.$item['logicalId'], $item['type'], $item['subtype'], 'tile',$item['unit'] , $item['generictype'], ($item['visible']!=''?$item['visible']:'1'), 'default', 'default', $item['min'], $item['max'], $order, $item['history'], true, 'default', $item['offset'], 2, null, $item['warningif'], $item['dangerif'], $item['invert']);
         $order++;
       }
     }
@@ -527,7 +527,7 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', 'getinformation start');
     $this->getInformationFomStove($this);
     log::add(__CLASS__, 'debug', 'getinformation stop');
-    }
+  }
 
 
   public function getjee4heat() {
