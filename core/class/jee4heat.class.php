@@ -407,31 +407,23 @@ if you need to set an attribute for a register, change json depending on stove r
 
     $cmds = cmd::byGenericType($_generic_type, null, false) ;
 		
-   $n =0;
+    $n =0;
 
     foreach ($cmds as $cmd) {
       $name = $cmd->getName();
       $setpoint = $cmd->getLogicalId();
+      $eqID = $cmd->getEqLogic_id();
       log::add(__CLASS__, 'debug', "setpoint : name found=".$name);
       log::add(__CLASS__, 'debug', "setpoint : logicalID found=".$setpoint);
+      log::add(__CLASS__, 'debug', "setpoint : parent ID found=".$eqID);
       $n++;
+      if ($eqID==$id) break;
     }
-    if ($cmd ==null) 
+    if ($n==0) 
       log::add(__CLASS__, 'debug', "setpoint : command not found");
-    /*     log::add(__CLASS__, 'debug', "setpoint : setpoint=".$setpoint);
-    log::add(__CLASS__, 'debug', "setpoint : ID=".$id);
-    log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
-    if ($ip !='') {
-       $stove_return = setStoveValue($ip, $setpoint, $value);
-          log::add(__CLASS__, 'debug', 'unblock called, socket has returned ='.$stove_return);
-      }
- */          
-log::add(__CLASS__, 'debug', "setpoint : n=".$n);
-log::add(__CLASS__, 'debug', "setpoint : ID=".$id);
-log::add(__CLASS__, 'debug', "setpoint : logicalID=".$logicalid);
-
-log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
-}
+    else
+      log::add(__CLASS__, 'debug', "setpoint : command found!");
+  }
 
 
   public function refresh()
