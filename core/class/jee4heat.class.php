@@ -119,9 +119,9 @@ class jee4heat extends eqLogic {
       // prepare value; this is necessary for register set point to multiply the value because it expects temperature this way (4 digits)
       $v = $value * 100;
       $szV = strval($v);
-      str_pad($szV,12,'0', STR_PAD_LEFT);
+      $padded = str_pad($szV,12,'0', STR_PAD_LEFT);
       // format write command as ["SEC","1","BRRRRRVVVVVVVVVVVV"]
-      $command = '["SEC","1","B'.$register.$szV.'"]';
+      $command = '["SEC","1","B'.$register.$$padded.'"]';
       log::add(__CLASS__, 'debug', 'command='.$command);
       if (!socket_send($socket, $command, strlen($command), 0)) {
         log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
