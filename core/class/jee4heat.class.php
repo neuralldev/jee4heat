@@ -421,8 +421,12 @@ if you need to set an attribute for a register, change json depending on stove r
     }
     if ($n==0) 
       log::add(__CLASS__, 'debug', "setpoint : command not found");
-    else
+    else {
       log::add(__CLASS__, 'debug', "setpoint : command found!");
+      $v=$cmd->getValue(); 
+      $cmd->event(($v+$step)*100);
+      log::add(__CLASS__, 'debug', "setpoint : new set point set to ".$v);
+    }
   }
 
 
