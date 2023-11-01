@@ -376,11 +376,17 @@ if you need to set an attribute for a register, change json depending on stove r
   public function updatesetpoint($step)
   {
     $id = $this->getId(); 
+    $logicalid = $this->getLogicalId();
     $ip = $this->getConfiguration('ip');
+    $_generic_type = 'THERMOSTAT_SET_SETPOINT';
+    $_type = '';
+    $_multiple = '';
     // identify set point
 //    $cmds = cmd::byEqLogicIdAndGenericType($this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', null, null, $this);
  //   $cmds = $this->getCmdByGenericType('THERMOSTAT_SET_SETPOINT',$id, true);
-    $cmds = cmd::byEqLogicId($$this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', 1, $this);
+    $cmds = 			$cmds = cmd::byEqLogicIdAndGenericType($logicalid, $_generic_type, $_multiple, $_type, $this);
+
+    //cmd::byEqLogicId($$this->getLogicalId(), 'THERMOSTAT_SET_SETPOINT', 1, $this);
  
    $n =0;
     foreach ($cmds as $cmd) {
@@ -390,7 +396,9 @@ if you need to set an attribute for a register, change json depending on stove r
       log::add(__CLASS__, 'debug', "setpoint : logicalID found=".$setpoint);
       $n++;
     }
-/*     log::add(__CLASS__, 'debug', "setpoint : setpoint=".$setpoint);
+    if ($cmd ==null) 
+      log::add(__CLASS__, 'debug', "setpoint : command not found");
+    /*     log::add(__CLASS__, 'debug', "setpoint : setpoint=".$setpoint);
     log::add(__CLASS__, 'debug', "setpoint : ID=".$id);
     log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
     if ($ip !='') {
