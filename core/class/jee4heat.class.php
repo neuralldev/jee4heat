@@ -266,7 +266,7 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
       $command->setType('action');
       $command->setSubType('other');
       $command->setEqLogic_id($this->getId());
-      if ($generic_type != null) $Command->setGeneric_type($generic_type);
+      if ($generic_type != null) $command->setGeneric_type($generic_type);
 
       $command->save();
   }
