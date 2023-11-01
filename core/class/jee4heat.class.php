@@ -72,7 +72,7 @@ const ERROR_NAMES = [
 
 class jee4heat extends eqLogic {
 
-  public static function pull($_options) {
+  public static function pull($_options=null) {
     $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
     if (is_object($cron)) {
       $cron->remove();
@@ -105,13 +105,13 @@ class jee4heat extends eqLogic {
   /*
   Temperature set point function, used to ask the stove to modulate up to this value
   */
-  private function setStoveValue($ip, $port, $register, $value)
+  private function setStoveValue($ip, $register, $value)
   {
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
       log::add(__CLASS__, 'debug', 'error opening socket');
     } else {
-      if (!socket_connect($socket, $ip, $port)) {
+      if (!socket_connect($socket, $ip, SOCKET_PORT)) {
           log::add(__CLASS__, 'debug', 'error connecting socket on '.$ip);
           log::add(__CLASS__, 'debug', ' error = '.socket_strerror(socket_last_error($socket)));
       }
@@ -324,8 +324,8 @@ if you need to set an attribute for a register, change json depending on stove r
   {
     $id = $this->getId();
     $ip = $this->getConfiguration('ip');
-    log::add(__CLASS__, 'debug', "cron : ID=".$id);
-    log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
+    log::add(__CLASS__, 'debug', "on : ID=".$id);
+    log::add(__CLASS__, 'debug', "on : IP du poele=".$ip);
           
     if ($ip !='') {
        $stove_return = $this->talktoStove($ip,SOCKET_PORT, ON_CMD);
@@ -342,8 +342,8 @@ if you need to set an attribute for a register, change json depending on stove r
   {
     $id = $this->getId();
     $ip = $this->getConfiguration('ip');
-    log::add(__CLASS__, 'debug', "cron : ID=".$id);
-    log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
+    log::add(__CLASS__, 'debug', "off : ID=".$id);
+    log::add(__CLASS__, 'debug', "off : IP du poele=".$ip);
           
     if ($ip !='') {
        $stove_return = $this->talktoStove($ip,SOCKET_PORT, OFF_CMD);
@@ -362,8 +362,8 @@ if you need to set an attribute for a register, change json depending on stove r
   {
     $id = $this->getId();
     $ip = $this->getConfiguration('ip');
-    log::add(__CLASS__, 'debug', "cron : ID=".$id);
-    log::add(__CLASS__, 'debug', "cron : IP du poele=".$ip);
+    log::add(__CLASS__, 'debug', "unblock : ID=".$id);
+    log::add(__CLASS__, 'debug', "unblock : IP du poele=".$ip);
           
     if ($ip !='') {
        $stove_return = $this->talktoStove($ip,SOCKET_PORT, UNBLOCK_CMD);
@@ -372,6 +372,23 @@ if you need to set an attribute for a register, change json depending on stove r
 
       }
   }
+
+  public function updatesetpoint($step)
+  {
+    $id = $this->getId();
+    $ip = $this->getConfiguration('ip');
+    // identify set point
+    $setpoint = cmd::byGenericType('THERMOSTAT_SET_SETPOINT',$id, true);
+    log::add(__CLASS__, 'debug', "setpoint : setpoint=".$setpoint);
+    log::add(__CLASS__, 'debug', "setpoint : ID=".$id);
+    log::add(__CLASS__, 'debug', "setpoint : IP du poele=".$ip);
+          
+    if ($ip !='') {
+       $stove_return = setStoveValue($ip, $setpoint, $value);
+          log::add(__CLASS__, 'debug', 'unblock called, socket has returned ='.$stove_return);
+      }
+  }
+
 
   public function refresh()
   {
@@ -425,6 +442,8 @@ if you need to set an attribute for a register, change json depending on stove r
     $Equipement->AddAction("jee4heat_off", "OFF");
     $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), 'lock');
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
+    $Equipement->AddAction("jee4heat_stepup", "+");
+    $Equipement->AddAction("jee4heat_stepdown", "-");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
   }
@@ -494,15 +513,21 @@ class jee4heatCmd extends cmd {
       case 'refresh':
         $this->getEqLogic()->getInformations();
         break;
-      case 'jee4heat_on':
+        case 'jee4heat_stepup':
+          $this->getEqLogic()->updatesetpoint(0.5);
+          break;
+          case 'jee4heat_stepdown':
+            $this->getEqLogic()->updatesetpoint(-0.5);
+            break;
+          case 'jee4heat_on':
         $this->getEqLogic()->state_on();
-        $this->toggleVisible('jee4heat_state_on', 0);
-        $this->toggleVisible('jee4heat_state_off', 1);
+//        $this->toggleVisible('jee4heat_state_on', 0);
+//        $this->toggleVisible('jee4heat_state_off', 1);
         break;
       case 'jee4heat_off':
         $this->getEqLogic()->state_off();
-        $this->toggleVisible('jee4heat_state_on', 1);
-        $this->toggleVisible('jee4heat_state_off', 0);
+//        $this->toggleVisible('jee4heat_state_on', 1);
+//        $this->toggleVisible('jee4heat_state_off', 0);
         break;
         default:
       }
