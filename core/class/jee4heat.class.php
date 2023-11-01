@@ -378,7 +378,7 @@ if you need to set an attribute for a register, change json depending on stove r
     $id = $this->getId(); 
     $logicalid = $this->getLogicalId();
     $ip = $this->getConfiguration('ip');
-    $_generic_type = 'THERMOSTAT_SET_SETPOINT';
+    $_generic_type = 'THERMOSTAT_SETPOINT';
     $_type = '';
     $_multiple = '';
     // identify set point

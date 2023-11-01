@@ -17,7 +17,7 @@
     {"name": "Puissance combustion", "type": "info", "subtype": "string",  "logicalId": "30011", "template": "tile"},
     {"name": "Temperature foyer", "type": "info", "subtype": "numeric",  "logicalId": "30026", "unit" : "°C", "offset": "#value#/10"},
     {"name": "Température ambiante", "type": "info", "subtype": "numeric",  "logicalId": "50006", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "#value#/100", "template": "tile"},
-    {"name": "Thermostat Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C", "generictype": "THERMOSTAT_SET_SETPOINT", "offset": "#value#/100", "template": "tile"},
+    {"name": "Thermostat Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT", "offset": "#value#/100", "template": "tile"},
     {"name": "Heating power", "type": "info", "subtype": "string",  "logicalId": "20801", "visible" : "0"},
     {"name": "INCONNU  20493", "type": "info", "subtype": "numeric",  "logicalId": "20493", "visible" : "0"},
     {"name": "INCONNU  30142", "type": "info", "subtype": "numeric",  "logicalId": "30142", "visible" : "0"},
