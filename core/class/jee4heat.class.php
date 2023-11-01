@@ -107,6 +107,7 @@ class jee4heat extends eqLogic {
   */
   private function setStoveValue($ip, $register, $value)
   {
+    log::add(__CLASS__, 'debug', 'set value '.$register.' '.$value);
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
       log::add(__CLASS__, 'debug', 'error opening socket');
@@ -121,6 +122,7 @@ class jee4heat extends eqLogic {
       str_pad($szV,12,'0', STR_PAD_LEFT);
       // format write command as ["SEC","1","BRRRRRVVVVVVVVVVVV"]
       $command = '["SEC","1","B'.$register.$szV.'"]';
+      log::add(__CLASS__, 'debug', 'command='.$command);
       if (!socket_send($socket, $command, strlen($command), 0)) {
         log::add(__CLASS__, 'debug', ' error sending = '.socket_strerror(socket_last_error($socket)));
       } else {
