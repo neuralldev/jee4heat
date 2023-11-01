@@ -130,6 +130,15 @@ class jee4heat extends eqLogic {
             log::add(__CLASS__, 'debug', ' error rceiving = '.socket_strerror(socket_last_error($socket)));
           }
         socket_close($socket);
+        // unpack answer
+        if ($stove_return=='') return false; // check if buffer is empty, if yes, then do nothing 
+        $message = substr($stove_return,2, strlen($stove_return) -4); // trim leading and trailing characters
+        $ret = explode('","', $message); // translate string to array
+      //  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
+        if($ret[0] != "SEL") return false; // check for message consistency
+        if($ret[1] != "1") return false; // check for message consistency
+        $stove_return = $ret[2];
+      
         return $stove_return;
       }
     }
@@ -233,11 +242,11 @@ public function readregisters($buffer) {
   if($nargs <= 2) return false; // check for message consistency
   
   for ($i = 2; $i < ($nargs-2); $i++) { // extract all parameters
-//    $prefix = substr($ret[$i],0, 1);
+    $prefix = substr($ret[$i],0, 1);
     $register = substr($ret[$i],1, 5); // extract register number from value
     $registervalue = intval(substr($ret[$i],-12)); // convert string to int to remove leading 'O'
    // if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
-    log::add(__CLASS__, 'debug', "cron : received register $register=$registervalue");
+    log::add(__CLASS__, 'debug', "cron : received register (prefix $prefix) $register=$registervalue");
     $Command = $this->getCmd(null, 'jee4heat_'.$register); // now set value of jeedom object
     if (is_object($Command)) {
       log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register); 
@@ -433,6 +442,7 @@ if you need to set an attribute for a register, change json depending on stove r
         log::add(__CLASS__, 'debug', "setpoint : trim logical ID".$setpoint.' to '.$register);
         $r=$this->setStoveValue($ip, $register, $v);
         log::add(__CLASS__, 'debug', "setpoint : stove return ".$r);
+        
 //        $cmd->event($v*100);
       }
 //      $this->getInformations();
