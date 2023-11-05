@@ -313,7 +313,7 @@ if you need to set an attribute for a register, change json depending on stove r
         $Command->setLogicalId($_logicalId);
         log::add(__CLASS__, 'debug', ' logicalid='.$_logicalId);
         $Command->setEqLogic_id($this->getId());
-        log::add(__CLASS__, 'debug', ' eqid='.$$this->getID());
+        log::add(__CLASS__, 'debug', ' eqid='.$this->getID());
         $Command->setName($Name);
         log::add(__CLASS__, 'debug', ' name='.$Name);
         $Command->setType($Type);
