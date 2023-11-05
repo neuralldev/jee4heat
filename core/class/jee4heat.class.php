@@ -534,6 +534,35 @@ if you need to set an attribute for a register, change json depending on stove r
     log::add(__CLASS__, 'debug', 'getjee4heat' . "");
     $this->checkAndUpdateCmd('jee4heat', "");
   }
+
+  public function toHtml($_version = 'dashboard') {  
+    /* 
+    // a n'utiliser que si dans la config de l'eqLogic, on laisse le choix a l'user d'utiliser le widget du plugin, ou les widget par défaut du core
+     if ($this->getConfiguration('widgetTemplate') != 1) {
+      return parent::toHtml($_version);
+    } 
+    */
+    
+    $replace = $this->preToHtml($_version); // initialise les tag standards : #id#, #name# ...
+    
+    if (!is_array($replace)) {
+      return $replace;
+    }
+    
+    $version = jeedom::versionAlias($_version);
+    
+    /* plusieurs lignes séparées pour comprendre */
+    $getTemplate = getTemplate('core', $version, 'jee4heat.template', __CLASS__); // on récupère le template 'propluvia.template' du plugin.
+    $template_replace = template_replace($replace, $getTemplate); // on remplace les tags
+    $postToHtml = $this->postToHtml($_version,$template_replace); // on met en cache le widget, si la config de l'user le permet.
+    return $postToHtml; // renvoie le code du template du widget.
+    
+    /* 
+    // Ces 4 lignes ci-dessus peuvent être concaténer comme ceci : 
+    return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'propluvia.template' , __CLASS__)));
+    */
+    
+  }
 }
 class jee4heatCmd extends cmd {
   public function dontRemoveCmd()
