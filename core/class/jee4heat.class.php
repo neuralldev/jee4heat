@@ -309,7 +309,7 @@ class jee4heat extends eqLogic {
         log::add(__CLASS__, 'debug', ' add record for '.$Name);
         // basic settings
         $Command = new jee4heatCmd();  
-        $Command->setId(null);
+       // $Command->setId(null);
         $Command->setLogicalId($_logicalId);
         log::add(__CLASS__, 'debug', ' logicalid='.$_logicalId);
         $Command->setEqLogic_id($this->getId());
