@@ -270,7 +270,7 @@ This function is defined to create the action buttons of equipment
 the actions will be called by desktop through execute function by their logical ID
 this function is called by postsave
 */
-public function AddAction($actionName, $actionTitle, $template = null, $generic_type=null) {
+public function AddAction($actionName, $actionTitle, $template = null, $generic_type=null, $subtype='other') {
   $createCmd = true;
   $command = $this->getCmd(null, $actionName);
   if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
@@ -289,7 +289,7 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
         $command->setTemplate('mobile', $template);
       }
       $command->setType('action');
-      $command->setSubType('other');
+      $command->setSubType($subtype);
       $command->setEqLogic_id($this->getId());
       if ($generic_type != null) $command->setGeneric_type($generic_type);
 
@@ -495,6 +495,7 @@ if you need to set an attribute for a register, change json depending on stove r
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
     $Equipement->AddAction("jee4heat_stepup", "+", null, 'THERMOST_SET_SETPOINT');
     $Equipement->AddAction("jee4heat_stepdown", "-", null, 'THERMOST_SET_SETPOINT');
+    $Equipement->AddAction("jee4heat_setpointvalue", "-", null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
   }
