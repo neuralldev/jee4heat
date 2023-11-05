@@ -303,7 +303,7 @@ class jee4heat extends eqLogic {
     subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
   if you need to set an attribute for a register, change json depending on stove registers
     */
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = "0")
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0)
   {
     $Command = $this->getCmd(null, $_logicalId);
     if (!is_object($Command)) {
@@ -506,9 +506,9 @@ class jee4heat extends eqLogic {
         $order++;
       }
     }
-    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, null);
+    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat','' , 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
     $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'alert','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 1);
-    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, null);
+    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line','' , '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
     $Equipement->setConfiguration('jee4heat_stovestate',STATE_REGISTER);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
