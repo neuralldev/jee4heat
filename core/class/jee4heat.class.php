@@ -344,10 +344,10 @@ class jee4heat extends eqLogic {
         log::add(__CLASS__, 'debug', ' historiseround='.$_historizeRound);
         if ($generic_type != null) $Command->setGeneric_type($generic_type);
         log::add(__CLASS__, 'debug', ' generic type='.$generic_type);
-        if ($repeatevent == true && $Type == 'info') $Command->setconfiguration('repeatEventManagement', 'never');
-        if ($valuemin != 'default') $Command->setconfiguration('minValue', $valuemin);
+        if ($repeatevent == true && $Type == 'info') $Command->setConfiguration('repeatEventManagement', 'never');
+        if ($valuemin != 'default') $Command->setConfiguration('minValue', $valuemin);
         log::add(__CLASS__, 'debug', ' min='.$valuemin);
-        if ($valuemax != 'default') $Command->setconfiguration('maxValue', $valuemax);
+        if ($valuemax != 'default') $Command->setConfiguration('maxValue', $valuemax);
         log::add(__CLASS__, 'debug', ' max='.$valuemax);
         if ($_warning != null) $Command->setDisplay("warningif", $_warning);
         log::add(__CLASS__, 'debug', ' warning='.$_warning);
