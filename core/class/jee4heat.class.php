@@ -327,31 +327,34 @@ class jee4heat extends eqLogic {
         $Command->setIsHistorized($IsHistorized);
         log::add(__CLASS__, 'debug', ' historise='.$IsHistorized);
         // add parameters if defined
-        $Command->save();
         if ($Template != null) {
           log::add(__CLASS__, 'debug', ' template='.$Template);
           $Command->setTemplate('dashboard', $Template);
             $Command->setTemplate('mobile', $Template);
         }
-        $Command->save();
 
         if ($unite != null && $SubType == 'numeric') $Command->setUnite($unite);
         log::add(__CLASS__, 'debug', ' unite='.$unite);
+        $Command->save();
         if ($icon != 'default') $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
         log::add(__CLASS__, 'debug', ' icon='.$icon);
+        $Command->save();
         if ($forceLineB != 'default') $Command->setdisplay('forceReturnLineBefore', 1);
         if ($_iconname != 'default') $Command->setdisplay('showIconAndNamedashboard', 1);
         if ($_noiconname != null) $Command->setdisplay('showNameOndashboard', 0);
         if ($_calculValueOffset != null) $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+        $Command->save();
         log::add(__CLASS__, 'debug', ' calcul='.$_calculValueOffset);
         if ($_historizeRound != null) $Command->setConfiguration('historizeRound', $_historizeRound);
         log::add(__CLASS__, 'debug', ' historiseround='.$_historizeRound);
         if ($generic_type != null) $Command->setGeneric_type($generic_type);
         log::add(__CLASS__, 'debug', ' generic type='.$generic_type);
+        $Command->save();
         if ($repeatevent == true && $Type == 'info') $Command->setConfiguration('repeatEventManagement', 'never');
         if ($valuemin != 'default') $Command->setConfiguration('minValue', $valuemin);
         log::add(__CLASS__, 'debug', ' min='.$valuemin);
         if ($valuemax != 'default') $Command->setConfiguration('maxValue', $valuemax);
+        $Command->save();
         log::add(__CLASS__, 'debug', ' max='.$valuemax);
         if ($_warning != null) $Command->setDisplay("warningif", $_warning);
         log::add(__CLASS__, 'debug', ' warning='.$_warning);
