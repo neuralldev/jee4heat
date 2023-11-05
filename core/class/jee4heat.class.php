@@ -311,10 +311,14 @@ if you need to set an attribute for a register, change json depending on stove r
           $Command = new jee4heatCmd();  
           $Command->setId(null);
           $Command->setLogicalId($_logicalId);
+          log::add(__CLASS__, 'debug', ' logicalid='.$_logicalId);
           $Command->setEqLogic_id($this->getId());
           $Command->setName($Name);
+          log::add(__CLASS__, 'debug', ' name='.$Name);
           $Command->setType($Type);
+          log::add(__CLASS__, 'debug', ' type='.$Type);
           $Command->setSubType($SubType);
+          log::add(__CLASS__, 'debug', ' subtype='.$SubType);
           $Command->setIsVisible($IsVisible);
           $Command->setIsHistorized($IsHistorized);
           // add parameters if defined
