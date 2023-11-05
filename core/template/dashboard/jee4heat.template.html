@@ -1,58 +1,86 @@
-<div class="cmd cmd-widget" data-type="action" data-subtype="slider" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#">
-      <div class="title #hide_name#">
-        <div class="cmdName">#name_display#</div>
-      </div>
-      <span id="thermo_icon"></span>
-      <p id="displayConsigne" class="text-right">
-        <span id="valeur#id#"></span>°C
-       </p>
-       <div id="boutons">
-        <a class="btn-sm bt_plus"><i class="fas fa-2x fa-plus-square"></i></a>
-         <br />
-        <a class="btn-sm bt_minus"><i class="fas fa-2x fa-minus-square"></i></a>
-       </div>
-    <style>
-     #thermo_icon { font-size:4em;}
-     #displayConsigne { display:inline-block; width:80px; font-family:"arial";}
-     #valeur#id# { font-size:3.5em; }
-     #boutons { display:inline-block; }
-    </style>  
-      <script>
-        var sbjs_Timer#id#;
-        /***** + *****/
-        $('.cmd[data-cmd_id=#id#] .bt_plus').on('click', function () {
-          var cmd = $('.cmd[data-cmd_uid=#uid#]')
-            var step = (isNaN(parseFloat('#step#'))) ?  0.5 : parseFloat('#step#');
-            cmd.find('#valeur#id#').text(parseFloat(parseFloat($('#valeur#id#').text()) + step ).toFixed(1) );
-              clearTimeout(sbjs_Timer#id#);
-              sbjs_Timer#id# = setTimeout(sbjs_Save#id#, 1500);              
-        });                 
-        /***** - *****/
-        $('.cmd[data-cmd_id=#id#] .bt_minus').on('click', function () {
-          var cmd = $('.cmd[data-cmd_uid=#uid#]')
-          var step = (isNaN(parseFloat('#step#'))) ?  0.5 : parseFloat('#step#');
-              cmd.find('#valeur#id#').text(parseFloat(parseFloat($('#valeur#id#').text()) - step ).toFixed(1) );
-              clearTimeout(sbjs_Timer#id#);
-              sbjs_Timer#id# = setTimeout(sbjs_Save#id#, 1500);
-        });
-        /***** Envoi de la nouvelle consigne *****/
-        function sbjs_Save#id#() {
-            jeedom.cmd.execute({ id: '#id#', value: { slider: parseFloat( $('#valeur#id#').text() ) }});
-        }
-        /***** MAJ Automatique *****/
-        jeedom.cmd.update['#id#'] = function(_options){
-            var cmd = $('.cmd[data-cmd_uid=#uid#]')
-            cmd.find('#valeur#id#').text(parseFloat(_options.display_value).toFixed(1));
-            
-            if (_options.display_value < 10) {
-                cmd.find('#thermo_icon').html('<i class="icon_blue jeedom-thermo-froid"></i>');}
-            else if (_options.display_value <= 16) {
-                cmd.find('#thermo_icon').html('<i class="icon_green jeedom-thermo-moyen"></i>');}
-            else if (_options.display_value <= 22) {
-                cmd.find('#thermo_icon').html('<i class="icon_yellow jeedom-thermo-chaud"></i>');}
-            else {
-                cmd.find('#thermo_icon').html('<i class="icon_orange jeedom-thermo-chaud"></i>');}
-        }
-        jeedom.cmd.update['#id#']({display_value:'#state#'});
-      </script>
+<div class="eqLogic eqLogic-widget allowResize allowReorderCmd #custom_layout# #eqLogic_class# #class#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width: #width#;height: #height#;#style#">
+  <center class="widget-name">
+    <span class="warning" title="#alert_name#">
+      <i class='#alert_icon#'></i>
+    </span>
+    <span class="cmd refresh pull-right cursor" data-cmd_id="#refresh_id#">
+      <i class="fas fa-sync"></i>
+    </span>
+    <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+    <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
+  </center>
+  <div class="#isVerticalAlign#">
+    <center>
+      #cmd#
+    </center>
+  </div>
+  #divGraphInfo#
+  <script>
+    if ('#refresh_id#' != '') {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .refresh').on('click', function () {
+        jeedom.cmd.execute({id: '#refresh_id#'})
+      })
+    } else {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .refresh').remove()
+    }
+  </script>
+  <div class="cmd cmd-widget" data-type="action" data-subtype="slider" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#">
+    <div class="title #hide_name#">
+      <div class="cmdName">#name_display#</div>
     </div>
+    <span id="thermo_icon"></span>
+    <p id="displayConsigne" class="text-right">
+      <span id="valeur#id#"></span>°C
+     </p>
+     <div id="boutons">
+      <a class="btn-sm bt_plus"><i class="fas fa-2x fa-plus-square"></i></a>
+       <br />
+      <a class="btn-sm bt_minus"><i class="fas fa-2x fa-minus-square"></i></a>
+     </div>
+  <style>
+   #thermo_icon { font-size:4em;}
+   #displayConsigne { display:inline-block; width:80px; font-family:"arial";}
+   #valeur#id# { font-size:3.5em; }
+   #boutons { display:inline-block; }
+  </style>  
+    <script>
+      var sbjs_Timer#id#;
+      /***** + *****/
+      $('.cmd[data-cmd_id=#id#] .bt_plus').on('click', function () {
+        var cmd = $('.cmd[data-cmd_uid=#uid#]')
+          var step = (isNaN(parseFloat('#step#'))) ?  0.5 : parseFloat('#step#');
+          cmd.find('#valeur#id#').text(parseFloat(parseFloat($('#valeur#id#').text()) + step ).toFixed(1) );
+            clearTimeout(sbjs_Timer#id#);
+            sbjs_Timer#id# = setTimeout(sbjs_Save#id#, 1500);              
+      });                 
+      /***** - *****/
+      $('.cmd[data-cmd_id=#id#] .bt_minus').on('click', function () {
+        var cmd = $('.cmd[data-cmd_uid=#uid#]')
+        var step = (isNaN(parseFloat('#step#'))) ?  0.5 : parseFloat('#step#');
+            cmd.find('#valeur#id#').text(parseFloat(parseFloat($('#valeur#id#').text()) - step ).toFixed(1) );
+            clearTimeout(sbjs_Timer#id#);
+            sbjs_Timer#id# = setTimeout(sbjs_Save#id#, 1500);
+      });
+      /***** Envoi de la nouvelle consigne *****/
+      function sbjs_Save#id#() {
+          jeedom.cmd.execute({ id: '#id#', value: { slider: parseFloat( $('#valeur#id#').text() ) }});
+      }
+      /***** MAJ Automatique *****/
+      jeedom.cmd.update['#id#'] = function(_options){
+          var cmd = $('.cmd[data-cmd_uid=#uid#]')
+          cmd.find('#valeur#id#').text(parseFloat(_options.display_value).toFixed(1));
+          
+          if (_options.display_value < 10) {
+              cmd.find('#thermo_icon').html('<i class="icon_blue jeedom-thermo-froid"></i>');}
+          else if (_options.display_value <= 16) {
+              cmd.find('#thermo_icon').html('<i class="icon_green jeedom-thermo-moyen"></i>');}
+          else if (_options.display_value <= 22) {
+              cmd.find('#thermo_icon').html('<i class="icon_yellow jeedom-thermo-chaud"></i>');}
+          else {
+              cmd.find('#thermo_icon').html('<i class="icon_orange jeedom-thermo-chaud"></i>');}
+      }
+      jeedom.cmd.update['#id#']({display_value:'#state#'});
+    </script>
+  </div>
+</div>
+

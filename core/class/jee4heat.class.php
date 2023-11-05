@@ -552,7 +552,7 @@ if you need to set an attribute for a register, change json depending on stove r
     $version = jeedom::versionAlias($_version);
     
     /* plusieurs lignes séparées pour comprendre */
-    $getTemplate = getTemplate('core', $version, 'jee4heat.template', __CLASS__); // on récupère le template 'propluvia.template' du plugin.
+    $getTemplate = getTemplate('core', $version, 'jee4heat.template', __CLASS__); // on récupère le template 'jee4heat.template' du plugin.
     $template_replace = template_replace($replace, $getTemplate); // on remplace les tags
     $postToHtml = $this->postToHtml($_version,$template_replace); // on met en cache le widget, si la config de l'user le permet.
     return $postToHtml; // renvoie le code du template du widget.
