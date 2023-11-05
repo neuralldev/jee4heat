@@ -193,13 +193,13 @@ class jee4heat extends eqLogic {
           }
         }
       }
-}
+  }
 
-/*
-la fonction CRON permet d'interroger les registres toutes les minutes. 
-le temps de mise à jour du poele peut aller de 1 à 5 minutes selon la source qui a déclenché le réglage
-depuis l'application cloud c'est plus long à être pris en compte
- */
+  /*
+  la fonction CRON permet d'interroger les registres toutes les minutes. 
+  le temps de mise à jour du poele peut aller de 1 à 5 minutes selon la source qui a déclenché le réglage
+  depuis l'application cloud c'est plus long à être pris en compte
+  */
   public static function cron() {
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
       if ($jee4heat->getIsEnable()) {
@@ -222,86 +222,86 @@ depuis l'application cloud c'est plus long à être pris en compte
     }
   }
 
-public function readregisters($buffer) {
-  if ($buffer=='') return false; // check if buffer is empty, if yes, then do nothing 
-  $message = substr($buffer,2, strlen($buffer) -4); // trim leading and trailing characters
-  $ret = explode('","', $message); // translate string to array
-  log::add(__CLASS__, 'debug', 'unpack $message ='.$message);
-//  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
-  if(($ret[0] != "SEL") && ($ret[0] != "SEC")) return false; // check for message consistency
-  $nargs = intval($ret[1]);
-  log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
-  if($nargs <= 2) return false; // check for message consistency
-  
-  for ($i = 2; $i < $nargs+2; $i++) { // extract all parameters
-    $prefix = substr($ret[$i],0, 1);
-    $register = substr($ret[$i],1, 5); // extract register number from value
-    $registervalue = intval(substr($ret[$i],-12)); // convert string to int to remove leading 'O'
-   // if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
-    log::add(__CLASS__, 'debug', "cron : register (prefix $prefix) $register=$registervalue");
-    $Command = $this->getCmd(null, 'jee4heat_'.$register); // now set value of jeedom object
-    if (is_object($Command)) { 
-      //log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register); 
-      if ($register == STATE_REGISTER) { // regular stove state feedback storage
-        // update state information according to value
-        $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
-        if ($cmdState != null) $cmdState->event($registervalue != 0);
-        $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-        if ($cmdMessage != null) $cmdMessage->event(MODE_NAMES[$registervalue]);
-        // if state == 9, the stove is in blocked mode, so we set the binary indicator to TRUE else FALSE
-        $cmdBlocked = $this->getCmd(null, 'jee4heat_stoveblocked');
-        $cmdBlocked->event(($registervalue == 9));
+  public function readregisters($buffer) {
+    if ($buffer=='') return false; // check if buffer is empty, if yes, then do nothing 
+    $message = substr($buffer,2, strlen($buffer) -4); // trim leading and trailing characters
+    $ret = explode('","', $message); // translate string to array
+    log::add(__CLASS__, 'debug', 'unpack $message ='.$message);
+  //  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
+    if(($ret[0] != "SEL") && ($ret[0] != "SEC")) return false; // check for message consistency
+    $nargs = intval($ret[1]);
+    log::add(__CLASS__, 'debug', 'number of registers returned ='.$ret[1]);
+    if($nargs <= 2) return false; // check for message consistency
+    
+    for ($i = 2; $i < $nargs+2; $i++) { // extract all parameters
+      $prefix = substr($ret[$i],0, 1);
+      $register = substr($ret[$i],1, 5); // extract register number from value
+      $registervalue = intval(substr($ret[$i],-12)); // convert string to int to remove leading 'O'
+    // if (substr($register,0,1) == "0") $registervalue = intval($registervalue);
+      log::add(__CLASS__, 'debug', "cron : register (prefix $prefix) $register=$registervalue");
+      $Command = $this->getCmd(null, 'jee4heat_'.$register); // now set value of jeedom object
+      if (is_object($Command)) { 
+        //log::add(__CLASS__, 'debug', ' store ['.$registervalue.'] value in logicalid='.$register); 
+        if ($register == STATE_REGISTER) { // regular stove state feedback storage
+          // update state information according to value
+          $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
+          if ($cmdState != null) $cmdState->event($registervalue != 0);
+          $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
+          if ($cmdMessage != null) $cmdMessage->event(MODE_NAMES[$registervalue]);
+          // if state == 9, the stove is in blocked mode, so we set the binary indicator to TRUE else FALSE
+          $cmdBlocked = $this->getCmd(null, 'jee4heat_stoveblocked');
+          $cmdBlocked->event(($registervalue == 9));
+        }
+        if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
+          // update error information according to value
+          $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
+          if ($cmdMessage != null) $cmdMessage->event(ERROR_NAMES[$registervalue]);
+        }
+        $Command->setConfiguration('jee4heat_prefix',$prefix);
+        $Command->event($registervalue);
+      } else {
+        log::add(__CLASS__, 'debug', 'could not find command '.$register);
       }
-      if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
-        // update error information according to value
-        $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-        if ($cmdMessage != null) $cmdMessage->event(ERROR_NAMES[$registervalue]);
-      }
-      $Command->setConfiguration('jee4heat_prefix',$prefix);
-      $Command->event($registervalue);
-    } else {
-      log::add(__CLASS__, 'debug', 'could not find command '.$register);
     }
+    return true;
   }
-  return true;
-}
-/*
-This function is defined to create the action buttons of equipment
-the actions will be called by desktop through execute function by their logical ID
-this function is called by postsave
-*/
-public function AddAction($actionName, $actionTitle, $template = null, $generic_type=null, $subtype='other') {
-  $createCmd = true;
-  $command = $this->getCmd(null, $actionName);
-  if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
-      $command = cmd::byEqLogicIdCmdName($this->getId(), $actionTitle);
-      if (is_object($command)) $createCmd = false;
-  }
-  if ($createCmd) { // only if action is not yet defined
-      if (!is_object($command)) {
-        $command = new jee4heatCmd();
-        $command->setLogicalId($actionName);
-        $command->setIsVisible(1);
-        $command->setName($actionTitle);
-      }
-      if ($template != null) {
-        $command->setTemplate('dashboard', $template);
-        $command->setTemplate('mobile', $template);
-      }
-      $command->setType('action');
-      $command->setSubType($subtype);
-      $command->setEqLogic_id($this->getId());
-      if ($generic_type != null) $command->setGeneric_type($generic_type);
-
-      $command->save();
-  }
-}  
-/*
-this function create an information based on stove registers
-it can set most of the useful paramters based on the json array defined by stove, such as :
-  subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
-if you need to set an attribute for a register, change json depending on stove registers
+  /*
+  This function is defined to create the action buttons of equipment
+  the actions will be called by desktop through execute function by their logical ID
+  this function is called by postsave
   */
+  public function AddAction($actionName, $actionTitle, $template = null, $generic_type=null, $SubType='other') {
+    $createCmd = true;
+    $command = $this->getCmd(null, $actionName);
+    if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
+        $command = cmd::byEqLogicIdCmdName($this->getId(), $actionTitle);
+        if (is_object($command)) $createCmd = false;
+    }
+    if ($createCmd) { // only if action is not yet defined
+        if (!is_object($command)) {
+          $command = new jee4heatCmd();
+          $command->setLogicalId($actionName);
+          $command->setIsVisible(1);
+          $command->setName($actionTitle);
+        }
+        if ($template != null) {
+          $command->setTemplate('dashboard', $template);
+          $command->setTemplate('mobile', $template);
+        }
+        $command->setType('action');
+        $command->setSubType($SubType);
+        $command->setEqLogic_id($this->getId());
+        if ($generic_type != null) $command->setGeneric_type($generic_type);
+
+        $command->save();
+    }
+  }  
+  /*
+  this function create an information based on stove registers
+  it can set most of the useful paramters based on the json array defined by stove, such as :
+    subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
+  if you need to set an attribute for a register, change json depending on stove registers
+    */
   public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = null)
   {
     $Command = $this->getCmd(null, $_logicalId);
@@ -558,23 +558,6 @@ if you need to set an attribute for a register, change json depending on stove r
     $this->checkAndUpdateCmd('jee4heat', "");
   }
 
-/*   public function toHtml($_version = 'dashboard') {  
-    $replace = $this->preToHtml($_version); // initialise les tag standards : #id#, #name# ...
-    
-    if (!is_array($replace)) {
-      return $replace;
-    }
-    
-    $version = jeedom::versionAlias($_version);
-    
-    $getTemplate = getTemplate('core', $version, 'jee4heat.template', __CLASS__); // on récupère le template 'jee4heat.template' du plugin.
-    $template_replace = template_replace($replace, $getTemplate); // on remplace les tags
-    $postToHtml = $this->postToHtml($_version,$template_replace); // on met en cache le widget, si la config de l'user le permet.
-    return $postToHtml; // renvoie le code du template du widget.
-    
-    
-    
-  } */
 }
 class jee4heatCmd extends cmd {
   public function dontRemoveCmd()
