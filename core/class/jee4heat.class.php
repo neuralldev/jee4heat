@@ -271,6 +271,7 @@ class jee4heat extends eqLogic {
   this function is called by postsave
   */
   public function AddAction($actionName, $actionTitle, $template = null, $generic_type=null, $SubType='other') {
+    log::add(__CLASS__, 'debug', ' add action '.$actionName);
     $createCmd = true;
     $command = $this->getCmd(null, $actionName);
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
