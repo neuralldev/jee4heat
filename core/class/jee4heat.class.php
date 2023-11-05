@@ -330,34 +330,34 @@ if you need to set an attribute for a register, change json depending on stove r
           $Command->setTemplate('dashboard', $Template);
             $Command->setTemplate('mobile', $Template);
         }
-        log::add(__CLASS__, 'debug', ' unite='.$unite);
-        log::add(__CLASS__, 'debug', ' icon='.$icon);
-        log::add(__CLASS__, 'debug', ' calcul='.$_calculValueOffset);
-        log::add(__CLASS__, 'debug', ' historiseround='.$_historizeRound);
-        log::add(__CLASS__, 'debug', ' generic type='.$generic_type);
-        log::add(__CLASS__, 'debug', ' min='.$valuemin);
-        log::add(__CLASS__, 'debug', ' max='.$valuemax);
-        log::add(__CLASS__, 'debug', ' order='.$_order);
-        log::add(__CLASS__, 'debug', ' warning='.$_warning);
-        log::add(__CLASS__, 'debug', ' danger='.$_danger);
-        log::add(__CLASS__, 'debug', ' invert='.$_invert);
 
         if ($unite != null && $SubType == 'numeric') $Command->setUnite($unite);
+        log::add(__CLASS__, 'debug', ' unite='.$unite);
         if ($icon != 'default') $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
+        log::add(__CLASS__, 'debug', ' icon='.$icon);
         if ($forceLineB != 'default') $Command->setdisplay('forceReturnLineBefore', 1);
         if ($_iconname != 'default') $Command->setdisplay('showIconAndNamedashboard', 1);
         if ($_noiconname != null) $Command->setdisplay('showNameOndashboard', 0);
         if ($_calculValueOffset != null) $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+        log::add(__CLASS__, 'debug', ' calcul='.$_calculValueOffset);
         if ($_historizeRound != null) $Command->setConfiguration('historizeRound', $_historizeRound);
+        log::add(__CLASS__, 'debug', ' historiseround='.$_historizeRound);
         if ($generic_type != null) $Command->setGeneric_type($generic_type);
+        log::add(__CLASS__, 'debug', ' generic type='.$generic_type);
         if ($repeatevent == true && $Type == 'info') $Command->setconfiguration('repeatEventManagement', 'never');
         if ($valuemin != 'default') $Command->setconfiguration('minValue', $valuemin);
+        log::add(__CLASS__, 'debug', ' min='.$valuemin);
         if ($valuemax != 'default') $Command->setconfiguration('maxValue', $valuemax);
-        if ($_order != null) $Command->setOrder($_order);
+        log::add(__CLASS__, 'debug', ' max='.$valuemax);
         if ($_warning != null) $Command->setDisplay("warningif", $_warning);
+        log::add(__CLASS__, 'debug', ' warning='.$_warning);
+        if ($_order != null) $Command->setOrder($_order);
+        log::add(__CLASS__, 'debug', ' order='.$_order);
         if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
+        log::add(__CLASS__, 'debug', ' danger='.$_danger);
         if ($_invert != null) $Command->setConfiguration('invertBinary', $_invert);
-        log::add(__CLASS__, 'debug', 'try to save');
+        log::add(__CLASS__, 'debug', ' invert='.$_invert);
+         log::add(__CLASS__, 'debug', 'try to save');
         $Command->save();
         log::add(__CLASS__, 'debug', 'command saved');
       }
