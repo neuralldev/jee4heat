@@ -312,51 +312,31 @@ class jee4heat extends eqLogic {
         $Command = new jee4heatCmd();  
        // $Command->setId(null);
         $Command->setLogicalId($_logicalId);
-        log::add(__CLASS__, 'debug', ' logicalid='.$_logicalId);
         $Command->setEqLogic_id($this->getId());
-        log::add(__CLASS__, 'debug', ' eqid='.$this->getID());
         $Command->setName($Name);
-        log::add(__CLASS__, 'debug', ' name='.$Name);
         $Command->setType($Type);
-        log::add(__CLASS__, 'debug', ' type='.$Type);
         $Command->setSubType($SubType);
-        log::add(__CLASS__, 'debug', ' subtype='.$SubType);
-
         $Command->setIsVisible($IsVisible);
-        log::add(__CLASS__, 'debug', ' visible='.$IsVisible);
         $Command->setIsHistorized($IsHistorized);
-        log::add(__CLASS__, 'debug', ' historise='.$IsHistorized);
         // add parameters if defined
         if ($Template != null) {
-          log::add(__CLASS__, 'debug', ' template='.$Template);
           $Command->setTemplate('dashboard', $Template);
             $Command->setTemplate('mobile', $Template);
         }
-
         if ($unite != null && $SubType == 'numeric') $Command->setUnite($unite);
-        log::add(__CLASS__, 'debug', ' unite='.$unite);
         if ($icon != 'default') $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
-        log::add(__CLASS__, 'debug', ' icon='.$icon);
         if ($forceLineB != 'default') $Command->setdisplay('forceReturnLineBefore', 1);
         if ($_iconname != 'default') $Command->setdisplay('showIconAndNamedashboard', 1);
         if ($_noiconname != null) $Command->setdisplay('showNameOndashboard', 0);
         if ($_calculValueOffset != null) $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
-        log::add(__CLASS__, 'debug', ' calcul='.$_calculValueOffset);
         if ($_historizeRound != null) $Command->setConfiguration('historizeRound', $_historizeRound);
-        log::add(__CLASS__, 'debug', ' historiseround='.$_historizeRound);
         if ($generic_type != null) $Command->setGeneric_type($generic_type);
-        log::add(__CLASS__, 'debug', ' generic type='.$generic_type);
         if ($repeatevent == true && $Type == 'info') $Command->setConfiguration('repeatEventManagement', 'never');
         if ($valuemin != 'default') $Command->setConfiguration('minValue', $valuemin);
-        log::add(__CLASS__, 'debug', ' min='.$valuemin);
         if ($valuemax != 'default') $Command->setConfiguration('maxValue', $valuemax);
-        log::add(__CLASS__, 'debug', ' max='.$valuemax);
         if ($_warning != null) $Command->setDisplay("warningif", $_warning);
-        log::add(__CLASS__, 'debug', ' warning='.$_warning);
         if ($_order != null) $Command->setOrder($_order);
-        log::add(__CLASS__, 'debug', ' order='.$_order);
         if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
-        log::add(__CLASS__, 'debug', ' danger='.$_danger);
 /*        log::add(__CLASS__, 'debug', 'try to save');
         if ($_invert != 0) $Command->setConfiguration('invertBinary', $_invert);
         log::add(__CLASS__, 'debug', ' invert='.$_invert);
