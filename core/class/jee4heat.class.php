@@ -495,7 +495,7 @@ if you need to set an attribute for a register, change json depending on stove r
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
     $Equipement->AddAction("jee4heat_stepup", "+", null, 'THERMOST_SET_SETPOINT');
     $Equipement->AddAction("jee4heat_stepdown", "-", null, 'THERMOST_SET_SETPOINT');
-    $Equipement->AddAction("jee4heat_setvalue", "Température", null, 'THERMOST_SET_SETPOINT', "slider");
+    $Equipement->AddAction("jee4heat_setvalue", "Température",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
   }
