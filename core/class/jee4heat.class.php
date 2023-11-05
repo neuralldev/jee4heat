@@ -321,18 +321,19 @@ class jee4heat extends eqLogic {
         log::add(__CLASS__, 'debug', ' type='.$Type);
         $Command->setSubType($SubType);
         log::add(__CLASS__, 'debug', ' subtype='.$SubType);
-        $Command->save();
 
         $Command->setIsVisible($IsVisible);
         log::add(__CLASS__, 'debug', ' visible='.$IsVisible);
         $Command->setIsHistorized($IsHistorized);
         log::add(__CLASS__, 'debug', ' historise='.$IsHistorized);
         // add parameters if defined
+        $Command->save();
         if ($Template != null) {
           log::add(__CLASS__, 'debug', ' template='.$Template);
           $Command->setTemplate('dashboard', $Template);
             $Command->setTemplate('mobile', $Template);
         }
+        $Command->save();
 
         if ($unite != null && $SubType == 'numeric') $Command->setUnite($unite);
         log::add(__CLASS__, 'debug', ' unite='.$unite);
