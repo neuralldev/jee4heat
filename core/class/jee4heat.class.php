@@ -320,12 +320,27 @@ if you need to set an attribute for a register, change json depending on stove r
           $Command->setSubType($SubType);
           log::add(__CLASS__, 'debug', ' subtype='.$SubType);
           $Command->setIsVisible($IsVisible);
+          log::add(__CLASS__, 'debug', ' visible='.$IsVisible);
           $Command->setIsHistorized($IsHistorized);
+          log::add(__CLASS__, 'debug', ' historise='.$IsHistorized);
           // add parameters if defined
           if ($Template != null) {
-              $Command->setTemplate('dashboard', $Template);
+            log::add(__CLASS__, 'debug', ' template='.$Template);
+            $Command->setTemplate('dashboard', $Template);
               $Command->setTemplate('mobile', $Template);
           }
+          log::add(__CLASS__, 'debug', ' unite='.$unite);
+          log::add(__CLASS__, 'debug', ' icon='.$icon);
+          log::add(__CLASS__, 'debug', ' calcul='.$_calculValueOffset);
+          log::add(__CLASS__, 'debug', ' historiseround='.$_historizeRound);
+          log::add(__CLASS__, 'debug', ' generic type='.$generic_type);
+          log::add(__CLASS__, 'debug', ' min='.$valuemin);
+          log::add(__CLASS__, 'debug', ' max='.$valuemax);
+          log::add(__CLASS__, 'debug', ' order='.$_order);
+          log::add(__CLASS__, 'debug', ' warning='.$_warning);
+          log::add(__CLASS__, 'debug', ' danger='.$_danger);
+          log::add(__CLASS__, 'debug', ' invert='.$_invert);
+
           if ($unite != null && $SubType == 'numeric') $Command->setUnite($unite);
           if ($icon != 'default') $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
           if ($forceLineB != 'default') $Command->setdisplay('forceReturnLineBefore', 1);
