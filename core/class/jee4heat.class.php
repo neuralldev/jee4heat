@@ -357,7 +357,8 @@ if you need to set an attribute for a register, change json depending on stove r
           if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
           if ($_invert != null) $Command->setConfiguration('invertBinary', $_invert);
           $Command->save();
-      }
+          log::add(__CLASS__, 'debug', 'command saved');
+        }
       log::add(__CLASS__, 'debug', ' addcommand end');
       return $Command;
   }
