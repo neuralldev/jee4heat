@@ -302,7 +302,7 @@ class jee4heat extends eqLogic {
     subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
   if you need to set an attribute for a register, change json depending on stove registers
     */
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = null)
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = false)
   {
     $Command = $this->getCmd(null, $_logicalId);
     if (!is_object($Command)) {
