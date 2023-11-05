@@ -321,6 +321,8 @@ class jee4heat extends eqLogic {
         log::add(__CLASS__, 'debug', ' type='.$Type);
         $Command->setSubType($SubType);
         log::add(__CLASS__, 'debug', ' subtype='.$SubType);
+        $Command->save();
+
         $Command->setIsVisible($IsVisible);
         log::add(__CLASS__, 'debug', ' visible='.$IsVisible);
         $Command->setIsHistorized($IsHistorized);
