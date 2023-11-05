@@ -303,7 +303,7 @@ class jee4heat extends eqLogic {
     subtype, widget template, generic type, unit, min and max values, evaluation formula, history flag, specific icon, ...
   if you need to set an attribute for a register, change json depending on stove registers
     */
-  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = false)
+  public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = "0")
   {
     $Command = $this->getCmd(null, $_logicalId);
     if (!is_object($Command)) {
@@ -354,13 +354,10 @@ class jee4heat extends eqLogic {
         if ($_warning != null) $Command->setDisplay("warningif", $_warning);
         log::add(__CLASS__, 'debug', ' warning='.$_warning);
         if ($_order != null) $Command->setOrder($_order);
-        $Command->save();
         log::add(__CLASS__, 'debug', ' order='.$_order);
         if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
-        $Command->save();
         log::add(__CLASS__, 'debug', ' danger='.$_danger);
         if ($_invert != null) $Command->setConfiguration('invertBinary', $_invert);
-        $Command->save();
         log::add(__CLASS__, 'debug', ' invert='.$_invert);
          log::add(__CLASS__, 'debug', 'try to save');
         $Command->save();
