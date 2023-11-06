@@ -324,7 +324,7 @@ class jee4heat extends eqLogic
     {
 
     // dump args
-    $f = new ReflectionMethod("jee4heat","AddCommand");
+   /*  $f = new ReflectionMethod("jee4heat","AddCommand");
     $funcnames = array();
     foreach ($f->getParameters() as $param) {
         $funcnames[] = $param->name;   
@@ -333,7 +333,7 @@ class jee4heat extends eqLogic
     $arg_list = func_get_args();
     for ($i = 0; $i < $numargs; $i++) {
       log::add(__CLASS__, 'debug', "$funcnames[$i]=" . $arg_list[$i]);
-    }
+    } */
 
 
     $createCmd = true;
