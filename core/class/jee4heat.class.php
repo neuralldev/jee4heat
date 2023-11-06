@@ -366,14 +366,13 @@ class jee4heat extends eqLogic
       $Command->setIsHistorized($IsHistorized);
       log::add(__CLASS__, 'debug', 'try to save A');
       $Command->save();
-      // add parameters if defined
-      if ($Template != null) {
+/*       if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
       }
       log::add(__CLASS__, 'debug', 'try to save B');
       $Command->save();
-      if ($unite != null && $SubType == 'numeric')
+ */      if ($unite != null && $SubType == 'numeric')
         $Command->setUnite($unite);
         log::add(__CLASS__, 'debug', 'try to save C');
         $Command->save();
