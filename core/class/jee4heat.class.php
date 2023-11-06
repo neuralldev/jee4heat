@@ -343,7 +343,7 @@ class jee4heat extends eqLogic
     $_invert = 0
   ) {
 
-    $f = new ReflectionFunction($"AddCommand");
+    $f = new ReflectionMethod("jee4heat","AddCommand");
     $funcnames = array();
     foreach ($f->getParameters() as $param) {
         $funcnames[] = $param->name;   
