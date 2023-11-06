@@ -360,7 +360,7 @@ class jee4heat extends eqLogic
       }
       
       $Command->setIsVisible($IsVisible);
-      if ($IsHistorized!=null) $Command->setIsHistorized($IsHistorized);
+      if ($IsHistorized!=null) $Command->setIsHistorized(strval($IsHistorized));
       if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
@@ -394,7 +394,7 @@ class jee4heat extends eqLogic
       if ($_danger != null)
         $Command->setDisplay("dangerif", $_danger);
       if ($_invert != null)
-        $Command->setConfiguration('invertBinary', $_invert);      
+        $Command->setDisplay('invertBinary', $_invert);      
       $Command->save();
       log::add(__CLASS__, 'debug', 'command saved');
     }
