@@ -359,12 +359,12 @@ class jee4heat extends eqLogic
         $Command->setSubType($SubType);
       }
       $Command->setIsVisible($IsVisible);
-/*      $Command->setIsHistorized($IsHistorized);
+      $Command->setIsHistorized($IsHistorized);
       if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
       }
-      if ($unite != null && $SubType == 'numeric')
+/*      if ($unite != null && $SubType == 'numeric')
         $Command->setUnite($unite);
       if ($icon != 'default')
         $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
