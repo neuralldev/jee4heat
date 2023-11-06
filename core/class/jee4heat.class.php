@@ -323,6 +323,7 @@ class jee4heat extends eqLogic
     $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
     {
 
+    // dump args
     $f = new ReflectionMethod("jee4heat","AddCommand");
     $funcnames = array();
     foreach ($f->getParameters() as $param) {
@@ -339,8 +340,10 @@ class jee4heat extends eqLogic
     $Command = $this->getCmd(null, $_logicalId);
     if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
       $Command = cmd::byEqLogicIdCmdName($this->getId(), $$_logicalId);
-      if (is_object($Command))
+      if (is_object($Command)) {
         $createCmd = false;
+        log::add(__CLASS__, 'debug', ' command already exists ');
+      }
     }
 
     if ($createCmd) {
@@ -355,7 +358,7 @@ class jee4heat extends eqLogic
         $Command->setType($Type);
         $Command->setSubType($SubType);
       }
-      $Command->setIsVisible($IsVisible);
+/*      $Command->setIsVisible($IsVisible);
       $Command->setIsHistorized($IsHistorized);
       if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
@@ -392,6 +395,7 @@ class jee4heat extends eqLogic
       if ($_invert != null)
         $Command->setConfiguration('invertBinary', $_invert);
       log::add(__CLASS__, 'debug', 'try to save Z');
+      */
       $Command->save();
       log::add(__CLASS__, 'debug', 'command saved');
     }
