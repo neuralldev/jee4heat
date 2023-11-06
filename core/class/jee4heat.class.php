@@ -360,8 +360,8 @@ class jee4heat extends eqLogic
       }
       
       $Command->setIsVisible($IsVisible);
-  /*    $Command->setIsHistorized($IsHistorized);
-     if ($Template != null) {
+      $Command->setIsHistorized($IsHistorized);
+  /*   if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
       }
