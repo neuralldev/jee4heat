@@ -323,6 +323,8 @@ class jee4heat extends eqLogic {
           $Command->setTemplate('dashboard', $Template);
             $Command->setTemplate('mobile', $Template);
         }
+        log::add(__CLASS__, 'debug', 'try to save 1');
+        $Command->save();
         if ($unite != null && $SubType == 'numeric') $Command->setUnite($unite);
         if ($icon != 'default') $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
         if ($forceLineB != 'default') $Command->setdisplay('forceReturnLineBefore', 1);
@@ -337,11 +339,9 @@ class jee4heat extends eqLogic {
         if ($_warning != null) $Command->setDisplay("warningif", $_warning);
         if ($_order != null) $Command->setOrder($_order);
         if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
-        log::add(__CLASS__, 'debug', 'try to save 1');
-        $Command->save();
-        log::add(__CLASS__, 'debug', 'try to save 2');
         if ($_invert != 0) $Command->setConfiguration('invertBinary', $_invert);
         log::add(__CLASS__, 'debug', ' invert='.$_invert);
+        log::add(__CLASS__, 'debug', 'try to save 2');
         $Command->save();
         log::add(__CLASS__, 'debug', 'command saved');
       }
