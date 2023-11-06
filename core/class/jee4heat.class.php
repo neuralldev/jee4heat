@@ -337,10 +337,12 @@ class jee4heat extends eqLogic {
         if ($_warning != null) $Command->setDisplay("warningif", $_warning);
         if ($_order != null) $Command->setOrder($_order);
         if ($_danger != null) $Command->setDisplay("dangerif", $_danger);
-/*        log::add(__CLASS__, 'debug', 'try to save');
+        log::add(__CLASS__, 'debug', 'try to save 1');
+        $Command->save();
+        log::add(__CLASS__, 'debug', 'try to save 2');
         if ($_invert != 0) $Command->setConfiguration('invertBinary', $_invert);
         log::add(__CLASS__, 'debug', ' invert='.$_invert);
-*/        $Command->save();
+        $Command->save();
         log::add(__CLASS__, 'debug', 'command saved');
       }
       log::add(__CLASS__, 'debug', ' addcommand end');
