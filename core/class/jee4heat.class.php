@@ -360,12 +360,8 @@ class jee4heat extends eqLogic
       $Command->setName($Name);
       $Command->setType($Type);
       $Command->setSubType($SubType);
-      log::add(__CLASS__, 'debug', 'try to save DEBUT');
-      $Command->save();
       $Command->setIsVisible($IsVisible);
       $Command->setIsHistorized($IsHistorized);
-      log::add(__CLASS__, 'debug', 'try to save A');
-      $Command->save();
 /*       if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
@@ -374,15 +370,12 @@ class jee4heat extends eqLogic
       $Command->save();
  */      if ($unite != null && $SubType == 'numeric')
         $Command->setUnite($unite);
-        log::add(__CLASS__, 'debug', 'try to save C');
         $Command->save();
         if ($icon != 'default')
         $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
-        log::add(__CLASS__, 'debug', 'try to save D');
         $Command->save();
         if ($forceLineB != 'default')
         $Command->setdisplay('forceReturnLineBefore', 1);
-        log::add(__CLASS__, 'debug', 'try to save E');
         $Command->save();
         if ($_iconname != 'default')
         $Command->setdisplay('showIconAndNamedashboard', 1);
@@ -394,19 +387,33 @@ class jee4heat extends eqLogic
         $Command->setConfiguration('historizeRound', $_historizeRound);
       if ($generic_type != null)
         $Command->setGeneric_type($generic_type);
-      if ($repeatevent == true && $Type == 'info')
+        log::add(__CLASS__, 'debug', 'try to save A');
+        $Command->save();
+        if ($repeatevent == true && $Type == 'info')
         $Command->setConfiguration('repeatEventManagement', 'never');
-      if ($valuemin != 'default')
+        log::add(__CLASS__, 'debug', 'try to save B');
+        $Command->save();
+        if ($valuemin != 'default')
         $Command->setConfiguration('minValue', $valuemin);
-      if ($valuemax != 'default')
+        log::add(__CLASS__, 'debug', 'try to save C');
+        $Command->save();
+        if ($valuemax != 'default')
         $Command->setConfiguration('maxValue', $valuemax);
-      if ($_warning != null)
+        log::add(__CLASS__, 'debug', 'try to save D');
+        $Command->save();
+        if ($_warning != null)
         $Command->setDisplay("warningif", $_warning);
-      if ($_order != null)
+        log::add(__CLASS__, 'debug', 'try to save E');
+        $Command->save();
+        if ($_order != null)
         $Command->setOrder($_order);
-      if ($_danger != null)
+        log::add(__CLASS__, 'debug', 'try to save F');
+        $Command->save();
+        if ($_danger != null)
         $Command->setDisplay("dangerif", $_danger);
       if ($_invert != null)
+      log::add(__CLASS__, 'debug', 'try to save G');
+      $Command->save();
         $Command->setConfiguration('invertBinary', $_invert);
       log::add(__CLASS__, 'debug', ' invert=' . $_invert);
       log::add(__CLASS__, 'debug', 'try to save Z');
