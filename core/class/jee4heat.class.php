@@ -360,11 +360,11 @@ class jee4heat extends eqLogic
       }
       $Command->setIsVisible($IsVisible);
       $Command->setIsHistorized($IsHistorized);
-      if ($Template != null) {
+/*      if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
       }
-/*      if ($unite != null && $SubType == 'numeric')
+      if ($unite != null && $SubType == 'numeric')
         $Command->setUnite($unite);
       if ($icon != 'default')
         $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
