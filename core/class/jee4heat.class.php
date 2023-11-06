@@ -361,7 +361,7 @@ class jee4heat extends eqLogic
       
       $Command->setIsVisible($IsVisible);
       if ($IsHistorized!=null) $Command->setIsHistorized($IsHistorized);
-  /*   if ($Template != null) {
+      if ($Template != null) {
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
       }
@@ -396,7 +396,7 @@ class jee4heat extends eqLogic
       if ($_invert != null)
         $Command->setConfiguration('invertBinary', $_invert);
       log::add(__CLASS__, 'debug', 'try to save Z');
-      */
+      
       $Command->save();
       log::add(__CLASS__, 'debug', 'command saved');
     }
