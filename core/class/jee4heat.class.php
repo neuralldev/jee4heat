@@ -342,11 +342,18 @@ class jee4heat extends eqLogic
     $_danger = null,
     $_invert = 0
   ) {
+
+    $f = new ReflectionFunction($funcName);
+    $funcnames = array();
+    foreach ($f->getParameters() as $param) {
+        $funcnames[] = $param->name;   
+    }
     $numargs = func_num_args();
     $arg_list = func_get_args();
     for ($i = 0; $i < $numargs; $i++) {
-      log::add(__CLASS__, 'debug', "Argument $i is: " . $arg_list[$i]);
+      log::add(__CLASS__, 'debug', "$funcnames[$i] is: " . $arg_list[$i]);
     }
+
 
     $createCmd = true;
     $Command = $this->getCmd(null, $_logicalId);
