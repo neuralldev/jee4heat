@@ -364,9 +364,9 @@ class jee4heat extends eqLogic
         $Command->setTemplate('dashboard', $Template);
         $Command->setTemplate('mobile', $Template);
       }
-      if ($unite != null && $SubType == 'numeric')
+/*      if ($unite != null && $SubType == 'numeric')
         $Command->setUnite($unite);
-/*      if ($icon != 'default')
+      if ($icon != 'default')
         $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
       if ($forceLineB != 'default')
         $Command->setdisplay('forceReturnLineBefore', 1);
