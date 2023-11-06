@@ -305,7 +305,7 @@ class jee4heat extends eqLogic {
     */
   public function AddCommand($Name, $_logicalId, $Type = 'info', $SubType = 'binary', $Template = null, $unite = null, $generic_type = null, $IsVisible = 1, $icon = 'default', $forceLineB = 'default', $valuemin = 'default', $valuemax = 'default', $_order = null, $IsHistorized = '0', $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0)
   {
-
+    $numargs = func_num_args();
     $arg_list = func_get_args();
     for ($i = 0; $i < $numargs; $i++) {
       log::add(__CLASS__, 'debug', "Argument $i is: " . $arg_list[$i]);
