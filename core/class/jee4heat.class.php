@@ -370,13 +370,10 @@ class jee4heat extends eqLogic
       $Command->save();
  */      if ($unite != null && $SubType == 'numeric')
         $Command->setUnite($unite);
-        $Command->save();
         if ($icon != 'default')
         $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
-        $Command->save();
         if ($forceLineB != 'default')
         $Command->setdisplay('forceReturnLineBefore', 1);
-        $Command->save();
         if ($_iconname != 'default')
         $Command->setdisplay('showIconAndNamedashboard', 1);
       if ($_noiconname != null)
