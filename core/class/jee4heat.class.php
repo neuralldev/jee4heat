@@ -658,7 +658,7 @@ class jee4heat extends eqLogic
       */
     $return['info']['string']['mypower'] = array(
       'template' => 'tmplmultistate',
-      'replace' => array(
+      'replace' => [
         "test" => [
           ["operation"=>"#value#<7",
           "state_light"=>"P#value#",
@@ -670,7 +670,7 @@ class jee4heat extends eqLogic
             "state_dark"=>"Auto"
           ]
         ]
-      )
+      ]
     );
     return $return;
   }
