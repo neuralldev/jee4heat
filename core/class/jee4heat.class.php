@@ -268,6 +268,7 @@ class jee4heat extends eqLogic
             log::add(__CLASS__, 'debug', "cron : found set visibility=".($registervalue == 9 ? 1 : 0));
             $cmdBlocked->setIsVisible(($registervalue == 9 ? 1 : 0));
             $cmdBlocked->save();
+            log::add(__CLASS__, 'debug', "cron :  blocked visible=".$cmdBlocked->getIsVisible());
           }
         }
         if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
