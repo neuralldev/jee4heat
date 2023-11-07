@@ -24,7 +24,7 @@ const ERROR_REGISTER = 30002;
 const BUFFER_SIZE = 2048;
 const SOCKET_PORT = 80;
 const DATA_QUERY = '["SEL","0"]';
-const ERROR_QUERY = '["SEC","3","I30001000000000000","I30002000000000000","I30017000000000000"]';
+const ERROR_QUERY = '["SEC","2","I30001000000000000","I30002000000000000"]';
 const UNBLOCK_CMD = '["SEC","1","J30255000000000001"]'; // Unblock
 const OFF_CMD = '["SEC","1","J30254000000000001"]'; // OFF
 const ON_CMD = '["SEC","1","J30253000000000001"]'; // O
@@ -40,7 +40,7 @@ const MODE_NAMES = [
   8 => "Sécurité",
   9 => "Bloqué",
   10 => "Récupération",
-  11 => "Standby",
+  11 => "En Veille",
   30 => "-",
   31 => "-",
   32 => "-",
@@ -500,6 +500,20 @@ class jee4heat extends eqLogic
     }
   }
 
+  public function getErrorCode() { 
+    $id = $this->getId();
+    $ip = $this->getConfiguration('ip');
+    log::add(__CLASS__, 'debug', "error : ID=" . $id);
+    log::add(__CLASS__, 'debug', "error : IP du poele=" . $ip);
+
+    if ($ip != '') {
+      $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ERROR_QUERY);
+      log::add(__CLASS__, 'debug', 'command error query sent, socket has returned =' . $stove_return);
+      // expected return "I" ["SEC","1","I30254000000000000"]
+    }
+
+    return $this->errorCode; 
+  } 
 
   public function refresh()
   {
@@ -507,7 +521,9 @@ class jee4heat extends eqLogic
       $s = print_r($cmd, 1);
       log::add(__CLASS__, 'debug', 'refresh  cmd: ' . $s);
       $cmd->execute();
+      // check for error
     }
+    $this->getErrorCode();
   }
 
   public function postSave()
