@@ -264,8 +264,10 @@ class jee4heat extends eqLogic
           if ($cmdBlocked != null) 
             $cmdBlocked->event(($registervalue == 9));
           $cmdUnblock = $this->getCmd(null, 'jee4heat_unblocked');
-          $cmdUnblock->setIsVisible(($registervalue == 9 ? 1 : 0));
-          $cmdUnblock->save();
+          if ($cmdUnblock != null)  {
+            $cmdUnblock->setIsVisible(($registervalue == 9 ? 1 : 0));
+            $cmdUnblock->save();
+          }
         }
         if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
           // update error information according to value
