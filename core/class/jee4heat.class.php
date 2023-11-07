@@ -659,7 +659,10 @@ class jee4heat extends eqLogic
       $return['info']['string']['mypower'] = array(
         'template' => 'tmplmultistate',
         'test' => array(
-          array('operation' => '#value# < 7','state_light' => '#value#','state_dark' => '#value#'),
+          array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
+          array('operation' => '#value# >= 1 && #value# <= 3','state_light' => '#value# Basse','state_dark' => '#value# Basse'),
+          array('operation' => '#value# >= 4 && #value# <= 5','state_light' => '#value# Moyenne','state_dark' => '#value# Moyenne'),
+          array('operation' => '#value# == 6','state_light' => '#value# Haute','state_dark' => '#value# Haute'),
           array('operation' => '#value# == 7','state_light' => 'Auto', 'state_dark' => 'Auto')
         )
       );
