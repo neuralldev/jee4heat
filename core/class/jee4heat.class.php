@@ -627,8 +627,8 @@ class jee4heat extends eqLogic
     $return['action']['other']['mylock'] = array(
       'template' => 'tmplicon',
       'replace' => array(
-        '#_icon_on_#' => '<i class=\'icon_green icon jeedom-lock-ferme\'></i>',
-        '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ouvert\'></i>'
+        '#_icon_on_#' => '<i class=\'icon_green icon jeedom-lock-ouvert\'></i>',
+        '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ferme\'></i>'
         )
     );
     return $return;
