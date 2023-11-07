@@ -656,22 +656,13 @@ class jee4heat extends eqLogic
             "state_dark":"Auto"}]
             ,"jeedomCoreVersion":"4.3.19"}
       */
-    $return['info']['string']['mypower'] = array(
-      'template' => 'tmplmultistate',
-      'replace' => [
-        "test" => [
-          ["operation"=>"#value#<7",
-          "state_light"=>"P#value#",
-          "state_dark"=>"P#value#"
-          ]
-          ,
-          ["operation"=>"#value#==7",
-            "state_light"=>"Auto",
-            "state_dark"=>"Auto"
-          ]
-        ]
-      ]
-    );
+      $return['info']['string']['mypower'] = array(
+        'template' => 'tmplmultistate',
+        'test' => array(
+          array('operation' => '#value# < 7','state' => '#value#'),
+          array('operation' => '#value# == 7','state' => 'Auto')
+        )
+      );
     return $return;
   }
   
