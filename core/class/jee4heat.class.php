@@ -659,8 +659,8 @@ class jee4heat extends eqLogic
       $return['info']['string']['mypower'] = array(
         'template' => 'tmplmultistate',
         'test' => array(
-          array('operation' => '#value# < 7','state' => '#value#'),
-          array('operation' => '#value# == 7','state' => 'Auto')
+          array('operation' => '#value# < 7','state_light' => '#value#'),
+          array('operation' => '#value# == 7','state_light' => 'Auto')
         )
       );
     return $return;
