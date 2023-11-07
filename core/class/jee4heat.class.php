@@ -24,7 +24,7 @@ const ERROR_REGISTER = 30002;
 const BUFFER_SIZE = 2048;
 const SOCKET_PORT = 80;
 const DATA_QUERY = '["SEL","0"]';
-const ERROR_QUERY = '["SEC","2","I30001000000000000","I30002000000000000"]';
+const ERROR_QUERY = '["SEC","1","I30002000000000000"]';
 const UNBLOCK_CMD = '["SEC","1","J30255000000000001"]'; // Unblock
 const OFF_CMD = '["SEC","1","J30254000000000001"]'; // OFF
 const ON_CMD = '["SEC","1","J30253000000000001"]'; // O
@@ -267,7 +267,7 @@ class jee4heat extends eqLogic
           // update error information according to value
           $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
           if ($cmdMessage != null)
-            $cmdMessage->event(ERROR_NAMES[$registervalue]);
+            $cmdMessage->event("Erreur : ".ERROR_NAMES[$registervalue]);
         }
         $Command->setConfiguration('jee4heat_prefix', $prefix);
         $Command->event($registervalue);
@@ -509,8 +509,12 @@ class jee4heat extends eqLogic
     if ($ip != '') {
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ERROR_QUERY);
       log::add(__CLASS__, 'debug', 'command error query sent, socket has returned =' . $stove_return);
-      // expected return "I" ["SEC","1","I30254000000000000"]
+      // expected return ["SEC","1","J30002000000000000"]
+      $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
+      if ($cmdMessage != null)
+        $cmdMessage->event("Erreur : ".ERROR_NAMES[$registervalue]);
     }
+}
 
     return $this->errorCode; 
   } 
