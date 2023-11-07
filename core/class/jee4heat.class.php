@@ -658,14 +658,19 @@ class jee4heat extends eqLogic
       */
     $return['info']['string']['mypower'] = array(
       'template' => 'tmplmultistate',
-      'replace' => array(
-        "test" => json_decode('[{"operation":"#value#<7",
-          "state_light":"P#value#",
-          "state_dark":"P#value#"},
-          {"operation":"#value#==7",
-            "state_light":"Auto",
-            "state_dark":"Auto"}])', true)
-      )
+      'replace' => [
+        "test" => [
+          ["operation"=>"#value#<7",
+          "state_light"=>"P#value#",
+          "state_dark"=>"P#value#"
+          ]
+          ,
+          ["operation"=>"#value#==7",
+            "state_light"=>"Auto",
+            "state_dark"=>"Auto"
+          ]
+        ]
+      ]
     );
     return $return;
   }
