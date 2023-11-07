@@ -500,24 +500,6 @@ class jee4heat extends eqLogic
     }
   }
 
-  public function getErrorCode() { 
-    $id = $this->getId();
-    $ip = $this->getConfiguration('ip');
-    log::add(__CLASS__, 'debug', "error : ID=" . $id);
-    log::add(__CLASS__, 'debug', "error : IP du poele=" . $ip);
-
-    if ($ip != '') {
-      $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ERROR_QUERY);
-      log::add(__CLASS__, 'debug', 'command error query sent, socket has returned =' . $stove_return);
-      // expected return ["SEC","1","J30002000000000000"]
-      $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-      if ($cmdMessage != null)
-        $cmdMessage->event("Erreur : ".ERROR_NAMES[$registervalue]);
-    }
-}
-
-    return $this->errorCode; 
-  } 
 
   public function refresh()
   {
@@ -631,7 +613,6 @@ class jee4heat extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
     $this->getInformationFomStove($this);
-    $this->getErrorCode();
     log::add(__CLASS__, 'debug', 'getinformation stop');
   }
 
