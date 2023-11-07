@@ -618,6 +618,7 @@ class jee4heat extends eqLogic
     $stateReg = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_".STATE_REGISTER);
     $unblock = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_unblock");
     if (!is_object($stateReg) && !is_object($unblock)) {
+      log::add(__CLASS__, 'debug', 'call for status');
       $status = $stateReg->execCmd();
       log::add(__CLASS__, 'debug', 'got status='.$status);
       $unblock->setIsVisible( $status != 9);
