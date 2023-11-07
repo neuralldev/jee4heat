@@ -667,10 +667,10 @@ class jee4heat extends eqLogic
         )
       );
       $return['info']['binary']['mylocked'] = array(
-        'template' => 'tmpliconline',
+        'template' => 'tmplicon',
         'replace' => array(
-          '#_icon_on_#' => '<span style="font-size:20px!important;font-color:green;"><br/>Non</span>',
-          '#_icon_off_#' => '<span style="font-size:20px!important;font-color:red;"><br/>Oui</span>'
+          '#_icon_on_#' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>',
+          '#_icon_off_#' => '<span style="font-size:20px!important;color:red;"><br/>Oui</span>'
           )
       );
     return $return;
