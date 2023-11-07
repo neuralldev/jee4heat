@@ -666,12 +666,12 @@ class jee4heat extends eqLogic
           array('operation' => '#value# == 7','state_light' => 'Auto', 'state_dark' => 'Auto')
         )
       );
-      $return['info']['string']['mylocked'] = array(
-        'template' => 'tmplmultistate',
+      $return['info']['binary']['mylocked'] = array(
+        'template' => 'tmpliconline',
         'test' => array(
-          array('operation' => '#value# == 0','state_light' => 'Non','state_dark' => 'Non'),
-          array('operation' => '#value# == 1','state_light' => 'Oui', 'state_dark' => 'Oui')
-        )
+          '#_icon_on_#' => 'Oui',
+          '#_icon_off_#' => 'Non'
+          )
       );
     return $return;
   }
