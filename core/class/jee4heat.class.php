@@ -263,7 +263,7 @@ class jee4heat extends eqLogic
           $cmdBlocked = $this->getCmd(null, 'jee4heat_stoveblocked');
           if ($cmdBlocked != null) 
             $cmdBlocked->event(($registervalue == 9));
-          $cmdUnblock = $this->getCmd(null, 'jee4heat_unblocked');
+          $cmdUnblock = $this->getCmd(null, 'jee4heat_unblock');
           if ($cmdUnblock != null)  {
             $cmdUnblock->setIsVisible(($registervalue == 9 ? 1 : 0));
             $cmdUnblock->save();
