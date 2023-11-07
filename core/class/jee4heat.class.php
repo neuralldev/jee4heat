@@ -664,7 +664,7 @@ class jee4heat extends eqLogic
             "operation"=>"#value#<7",
             "state_light"=>"P#value#",
             "state_dark"=>"P#value#"
-          
+          )
           ,
           array(
             "operation"=>"#value#==7",
