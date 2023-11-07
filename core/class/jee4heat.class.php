@@ -615,10 +615,8 @@ class jee4heat extends eqLogic
     $this->getInformationFomStove($this);
     // now refresh specific information
     // is there an error ? 
-    $stateReg = $this->getCmd(null, 'jee4heat_'.STATE_REGISTER);
-    $unblock  = $this->getCmd(null, 'jee4heat_unblock');
-    //$stateReg = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_".STATE_REGISTER);
-    //$unblock = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_unblock");
+    $stateReg = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_".STATE_REGISTER);
+    $unblock = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_unblock");
     if (!is_object($stateReg) && !is_object($unblock)) {
       log::add(__CLASS__, 'debug', 'call for status');
       $status = $stateReg->execCmd();
