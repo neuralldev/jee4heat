@@ -267,6 +267,7 @@ class jee4heat extends eqLogic
             $cmdBlocked->event(($registervalue == 9));
             log::add(__CLASS__, 'debug', "cron : found set visibility");
             $cmdBlocked->setIsVisible(($registervalue == 9 ? 1 : 0));
+            $cmdBlocked->save();
           }
         }
         if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
@@ -276,6 +277,7 @@ class jee4heat extends eqLogic
             $cmdMessage->event("Erreur : ".ERROR_NAMES[$registervalue]);
         }
         $Command->setConfiguration('jee4heat_prefix', $prefix);
+        $Command->save();
         $Command->event($registervalue);
       } else {
         log::add(__CLASS__, 'debug', 'could not find command ' . $register);
