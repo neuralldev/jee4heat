@@ -623,7 +623,7 @@ class jee4heat extends eqLogic
   }
 
   public static function templateWidget(){
-    $return = array('action' => array('string' => array()));
+    $return = array('action' => array('string' => array()), 'info' => array('string' => array()));
     /*
     {"id":"","name":"Jee4Heat","type":"action","subtype":"slider","template":"tmplicon",
       "display":{"icon":""},
