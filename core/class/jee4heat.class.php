@@ -262,6 +262,7 @@ class jee4heat extends eqLogic
           // if state == 9, the stove is in blocked mode, so we set the binary indicator to TRUE else FALSE
           $cmdBlocked = $this->getCmd(null, 'jee4heat_stoveblocked');
           $cmdBlocked->event(($registervalue == 9));
+          $cmdBlocked->setIsVisible(($registervalue == 9));
         }
         if (($register == ERROR_REGISTER) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
           // update error information according to value
@@ -613,16 +614,6 @@ class jee4heat extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
     $this->getInformationFomStove($this);
-    // now refresh specific information
-    // is there an error ? 
-    $stateReg = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_".STATE_REGISTER);
-    $unblock = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_unblock");
-    if (!is_object($stateReg) && !is_object($unblock)) {
-      log::add(__CLASS__, 'debug', 'call for status');
-      $status = $stateReg->execCmd();
-      log::add(__CLASS__, 'debug', 'got status='.$status);
-      $unblock->setIsVisible( $status != 9);
-    }
     log::add(__CLASS__, 'debug', 'getinformation stop');
   }
 
