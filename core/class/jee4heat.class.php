@@ -523,7 +523,6 @@ class jee4heat extends eqLogic
       $cmd->execute();
       // check for error
     }
-    $this->getErrorCode();
   }
 
   public function postSave()
@@ -628,6 +627,7 @@ class jee4heat extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
     $this->getInformationFomStove($this);
+    $this->getErrorCode();
     log::add(__CLASS__, 'debug', 'getinformation stop');
   }
 
