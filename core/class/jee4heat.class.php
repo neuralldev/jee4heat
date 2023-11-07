@@ -265,7 +265,7 @@ class jee4heat extends eqLogic
           if ($cmdBlocked != null) {
             log::add(__CLASS__, 'debug', "cron : found blocked cmd");
             $cmdBlocked->event(($registervalue == 9));
-            log::add(__CLASS__, 'debug', "cron : found set visibility");
+            log::add(__CLASS__, 'debug', "cron : found set visibility=".($registervalue == 9 ? 1 : 0));
             $cmdBlocked->setIsVisible(($registervalue == 9 ? 1 : 0));
             $cmdBlocked->save();
           }
