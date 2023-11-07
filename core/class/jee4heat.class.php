@@ -597,7 +597,7 @@ class jee4heat extends eqLogic
   public function postUpdate()
   {
     log::add(__CLASS__, 'debug', 'postupdate start');
-    self::cron($this->getId());
+    //self::cron($this->getId());
     log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
