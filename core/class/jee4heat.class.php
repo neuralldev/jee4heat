@@ -575,7 +575,7 @@ class jee4heat extends eqLogic
     /* create on, off, unblock and refresh actions */
     $Equipement->AddAction("jee4heat_on", "ON");
     $Equipement->AddAction("jee4heat_off", "OFF");
-    $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), 'lock');
+    $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__),"jee4heat::mylock");
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
     $Equipement->AddAction("jee4heat_stepup", "+", null, 'THERMOST_SET_SETPOINT');
     $Equipement->AddAction("jee4heat_stepdown", "-", null, 'THERMOST_SET_SETPOINT');
@@ -597,7 +597,7 @@ class jee4heat extends eqLogic
   public function postUpdate()
   {
     log::add(__CLASS__, 'debug', 'postupdate start');
-    //$this->getInformations();
+    self::cron($this->getId());
     log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
@@ -621,6 +621,19 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'getjee4heat' . "");
     $this->checkAndUpdateCmd('jee4heat', "");
   }
+
+  public static function templateWidget(){
+    $return = array('info' => array('string' => array()));
+    $return['info']['binary']['mylock'] = array(
+      'template' => 'tmplicon',
+      'replace' => array(
+        '#_icon_on_#' => '<i class=\'icon_green icon jeedom-lock-ferme\'></i>',
+        '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ouvert\'></i>'
+        )
+    );
+    return $return;
+  }
+  
 
 }
 class jee4heatCmd extends cmd
