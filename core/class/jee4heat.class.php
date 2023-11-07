@@ -623,8 +623,8 @@ class jee4heat extends eqLogic
   }
 
   public static function templateWidget(){
-    $return = array('info' => array('string' => array()));
-    $return['info']['binary']['mylock'] = array(
+    $return = array('action' => array('string' => array()));
+    $return['action']['other']['mylock'] = array(
       'template' => 'tmplicon',
       'replace' => array(
         '#_icon_on_#' => '<i class=\'icon_green icon jeedom-lock-ferme\'></i>',
