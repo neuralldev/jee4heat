@@ -624,11 +624,45 @@ class jee4heat extends eqLogic
 
   public static function templateWidget(){
     $return = array('action' => array('string' => array()));
+    /*
+    {"id":"","name":"Jee4Heat","type":"action","subtype":"slider","template":"tmplicon",
+      "display":{"icon":""},
+      "replace":{
+        "#_time_widget_#":"0",
+        "#_icon_on_#":"<i class='icon animal-panda '></i>",
+        "#_icon_off_#":"<i class='icon animal-pig4 '></i>"},
+        "test":[],"jeedomCoreVersion":"4.3.19"}
+    */
     $return['action']['other']['mylock'] = array(
       'template' => 'tmplicon',
       'replace' => array(
         '#_icon_on_#' => '<i class=\'icon_green icon jeedom-lock-ouvert\'></i>',
         '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ferme\'></i>'
+      )
+    );
+      /*
+      "id":"","name":"MyPower",
+      "type":"info","subtype":"string",
+      "template":"tmplmultistate",
+      "display":{"icon":""},
+      "replace":{
+        "#_time_widget_#":"0",
+        "#_desktop_width_#":"","#_mobile_width_#":""},
+        "test":[{"operation":"#value#<7",
+          "state_light":"P#value#",
+          "state_dark":"P#value#"},
+          {"operation":"#value#==7",
+            "state_light":"Auto",
+            "state_dark":"Auto"}]
+            ,"jeedomCoreVersion":"4.3.19"}
+      */
+    $return['info']['string']['mypower'] = array(
+      'template' => 'tmplmultistate',
+      'replace' => array(
+        "test" => array(
+          array("operation"=>"#value#<7","state_light"=>"P#value#","state_dark"=>"P#value#"),
+          array("operation"=>"#value#==7","state_light"=>"Auto","state_dark"=>"Auto")
+        )
         )
     );
     return $return;
