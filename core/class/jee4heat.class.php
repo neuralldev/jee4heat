@@ -656,7 +656,7 @@ class jee4heat extends eqLogic
           '#_icon_off_#' => '<span style="font-size:20px!important;color:red;"><br/>Oui</span>'
           )
       );
-      $return['info']['string']['myerror'] = array(
+      $return['info']['numeric']['myerror'] = array(
         'template' => 'tmplmultistate',
         'test' => array(
           array('operation' => '#value# == 0','state_light' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>','state_dark' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>'),
