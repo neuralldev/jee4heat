@@ -632,15 +632,6 @@ class jee4heat extends eqLogic
 
   public static function templateWidget(){
     $return = array('action' => array('string' => array()), 'info' => array('string' => array()));
-    /*
-    {"id":"","name":"Jee4Heat","type":"action","subtype":"slider","template":"tmplicon",
-      "display":{"icon":""},
-      "replace":{
-        "#_time_widget_#":"0",
-        "#_icon_on_#":"<i class='icon animal-panda '></i>",
-        "#_icon_off_#":"<i class='icon animal-pig4 '></i>"},
-        "test":[],"jeedomCoreVersion":"4.3.19"}
-    */
     $return['action']['other']['mylock'] = array(
       'template' => 'tmplicon',
       'replace' => array(
@@ -648,22 +639,6 @@ class jee4heat extends eqLogic
         '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ferme\'></i>'
       )
     );
-      /*
-      "id":"","name":"MyPower",
-      "type":"info","subtype":"string",
-      "template":"tmplmultistate",
-      "display":{"icon":""},
-      "replace":{
-        "#_time_widget_#":"0",
-        "#_desktop_width_#":"","#_mobile_width_#":""},
-        "test":[{"operation":"#value#<7",
-          "state_light":"P#value#",
-          "state_dark":"P#value#"},
-          {"operation":"#value#==7",
-            "state_light":"Auto",
-            "state_dark":"Auto"}]
-            ,"jeedomCoreVersion":"4.3.19"}
-      */
       $return['info']['string']['mypower'] = array(
         'template' => 'tmplmultistate',
         'test' => array(
@@ -680,6 +655,13 @@ class jee4heat extends eqLogic
           '#_icon_on_#' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>',
           '#_icon_off_#' => '<span style="font-size:20px!important;color:red;"><br/>Oui</span>'
           )
+      );
+      $return['info']['string']['myerror'] = array(
+        'template' => 'tmplmultistate',
+        'test' => array(
+          array('operation' => '#value# == 0','state_light' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>','state_dark' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>'),
+          array('operation' => '#value# != 0','state_light' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>','state_dark' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>')
+        )
       );
     return $return;
   }
