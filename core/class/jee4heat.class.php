@@ -409,6 +409,19 @@ class jee4heat extends eqLogic
     return $Command;
   }
 
+  private function toggleVisible($_logicalId, $state)
+  {
+    $Command = $this->getCmd(null, $_logicalId);
+    if (is_object($Command)) {
+      log::add(__CLASS__, 'debug', 'toggle visible state of ' . $_logicalId . " to " . $state);
+      // basic settings
+      $Command->setIsVisible($state);
+      $Command->save();
+      return true;
+    }
+    return false;
+  }
+
   /**
    * this command toggles state of the stove to ON
    * if must be called only when the stove is in OFF mode (Etat=0)
@@ -425,6 +438,8 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', 'command on sent, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30253000000000000"]
     }
+    $this->toggleVisible('jee4heat_on', 0);
+    $this->toggleVisible('jee4heat_off', 1);
   }
 
   /**
@@ -443,6 +458,8 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', 'command off sent, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30254000000000000"]
     }
+    $this->toggleVisible('jee4heat_on', 1);
+    $this->toggleVisible('jee4heat_off', 0);
   }
 
   /**
@@ -678,19 +695,6 @@ class jee4heatCmd extends cmd
     return false;
   }
 
-  private function toggleVisible($_logicalId, $state)
-  {
-    $Command = $this->getCmd(null, $_logicalId);
-    if (is_object($Command)) {
-      log::add(__CLASS__, 'debug', 'toggle visible state of ' . $_logicalId . " to " . $state);
-      // basic settings
-      $Command->setIsVisible($state);
-      $Command->save();
-      return true;
-    }
-    return false;
-  }
-
   public function execute($_options = null)
   {
     $action = $this->getLogicalId();
@@ -707,6 +711,7 @@ class jee4heatCmd extends cmd
         break;
       case 'jee4heat_on':
         $this->getEqLogic()->state_on();
+
         break;
       case 'jee4heat_off':
         $this->getEqLogic()->state_off();
