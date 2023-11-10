@@ -112,11 +112,11 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'set value ' . $register . '=' . $value);
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
-      log::add(__CLASS__, 'debug', 'error opening socket');
+      log::add(__CLASS__, 'error', 'error opening socket setting stove value');
     } else {
       if (!socket_connect($socket, $ip, SOCKET_PORT)) {
         log::add(__CLASS__, 'debug', 'error connecting socket on ' . $ip);
-        log::add(__CLASS__, 'debug', ' error = ' . socket_strerror(socket_last_error($socket)));
+        log::add(__CLASS__, 'error', ' error = ' . socket_strerror(socket_last_error($socket)));
       }
       // prepare value; this is necessary for register set point to multiply the value because it expects temperature this way (4 digits)
       $v = $value * 100;
@@ -158,10 +158,10 @@ class jee4heat extends eqLogic
       */
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
-      log::add(__CLASS__, 'debug', 'error opening socket');
+      log::add(__CLASS__, 'error', 'error opening socket');
     } else {
       if (!socket_connect($socket, $ip, $port)) {
-        log::add(__CLASS__, 'debug', 'error connecting socket on ' . $ip);
+        log::add(__CLASS__, 'error', 'error connecting socket on ' . $ip);
         log::add(__CLASS__, 'debug', ' error = ' . socket_strerror(socket_last_error($socket)));
       }
       // query status
@@ -438,8 +438,8 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', 'command on sent, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30253000000000000"]
     }
-    $this->toggleVisible('jee4heat_on', 0);
-    $this->toggleVisible('jee4heat_off', 1);
+   // $this->toggleVisible('jee4heat_on', 0);
+    //$this->toggleVisible('jee4heat_off', 1);
   }
 
   /**
@@ -458,8 +458,8 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', 'command off sent, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30254000000000000"]
     }
-    $this->toggleVisible('jee4heat_on', 1);
-    $this->toggleVisible('jee4heat_off', 0);
+   // $this->toggleVisible('jee4heat_on', 1);
+    //$this->toggleVisible('jee4heat_off', 0);
   }
 
   /**
@@ -540,7 +540,7 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'postsave start');
 
     $_eqName = $this->getName();
-    log::add(__CLASS__, 'debug', 'Sauvegarde de l\'équipement [postSave()] : ' . $_eqName);
+    log::add(__CLASS__, 'info', 'Sauvegarde de l\'équipement [postSave()] : ' . $_eqName);
     $order = 1;
 
     if (!is_file(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json')) {
