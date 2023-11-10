@@ -75,15 +75,18 @@ class jee4heat extends eqLogic
 
   public static function pull($_options = null)
   {
+    log::add(__CLASS__, 'debug', 'pull start');
     $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
     if (is_object($cron)) {
       $cron->remove();
     }
+    log::add(__CLASS__, 'debug', 'pull end');
     return;
   }
 
   public static function deadCmd()
   {
+    log::add(__CLASS__, 'debug', 'deadcmd start');
     $return = array();
     foreach (eqLogic::byType('jee4heat') as $jee4heat) {
       foreach ($jee4heat->getCmd() as $cmd) {
@@ -101,6 +104,7 @@ class jee4heat extends eqLogic
         }
       }
     }
+    log::add(__CLASS__, 'debug', 'deadcmd end');
     return $return;
   }
 
@@ -156,7 +160,8 @@ class jee4heat extends eqLogic
       pour allumer le système il faut envoyer la commande ON_CMD, il n'y a aucun retour particulier
       pour demander l'extinction du système il faut envoyer la commande OFF_CMD, il n'y a aucun retour particulier   
       */
-    $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+      log::add(__CLASS__, 'debug', 'getstovevalue start');
+      $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
       log::add(__CLASS__, 'error', 'error opening socket');
     } else {
@@ -173,6 +178,7 @@ class jee4heat extends eqLogic
           log::add(__CLASS__, 'debug', ' error rceiving = ' . socket_strerror(socket_last_error($socket)));
         }
         socket_close($socket);
+        log::add(__CLASS__, 'debug', 'getstovevalue end');
         return $stove_return;
       }
     }
@@ -206,15 +212,16 @@ class jee4heat extends eqLogic
   */
   public static function cron()
   {
+    log::add(__CLASS__, 'debug', 'cron start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
       if ($jee4heat->getIsEnable()) {
         if (($modele = $jee4heat->getConfiguration('modele')) != '') {
           /* lire les infos de l'équipement ici */
           $ip = $jee4heat->getConfiguration('ip');
           $id = $jee4heat->getId();
-          log::add(__CLASS__, 'debug', "cron : ID=" . $id);
-          log::add(__CLASS__, 'debug', "cron : IP du poele=" . $ip);
-          log::add(__CLASS__, 'debug', "cron : modele=" . $modele);
+          log::add(__CLASS__, 'debug', "cron for ID=" . $id);
+          log::add(__CLASS__, 'debug', "cron     IP=" . $ip);
+          log::add(__CLASS__, 'debug', "cron  model=" . $modele);
           if ($jee4heat->getConfiguration('modele') != '') {
             $stove_return = $jee4heat->getStoveValue($ip, SOCKET_PORT, DATA_QUERY); // send query
             if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
@@ -225,6 +232,7 @@ class jee4heat extends eqLogic
         }
       }
     }
+    log::add(__CLASS__, 'debug', 'cron end');
   }
 
   public function readregisters($buffer)
