@@ -354,7 +354,7 @@ class jee4heat extends eqLogic
     $createCmd = true;
     $Command = $this->getCmd(null, $_logicalId);
     if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
-      $Command = cmd::byEqLogicIdCmdName($this->getId(), $$_logicalId);
+      $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
       if (is_object($Command)) {
         $createCmd = false;
         log::add(__CLASS__, 'debug', ' command already exists ');
@@ -470,6 +470,19 @@ class jee4heat extends eqLogic
     //$this->toggleVisible('jee4heat_off', 0);
   }
 
+  public function set_setpoint()
+  {
+    log::add(__CLASS__, 'debug', 'set setpoint start');
+    //find slider
+    $Command = cmd::byEqLogicIdCmdName($this->getId(), 'jee4heat_slider');
+    $value = $Command->execCmd();
+    if ($value > 0) {
+      log::add(__CLASS__, 'debug','value found '. $value);
+      $this->updatesetpoint($value, true);
+    }
+    log::add(__CLASS__, 'debug', 'set setpoint end');   
+  }
+
   /**
    * this command allows to unblock the stove if an error is raised
    * if must be called only when the error is cleared (e.g. add pellets, etc)
@@ -491,7 +504,7 @@ class jee4heat extends eqLogic
     }
   }
 
-  public function updatesetpoint($step)
+  public function updatesetpoint($value, $absolute = false)
   {
     $id = $this->getId();
     $logicalid = $this->getLogicalId();
@@ -520,7 +533,10 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', "setpoint : command not found");
     else {
       log::add(__CLASS__, 'debug', "setpoint : command found!");
-      $v = (floatval($cmd->execCmd()) + $step);
+      if ($absolute)
+        $v = (floatval($value));
+      else
+        $v = (floatval($cmd->execCmd()) + $value);      
       log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
       if ($v > 0) {
         $register = substr($setpoint, -5);
@@ -610,8 +626,10 @@ class jee4heat extends eqLogic
     $Equipement->AddAction("jee4heat_off", "OFF");
     $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__),"jee4heat::mylock");
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
-    $Equipement->AddAction("jee4heat_stepup", "+", null, 'THERMOST_SET_SETPOINT');
-    $Equipement->AddAction("jee4heat_stepdown", "-", null, 'THERMOST_SET_SETPOINT');
+    $Equipement->AddAction("jee4heat_stepup", "+", null);
+    $Equipement->AddAction("jee4heat_stepdown", "-", null);
+    $Equipement->AddAction("jee4heat_slider", "Régler consigne", null, "THERMOSTAT_SET_SETPOINT", "slider");
+    
     //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
@@ -724,7 +742,11 @@ class jee4heatCmd extends cmd
       case 'jee4heat_off':
         $this->getEqLogic()->state_off();
         break;
-      default:
+        case 'jee4heat_slider':
+          // réglage de la consigne
+          $this->getEqLogic()->set_setpoint();
+          break;
+        default:
     }
     return;
   }
