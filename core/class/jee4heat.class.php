@@ -297,7 +297,7 @@ class jee4heat extends eqLogic
   the actions will be called by desktop through execute function by their logical ID
   this function is called by postsave
   */
-  public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $SubType = 'other', $min=null, $max=null)
+  public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $SubType = 'other', $min=null, $max=null, $step=null)
   {
     log::add(__CLASS__, 'debug', ' add action ' . $actionName);
     $createCmd = true;
@@ -327,6 +327,8 @@ class jee4heat extends eqLogic
         $command->setConfiguration('minValue', $min);
       if ($max != null)
         $command->setConfiguration('maxValue', $max);
+        if ($step != null)
+        $command->setDisplay('step', $step);
       $command->save();
     }
   }
