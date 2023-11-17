@@ -634,7 +634,7 @@ class jee4heat extends eqLogic
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
     $Equipement->AddAction("jee4heat_stepup", "+", null);
     $Equipement->AddAction("jee4heat_stepdown", "-", null);
-    $Equipement->AddAction("jee4heat_slider", "Régler consigne", null, "THERMOSTAT_SET_SETPOINT", "slider", 10,25);
+    $Equipement->AddAction("jee4heat_slider", "Régler consigne", "Button", "THERMOSTAT_SET_SETPOINT", "slider", 10,25, 0.5);
     
     //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
