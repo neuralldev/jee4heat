@@ -476,7 +476,7 @@ class jee4heat extends eqLogic
   public function set_setpoint()
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');      
-    $Command = cmd::byEqLogicIdCmdName($this->getId(), "jee4heat_slider");
+    $Command = cmd::byEqLogicIdCmdName(null, "jee4heat_slider");
     if ($Command != null) {
       $v = $Command->getConfiguration('lastCmdValue');
      log::add(__CLASS__, 'debug', 'slider value='.$v);
