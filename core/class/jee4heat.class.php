@@ -297,7 +297,7 @@ class jee4heat extends eqLogic
   the actions will be called by desktop through execute function by their logical ID
   this function is called by postsave
   */
-  public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $SubType = 'other')
+  public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $SubType = 'other', $min=null, $max=null)
   {
     log::add(__CLASS__, 'debug', ' add action ' . $actionName);
     $createCmd = true;
@@ -323,7 +323,10 @@ class jee4heat extends eqLogic
       $command->setEqLogic_id($this->getId());
       if ($generic_type != null)
         $command->setGeneric_type($generic_type);
-
+      if ($min != null)
+        $command->setConfiguration('minValue', $min);
+      if ($max != null)
+        $command->setConfiguration('maxValue', $max);
       $command->save();
     }
   }
@@ -623,7 +626,7 @@ class jee4heat extends eqLogic
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
     $Equipement->AddAction("jee4heat_stepup", "+", null);
     $Equipement->AddAction("jee4heat_stepdown", "-", null);
-    $Equipement->AddAction("jee4heat_slider", "Régler consigne", null, "THERMOSTAT_SET_SETPOINT", "slider");
+    $Equipement->AddAction("jee4heat_slider", "Régler consigne", null, "THERMOSTAT_SET_SETPOINT", "slider", 10,25);
     
     //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
