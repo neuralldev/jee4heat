@@ -473,18 +473,8 @@ class jee4heat extends eqLogic
   public function set_setpoint()
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');
-    //find slider
-    $Command = cmd::byEqLogicIdCmdName($this->getId(), 'jee4heat_slider');
-    if (!$Command) {
-      $value = $Command->execCmd();
-      if ($value > 0) {
-        log::add(__CLASS__, 'debug','value found '. $value);
-        $this->updatesetpoint($value, true);
-      } else {
-        log::add(__CLASS__, 'debug','value not found '. $value);
-      }
-    } else
-      log::add(__CLASS__, 'debug', 'set setpoint command not found');   
+    //find setpoint value and store it on stove as it after slider move
+    $this->updatesetpoint(0,false);   
     log::add(__CLASS__, 'debug', 'set setpoint end');   
   }
 
