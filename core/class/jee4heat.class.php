@@ -662,7 +662,7 @@ class jee4heat extends eqLogic
     $Equipement->AddAction("jee4heat_stepup", "+", null);
     $Equipement->AddAction("jee4heat_stepdown", "-", null);
     $Equipement->AddAction("jee4heat_slider", "Régler consigne", "button", "THERMOSTAT_SET_SETPOINT", "slider", 10,25, 0.5);
-    $Equipement->linksetpoint("jee4heatslider", "")    
+    $Equipement->linksetpoint("jee4heatslider", ""); 
     //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
