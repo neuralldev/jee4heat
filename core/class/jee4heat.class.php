@@ -554,6 +554,33 @@ class jee4heat extends eqLogic
     }
   }
 
+  public function linksetpoint($slider, $setpointlogicalID) {
+    $Command = cmd::byEqLogicIdAndLogicalId($this->getId(), "jee4heat_slider");
+    if ($Command != null) {
+      // search for setpoint
+    } else
+      log::add(__CLASS__, 'debug', 'cannot find jee4heat_slider command in eq='.$this->getId());   
+      $id = $this->getId();
+      $_generic_type = 'THERMOSTAT_SETPOINT';  
+      $cmds = cmd::byGenericType($_generic_type, null, false);
+      $n = 0;
+      foreach ($cmds as $cmd) {
+        $setpoint = $cmd->getLogicalId();
+        $eqID = $cmd->getEqLogic_id();
+        $cmdID = $cmd->getId();
+        $n++;
+        if ($eqID == $id)
+          break;
+      }
+      if ($n == 0)
+        log::add(__CLASS__, 'debug', "setpoint : command not found");
+      else {
+        log::add(__CLASS__, 'debug', "setpoint : command found!");
+        $Command->setValue($cmdID);
+        $Command->save();
+        log::add(__CLASS__, 'debug', "setpoint ID $cmdID stored");
+      }  
+  }
 
   public function refresh()
   {
@@ -635,7 +662,7 @@ class jee4heat extends eqLogic
     $Equipement->AddAction("jee4heat_stepup", "+", null);
     $Equipement->AddAction("jee4heat_stepdown", "-", null);
     $Equipement->AddAction("jee4heat_slider", "Régler consigne", "button", "THERMOSTAT_SET_SETPOINT", "slider", 10,25, 0.5);
-    
+    $Equipement->linksetpoint("jee4heatslider", "")    
     //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
