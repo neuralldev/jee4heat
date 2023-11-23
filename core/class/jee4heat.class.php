@@ -73,7 +73,7 @@ const ERROR_NAMES = [
 class jee4heat extends eqLogic
 {
 
-  public static function pull($_options = null)
+  public function pull($_options = null)
   {
     log::add(__CLASS__, 'debug', 'pull start');
     $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
@@ -715,30 +715,30 @@ class jee4heat extends eqLogic
         '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ferme\'></i>'
       )
     );
-      $return['info']['string']['mypower'] = array(
-        'template' => 'tmplmultistate',
-        'test' => array(
-          array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
-          array('operation' => '#value# >= 1 && #value# <= 3','state_light' => '#value# Basse','state_dark' => '#value# Basse'),
-          array('operation' => '#value# >= 4 && #value# <= 5','state_light' => '#value# Moyenne','state_dark' => '#value# Moyenne'),
-          array('operation' => '#value# == 6','state_light' => '#value# Haute','state_dark' => '#value# Haute'),
-          array('operation' => '#value# == 7','state_light' => 'Auto', 'state_dark' => 'Auto')
+    $return['info']['string']['mypower'] = array(
+      'template' => 'tmplmultistate',
+      'test' => array(
+        array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
+        array('operation' => '#value# >= 1 && #value# <= 3','state_light' => '#value# Basse','state_dark' => '#value# Basse'),
+        array('operation' => '#value# >= 4 && #value# <= 5','state_light' => '#value# Moyenne','state_dark' => '#value# Moyenne'),
+        array('operation' => '#value# == 6','state_light' => '#value# Haute','state_dark' => '#value# Haute'),
+        array('operation' => '#value# == 7','state_light' => 'Auto', 'state_dark' => 'Auto')
+      )
+    );
+    $return['info']['binary']['mylocked'] = array(
+      'template' => 'tmplicon',
+      'replace' => array(
+        '#_icon_on_#' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>',
+        '#_icon_off_#' => '<span style="font-size:20px!important;color:red;"><br/>Oui</span>'
         )
-      );
-      $return['info']['binary']['mylocked'] = array(
-        'template' => 'tmplicon',
-        'replace' => array(
-          '#_icon_on_#' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>',
-          '#_icon_off_#' => '<span style="font-size:20px!important;color:red;"><br/>Oui</span>'
-          )
-      );
-      $return['info']['numeric']['myerror'] = array(
-        'template' => 'tmplmultistate',
-        'test' => array(
-          array('operation' => '#value# == 0','state_light' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>','state_dark' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>'),
-          array('operation' => '#value# != 0','state_light' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>','state_dark' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>')
-        )
-      );
+    );
+    $return['info']['numeric']['myerror'] = array(
+      'template' => 'tmplmultistate',
+      'test' => array(
+        array('operation' => '#value# == 0','state_light' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>','state_dark' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>'),
+        array('operation' => '#value# != 0','state_light' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>','state_dark' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>')
+      )
+    );
     return $return;
   }
   
