@@ -715,6 +715,15 @@ class jee4heat extends eqLogic
         '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ferme\'></i>'
       )
     );
+    $return['info']['string']['mypellets'] = array(
+      'template' => 'tmplmultistate',
+      'test' => array(
+        array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
+        array('operation' => '#value# >= 1 && #value# <= 9','state_light' => '#value#','state_dark' => '#value#'),
+        array('operation' => '#value# == 10 && #value# <= 5','state_light' => 'extinction','state_dark' => 'extinction'),
+        array('operation' => '#value# == 255','state_light' => 'Allumage', 'state_dark' => 'Allumage')
+      )
+    );
     $return['info']['string']['mypower'] = array(
       'template' => 'tmplmultistate',
       'test' => array(

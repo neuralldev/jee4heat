@@ -15,7 +15,7 @@
     {"name": "Etat equipement", "type": "info", "subtype": "numeric",  "logicalId": "30001", "generictype": "THERMOSTAT_STATE_NAME"},
     {"name": "Erreur", "type": "info", "subtype": "numeric",  "logicalId": "30002", "template" : "jee4heat::myerror"},
     {"name": "Temperature des fumées", "type": "info", "subtype": "numeric",  "logicalId": "30005", "unit" : "°C", "template": "tile"},
-    {"name": "Puissance combustion", "type": "info", "subtype": "string",  "logicalId": "30011", "template": "tile"},
+    {"name": "Vitesse Pellets", "type": "info", "subtype": "string",  "logicalId": "30011", "template": "jee4heat::mypellets"},
     {"name": "Temperature foyer", "type": "info", "subtype": "numeric",  "logicalId": "30026", "unit" : "°C"},
     {"name": "Température ambiante", "type": "info", "subtype": "numeric",  "logicalId": "50006", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "#value#/100", "template": "tile", "history": "1"},
     {"name": "Thermostat Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT", "offset": "#value#/100", "template": "tile", "history": "1","min": "15", "max": "25"},
