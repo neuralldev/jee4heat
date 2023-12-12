@@ -8,7 +8,7 @@
       "error" : 30002,
       "setpoint": 50138
   },
-  "commands": [
+  "commands": [ 
     {"name": "Service Time", "type": "info", "subtype": "numeric",  "logicalId": "20118", "unit": "h", "warningif": "#value# < 240", "dangerif": "#value# < 48", "template": "tile"},
     {"name": "Puissance Combustion", "type": "info", "subtype": "string",  "logicalId": "20364", "template": "jee4heat::mypower"},
     {"name": "Puissance Chauffage", "type": "info", "subtype": "numeric",  "logicalId": "20575"},
