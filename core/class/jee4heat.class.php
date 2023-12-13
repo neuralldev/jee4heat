@@ -601,7 +601,7 @@ class jee4heat extends eqLogic
     $order = 1;
 
     if (!is_file(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json')) {
-      log::add(__CLASS__, 'debug', 'postsave no file found for ' . _eqName . ', then do nothing');
+      log::add(__CLASS__, 'debug', 'postsave no file found for ' . $_eqName . ', then do nothing');
       return;
     }
     $content = file_get_contents(__DIR__ . '/../config/devices/' . $this->getConfiguration('modele') . '.json');
@@ -666,6 +666,8 @@ class jee4heat extends eqLogic
     //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
+    // now refresh
+    $this->getInformations();
   }
 
   public function preUpdate()
@@ -784,11 +786,13 @@ class jee4heatCmd extends cmd
       case 'jee4heat_off':
         $this->getEqLogic()->state_off();
         break;
-        case 'jee4heat_slider':
+      case 'jee4heat_slider':
           // réglage de la consigne
           $this->getEqLogic()->set_setpoint();
-          break;
-        default:
+        break;
+      default:
+      log::add(__CLASS__, 'debug', 'action to execute not found');
+
     }
     return;
   }
