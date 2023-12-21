@@ -787,7 +787,7 @@ class jee4heatCmd extends cmd
         break;
       case 'jee4heat_slider':
           // réglage de la consigne
-          log::add(__CLASS__, 'debug', json_encode($_options));
+          log::add(__CLASS__, 'debug', 'options='.json_encode($_options));
           $this->getEqLogic()->set_setpoint();
         
         break;
