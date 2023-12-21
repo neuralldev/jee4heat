@@ -478,10 +478,8 @@ class jee4heat extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');      
     log::add(__CLASS__, 'debug', 'options='.json_encode($_options));
-    $Command = cmd::byEqLogicIdAndLogicalId($this->getId(), "jee4heat_slider");
-    if ($Command != null) {
-      $v = $Command->getConfiguration('lastCmdValue');
-     log::add(__CLASS__, 'debug', 'slider value='.$v);
+    $v = $_options["slider"];
+    log::add(__CLASS__, 'debug', 'slider value='.$v);
       //find setpoint value and store it on stove as it after slider move
       if ($v > 0) $this->updatesetpoint($v,true);  
     } else
