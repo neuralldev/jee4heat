@@ -474,9 +474,10 @@ class jee4heat extends eqLogic
     //$this->toggleVisible('jee4heat_off', 0);
   }
 
-  public function set_setpoint()
+  public function set_setpoint($_options)
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');      
+    log::add(__CLASS__, 'debug', 'options='.json_encode($_options));
     $Command = cmd::byEqLogicIdAndLogicalId($this->getId(), "jee4heat_slider");
     if ($Command != null) {
       $v = $Command->getConfiguration('lastCmdValue');
@@ -787,9 +788,7 @@ class jee4heatCmd extends cmd
         break;
       case 'jee4heat_slider':
           // réglage de la consigne
-          log::add(__CLASS__, 'debug', 'options='.json_encode($_options));
-          $this->getEqLogic()->set_setpoint();
-        
+          $this->getEqLogic()->set_setpoint($_options);        
         break;
       default:
       log::add(__CLASS__, 'debug', 'action to execute not found');
