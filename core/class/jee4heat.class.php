@@ -486,6 +486,8 @@ class jee4heat extends eqLogic
       else
         log::add(__CLASS__, 'debug', 'cannot find jee4heat_slider command in eq='.$this->getId());   
     log::add(__CLASS__, 'debug', 'set setpoint end');   
+    // now refresh display  
+    $this->getInformations();
   }
 
   /**
