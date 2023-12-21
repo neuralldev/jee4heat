@@ -477,7 +477,7 @@ class jee4heat extends eqLogic
   public function set_setpoint($_options)
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');      
-    log::add(__CLASS__, 'debug', 'options='.json_encode($_options));
+    log::add(__CLASS__, 'debug', 'options from execute='.json_encode($_options));
     $v = $_options["slider"];
     log::add(__CLASS__, 'debug', 'slider value='.$v);
       //find setpoint value and store it on stove as it after slider move
