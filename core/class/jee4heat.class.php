@@ -166,21 +166,20 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'error', 'error opening socket');
     } else {
       if (!socket_connect($socket, $ip, $port)) {
-        log::add(__CLASS__, 'error', 'error connecting socket on ' . $ip);
+        log::add(__CLASS__, 'error', 'getstovevalue: error connecting socket on ' . $ip);
         log::add(__CLASS__, 'debug', ' error = ' . socket_strerror(socket_last_error($socket)));
-      }
+      } else
       // query status
-
-      if (!socket_send($socket, $command, strlen($command), 0)) {
-        log::add(__CLASS__, 'debug', ' error sending = ' . socket_strerror(socket_last_error($socket)));
-      } else {
-        if (($bytereceived = socket_recv($socket, $stove_return, BUFFER_SIZE, 0)) == false) {
-          log::add(__CLASS__, 'debug', ' error rceiving = ' . socket_strerror(socket_last_error($socket)));
+        if (!socket_send($socket, $command, strlen($command), 0)) {
+          log::add(__CLASS__, 'debug', ' error sending = ' . socket_strerror(socket_last_error($socket)));
+        } else {
+          if (($bytereceived = socket_recv($socket, $stove_return, BUFFER_SIZE, 0)) == false) {
+            log::add(__CLASS__, 'debug', ' error receiving = ' . socket_strerror(socket_last_error($socket)));
+          }
+          socket_close($socket);
+          log::add(__CLASS__, 'debug', 'getstovevalue end');
+          return $stove_return;
         }
-        socket_close($socket);
-        log::add(__CLASS__, 'debug', 'getstovevalue end');
-        return $stove_return;
-      }
     }
   }
 
