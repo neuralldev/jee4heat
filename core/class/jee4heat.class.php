@@ -121,6 +121,8 @@ class jee4heat extends eqLogic
       if (!socket_connect($socket, $ip, SOCKET_PORT)) {
         log::add(__CLASS__, 'debug', 'error connecting socket on ' . $ip);
         log::add(__CLASS__, 'error', ' error = ' . socket_strerror(socket_last_error($socket)));
+        socket_close($socket);
+        return("ERROR");
       }
       // prepare value; this is necessary for register set point to multiply the value because it expects temperature this way (4 digits)
       $v = $value * 100;
@@ -131,9 +133,13 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', 'command=' . $command);
       if (!socket_send($socket, $command, strlen($command), 0)) {
         log::add(__CLASS__, 'debug', ' error sending = ' . socket_strerror(socket_last_error($socket)));
+        socket_close($socket);
+        return("ERROR");
       } else {
         if (($bytereceived = socket_recv($socket, $stove_return, BUFFER_SIZE, 0)) == false) {
           log::add(__CLASS__, 'debug', ' error rceiving = ' . socket_strerror(socket_last_error($socket)));
+          socket_close($socket);
+          return("ERROR");
         }
         socket_close($socket);
         // unpack answer
@@ -446,9 +452,13 @@ class jee4heat extends eqLogic
     $ip = $this->getConfiguration('ip');
     log::add(__CLASS__, 'debug', "on : ID=" . $id);
     log::add(__CLASS__, 'debug', "on : IP du poele=" . $ip);
-
     if ($ip != '') {
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+      for ($i=0;$i<3 && ($stove_return=="ERROR");$i++)
+        {
+          sleep(3);
+          $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+        }
       log::add(__CLASS__, 'debug', 'command on sent, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30253000000000000"]
     }
@@ -470,6 +480,11 @@ class jee4heat extends eqLogic
 
     if ($ip != '') {
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, OFF_CMD);
+      for ($i=0;$i<3 && ($stove_return=="ERROR");$i++)
+        {
+          sleep(3);
+          $stove_return = $this->getStoveValue($ip, SOCKET_PORT, OFF_CMD);
+        }
       log::add(__CLASS__, 'debug', 'command off sent, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30254000000000000"]
     }
