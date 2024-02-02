@@ -96,10 +96,12 @@ function addCmdToTable(_cmd) {
 		return;
 	}
 	var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+// ID
 	tr += '<td class="hidden-xs">'
   	tr += '<span class="cmdAttr" data-l1key="id"></span>'
   	tr += '</td>'
-  	tr += '<td>'
+// NOM
+	tr += '<td>'
   	tr += '<div class="input-group">'
   	tr += '<input class="cmdAttr form-control input-sm roundedLeft" data-l1key="name" placeholder="{{Nom de la commande}}">'
   	tr += '<span class="input-group-btn"><a class="cmdAction btn btn-sm btn-default" data-l1key="chooseIcon" title="{{Choisir une icône}}"><i class="fas fa-icons"></i></a></span>'
@@ -109,12 +111,14 @@ function addCmdToTable(_cmd) {
   	tr += '<option value="">{{Aucune}}</option>'
   	tr += '</select>'
   	tr += '</td>'
-  	tr += '<td>'
-	tr += '<td style="display:none;">';
+// TYPE
+	tr += '<td>'
+//	tr += '<td style="display:none;">';
 	tr += '<span class="type" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>'
   	tr += '<span class="subType" subType="' + init(_cmd.subType) + '"></span>'
   	tr += '</td>'
-  	tr += '<td>'
+// OPTIONS
+	tr += '<td>'
   	tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/>{{Afficher}}</label> '
   	tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isHistorized" checked/>{{Historiser}}</label> '
   	tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="display" data-l2key="invertBinary"/>{{Inverser}}</label> '
@@ -124,9 +128,11 @@ function addCmdToTable(_cmd) {
   	tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="unite" placeholder="Unité" title="{{Unité}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
 	tr += '</div>'
 	tr += '</td>'
+// ETAT
 	tr += '<td>';
 	tr += '<span class="cmdAttr" data-l1key="htmlstate"></span>';
 	tr += '</td>';
+// ACTION
 	tr += '<td>'
   	if (is_numeric(_cmd.id)) {
     	tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure" title="{{Configuration avancée}}"><i class="fas fa-cogs"></i></a> '
