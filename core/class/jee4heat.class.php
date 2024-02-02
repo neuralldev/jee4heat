@@ -117,6 +117,7 @@ class jee4heat extends eqLogic
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
       log::add(__CLASS__, 'error', 'error opening socket setting stove value');
+      return("ERROR");
     } else {
       if (!socket_connect($socket, $ip, SOCKET_PORT)) {
         log::add(__CLASS__, 'debug', 'error connecting socket on ' . $ip);
@@ -170,17 +171,24 @@ class jee4heat extends eqLogic
       $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     if (!$socket) {
       log::add(__CLASS__, 'error', 'error opening socket');
+      return("ERROR");
     } else {
       if (!socket_connect($socket, $ip, $port)) {
         log::add(__CLASS__, 'error', 'getstovevalue: error connecting socket on ' . $ip);
         log::add(__CLASS__, 'debug', ' error = ' . socket_strerror(socket_last_error($socket)));
+        socket_close($socket);
+        return("ERROR");
       } else
       // query status
         if (!socket_send($socket, $command, strlen($command), 0)) {
           log::add(__CLASS__, 'debug', ' error sending = ' . socket_strerror(socket_last_error($socket)));
+          socket_close($socket);
+          return("ERROR");  
         } else {
           if (($bytereceived = socket_recv($socket, $stove_return, BUFFER_SIZE, 0)) == false) {
             log::add(__CLASS__, 'debug', ' error receiving = ' . socket_strerror(socket_last_error($socket)));
+            socket_close($socket);
+            return("ERROR");
           }
           socket_close($socket);
           log::add(__CLASS__, 'debug', 'getstovevalue end');
@@ -201,10 +209,11 @@ class jee4heat extends eqLogic
         log::add(__CLASS__, 'debug', "refresh : modele=" . $modele);
         if ($jee4heat->getConfiguration('modele') != '') {
           $stove_return = $jee4heat->getStoveValue($ip, SOCKET_PORT, DATA_QUERY); // send query
-          if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
-            log::add(__CLASS__, 'debug', 'refresh socket has returned =' . $stove_return);
-          else
-            log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable =' . $stove_return);
+          if ($stove_return !="ERROR")
+            if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
+              log::add(__CLASS__, 'debug', 'refresh socket has returned =' . $stove_return);
+            else
+              log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable =' . $stove_return);
         }
       }
     }
@@ -229,10 +238,11 @@ class jee4heat extends eqLogic
           log::add(__CLASS__, 'debug', "cron  model=" . $modele);
           if ($jee4heat->getConfiguration('modele') != '') {
             $stove_return = $jee4heat->getStoveValue($ip, SOCKET_PORT, DATA_QUERY); // send query
-            if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
-              log::add(__CLASS__, 'debug', 'cron socket has returned =' . $stove_return);
-            else
-              log::add(__CLASS__, 'debug', 'cron socket has returned which is not unpackable =' . $stove_return);
+            if ($stove_return !="ERROR")
+              if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
+                log::add(__CLASS__, 'debug', 'cron socket has returned =' . $stove_return);
+              else
+                log::add(__CLASS__, 'debug', 'cron socket has returned which is not unpackable =' . $stove_return);
           }
         }
       }
@@ -524,7 +534,12 @@ class jee4heat extends eqLogic
 
     if ($ip != '') {
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, UNBLOCK_CMD);
-      log::add(__CLASS__, 'debug', 'unblock called, socket has returned =' . $stove_return);
+      for ($i=0;$i<3 && ($stove_return=="ERROR");$i++)
+      {
+        sleep(3);
+        $stove_return = $this->getStoveValue($ip, SOCKET_PORT, UNBLOCK_CMD);
+      }
+    log::add(__CLASS__, 'debug', 'unblock called, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30255000000000000"]
       $this->getInformations();
     }
@@ -569,6 +584,11 @@ class jee4heat extends eqLogic
         $prefix = $cmd->getConfiguration("jee4heat_prefix");
         log::add(__CLASS__, 'debug', "setpoint : trim logical ID" . $setpoint . ' to ' . $register);
         $r = $this->setStoveValue($ip, $register, $v, $prefix);
+        for ($i=0;$i<3 && ($r=="ERROR");$i++)
+        {
+          sleep(3);
+          $r = $this->setStoveValue($ip, $register, $v, $prefix);
+        }
         log::add(__CLASS__, 'debug', "setpoint : stove return " . $r);
       }
     }
