@@ -191,7 +191,7 @@ class jee4heat extends eqLogic
         } else {
             $message = "Failed to connect to $host:$port. (timed out after {$elapsed}ms)";
         }
-       return false;// throw new Exception($message);
+       return 0;// throw new Exception($message);
     }
 
     return $socket;
