@@ -187,9 +187,9 @@ class jee4heat extends eqLogic
     } else {
         $elapsed = round($elapsed, 4);
         if(!is_null($err) && $err !== 0 && $err !== 114 && $err !== 115){
-            $message = "Failed to connect to $host:$port. ($err: ".socket_strerror($err)."; after {$elapsed}ms)";
+            log::add(__CLASS__, 'debug', "Failed to connect to $host:$port. ($err: ".socket_strerror($err)."; after {$elapsed}ms)";
         } else {
-            $message = "Failed to connect to $host:$port. (timed out after {$elapsed}ms)";
+          log::add(__CLASS__, 'debug', "Failed to connect to $host:$port. (timed out after {$elapsed}ms)";
         }
        return 0;// throw new Exception($message);
     }
