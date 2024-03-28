@@ -296,7 +296,7 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'error', 'error opening socket');
       return("ERROR");
     } else {
-      if ($socket = $this->mysocket_connect_timeout($ip, $port, 5000)) {
+      if (!$socket = socket_connect($socket, $ip, SOCKET_PORT)) {
         log::add(__CLASS__, 'error', 'getstovevalue: error connecting socket on ' . $ip);
         log::add(__CLASS__, 'debug', ' error = ' . socket_strerror(socket_last_error($socket)));
         socket_close($socket);
