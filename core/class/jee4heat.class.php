@@ -243,18 +243,32 @@ class jee4heat extends eqLogic
         log::add(__CLASS__, 'debug', "refresh : ID=" . $id);
         log::add(__CLASS__, 'debug', "refresh : IP du poele=" . $ip);
         log::add(__CLASS__, 'debug', "refresh : modele=" . $modele);
-        if ($jee4heat->getConfiguration('modele') != '') {
-          $stove_return = $jee4heat->getStoveValue($ip, SOCKET_PORT, DATA_QUERY); // send query
-          if ($stove_return !="ERROR")
-            if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
-              log::add(__CLASS__, 'debug', 'refresh socket has returned =' . $stove_return);
-            else
-              log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable =' . $stove_return);
+        // add iteration to catch random socket errors 
+        $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+        for ($i=0;$i<3 && ($stove_return=="ERROR");$i++)
+          {
+            sleep(3);
+            $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+          }
+        // end iteration
+        if ($stove_return !="ERROR") {
+          if ($jee4heat->readregisters($stove_return)) {// translate registers to jeedom values, return true if successful
+            log::add(__CLASS__, 'debug', 'refresh socket has returned =' . $stove_return);
+            return TRUE;
+          } else {
+            log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable =' . $stove_return);
+            return FALSE;
+          }
+        } else {
+          // connection succeeds but fetching information failed
+          log::add(__CLASS__, 'debug', 'getInformationFomStove: error reading information from stove');
+          return FALSE;
         }
-        else
-        log::add(__CLASS__, 'debug', 'getInformationFomStove: error reading information from stove');
-  }
+      }
     }
+    // if jeedom equipment is not eanbled, then do nothing but do not return an error
+    log::add(__CLASS__, 'debug', 'getInformationFomStove: equipment is not enabled in Jeedom');
+    return TRUE;
   }
 
   /*
