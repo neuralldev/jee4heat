@@ -767,12 +767,14 @@ class jee4heat extends eqLogic
 
   public function preUpdate()
   {
-    if (!$this->getIsEnable())
-      throw new Exception(__((__("L'équipement est désactivé, impossible de régler : ", __FILE__)) . $this->getName(), __FILE__));
+    log::add(__CLASS__, 'debug', 'preupdate start');
+//    if (!$this->getIsEnable())
+//      throw new Exception(__((__("L'équipement est désactivé, impossible de régler ", __FILE__)) . $this->getName(), __FILE__));
 
     if ($this->getConfiguration('ip') == '') {
-      throw new Exception(__((__('Le champ IP ne peut être vide pour l\'équipement : ', __FILE__)) . $this->getName(), __FILE__));
+      throw new Exception(__((__('Le champ IP ne peut être vide pour l\'équipement ', __FILE__)) . $this->getName(), __FILE__));
     }
+    log::add(__CLASS__, 'debug', 'preupdate stop');
   }
 
   public function postUpdate()
