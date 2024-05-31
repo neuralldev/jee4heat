@@ -297,7 +297,7 @@ class jee4heat extends eqLogic
                 log::add(__CLASS__, 'debug', 'cron socket has returned which is not unpackable =' . $stove_return);
           }
         } 
-      }
+      } else
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
     log::add(__CLASS__, 'debug', 'cron end');
