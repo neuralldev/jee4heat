@@ -721,7 +721,7 @@ class jee4heat extends eqLogic
           'jee4heat_' . $item['logicalId'],
           $item['type'],
           $item['subtype'],
-          (array_key_exists('template', $item)?'tile':$item['template']),
+          (isset($item['template'])?'tile':$item['template']),
           (array_key_exists('unit', $item)?'':$item['unit']),
           (array_key_exists('generictype', $item)?'':$item['generictype']),
           (array_key_exists('visible', $item)?'1':$item['visible']),
