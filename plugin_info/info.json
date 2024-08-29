@@ -4,7 +4,7 @@
 	"description" : "Ce plugin permet de se connecter via le cloud TiEmme Elettronica",
 	"licence" : "AGPL",
 	"author" : "neuralldev",
-	"require" : "4.0",
+	"require" : "4.4",
     "hasDependency" : false,
 	"category": "wellness",
 	"language" : ["fr_FR"],
