@@ -726,7 +726,7 @@ class jee4heat extends eqLogic
           (array_key_exists('generictype', $$item)?'':$item['generictype']),
           (array_key_exists('visible', $$item)?'1':$item['visible']),
           'default',
-          'default',
+          'default', 
           (array_key_exists('min', $$item)?'':$item['min']),
           (array_key_exists('max', $$item)?'':$item['max']),
           $order,
