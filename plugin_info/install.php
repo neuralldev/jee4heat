@@ -19,37 +19,12 @@
 require_once __DIR__ . '/../../../core/php/core.inc.php';
 
 function jee4heat_install() {
-  $cron = cron::byClassAndFunction('jee4heat', 'pull');
-  if (!is_object($cron)) {
-      $cron = new cron();
-      $cron->setClass('jee4heat');
-      $cron->setFunction('pull');
-      $cron->setEnable(1);
-      $cron->setDeamon(0);
-      $cron->setSchedule('* 1 * * *');
-      $cron->save();
-  }
 }
 
 function jee4heat_update() {
-  $cron = cron::byClassAndFunction('jee4heat', 'pull');
-  if (!is_object($cron)) {
-      $cron = new cron();
-      $cron->setClass('jee4heat');
-      $cron->setFunction('pull');
-      $cron->setEnable(1);
-      $cron->setDeamon(0);
-      $cron->setSchedule('* 1 * * *');
-      $cron->save();
-  }
-  $cron->stop();
 }
 
 function jee4heat_remove() {
-  $cron = cron::byClassAndFunction('jee4heat', 'pull');
-  if (is_object($cron)) {
-      $cron->remove();
-  }
 }
 
 ?>

@@ -112,13 +112,6 @@ class jee4heat extends eqLogic
   
   public function pull($_options = null)
   {
-    log::add(__CLASS__, 'debug', 'pull start');
-    $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
-    if (is_object($cron)) {
-      $cron->remove();
-    }
-    log::add(__CLASS__, 'debug', 'pull end');
-    return;
   }
 
   public static function deadCmd()
@@ -314,7 +307,7 @@ class jee4heat extends eqLogic
     //  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
     if (($ret[0] != "SEL") && ($ret[0] != "SEC"))
       return false; // check for message consistency
-    $nargs = intval($ret[1]);
+    $nargs = intval($ret[1]); 
     log::add(__CLASS__, 'debug', 'number of registers returned =' . $ret[1]);
     if ($ret[0]=="SEC") {
       log::add(__CLASS__, 'debug', 'SEC status returned');
