@@ -21,6 +21,7 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 const STATE_REGISTER = 30001;
 const ERROR_REGISTER = 30002;
+const COMMANDS = [30253,30254];
 const BUFFER_SIZE = 2048;
 const SOCKET_PORT = 80;
 const DATA_QUERY = '["SEL","0"]';
@@ -315,6 +316,11 @@ class jee4heat extends eqLogic
       return false; // check for message consistency
     $nargs = intval($ret[1]);
     log::add(__CLASS__, 'debug', 'number of registers returned =' . $ret[1]);
+    if ($ret[0]=="SEC") {
+      log::add(__CLASS__, 'debug', 'SEC status returned');
+      // no register storage required  
+      return true;
+    }
     if ($nargs <= 2)
       return false; // check for message consistency
 
