@@ -27,4 +27,4 @@ function jee4heat_update() {
 function jee4heat_remove() {
 }
 
-?>
+
