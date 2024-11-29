@@ -723,20 +723,19 @@ class jee4heat extends eqLogic
     $cmds = cmd::byGenericType($_generic_type, null, false);
     $n = 0;
     foreach ($cmds as $cmd) {
-      $setpoint = $cmd->getLogicalId();
-      $eqID = $cmd->getEqLogic_id();
-      $cmdID = $cmd->getId();
+      //$setpoint = $cmd->getLogicalId();
+      //$cmdID = $cmd->getId();
       $n++;
-      if ($eqID == $id)
+      if ($cmd->getEqLogic_id()== $id)
         break;
     }
     if ($n == 0)
       log::add(__CLASS__, 'debug', "setpoint : command not found");
     else {
       log::add(__CLASS__, 'debug', "setpoint : command found!");
-      $Command->setValue($cmdID);
+      $Command->setValue($cmd->getId());
       $Command->save();
-      log::add(__CLASS__, 'debug', "setpoint ID $cmdID stored");
+      log::add(__CLASS__, 'debug', "setpoint ID ".$cmd->getId()." stored");
     }
   }
   public function refresh()
