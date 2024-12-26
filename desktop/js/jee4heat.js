@@ -35,7 +35,7 @@ $('#bt_autoDEL_eq').on('click', function () {
 	dialog_title = '{{Recréer les commandes}}';
 	dialog_message += '<label class="lbl lbl-warning" for="name">{{Attention, cela va supprimer les commandes existantes.}}</label> ';
 	dialog_message += '</form>';
-	bootbox.dialog({
+	domutils.dialog({
 		title: dialog_title,
 		message: dialog_message,
 		buttons: {
@@ -47,9 +47,9 @@ $('#bt_autoDEL_eq').on('click', function () {
 				label: "{{Démarrer}}",
 				className: "btn-success",
 				callback: function () {
-					bootbox.confirm('{{Etes-vous sûr de vouloir récréer toutes les commandes ? Cela va supprimer les commandes existantes}}', function (result) {
+					domutils.confirm('{{Etes-vous sûr de vouloir récréer toutes les commandes ? Cela va supprimer les commandes existantes}}', function (result) {
 						if (result) {
-							$.ajax({
+							domutils.ajax({
 								type: "POST",
 								url: "plugins/jee4heat/core/ajax/jee4heat.ajax.php",
 								data: {
@@ -61,9 +61,6 @@ $('#bt_autoDEL_eq').on('click', function () {
 									handleAjaxError(request, status, error);
 								},
 								success: function (data) {
-									/*if (data.state != 'ok') {
-									    return;
-									} */
 									$('.eqLogicDisplayCard[data-eqLogic_id=' + $('.eqLogicAttr[data-l1key=id]').value() + ']').click();
 									$('#div_alert').showAlert({
 										message: '{{Opération réalisée avec succès}}',
