@@ -295,12 +295,20 @@ class jee4heat extends eqLogic
           log::add(__CLASS__, 'debug', "cron     IP=" . $ip);
           log::add(__CLASS__, 'debug', "cron  model=" . $modele);
           if ($jee4heat->getConfiguration('modele') != '') {
-            $stove_return = $jee4heat->getStoveValue($ip, SOCKET_PORT, DATA_QUERY); // send query
-            if ($stove_return != "ERROR")
-              if ($jee4heat->readregisters($stove_return)) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'cron socket has returned =' . $stove_return);
-              else
-                log::add(__CLASS__, 'debug', 'cron socket has returned which is not unpackable =' . $stove_return);
+            $attempts = 0;
+            do {
+              $stove_return = $jee4heat->getStoveValue($ip, SOCKET_PORT, DATA_QUERY); // send query
+              if ($stove_return != "ERROR") {
+                if ($jee4heat->readregisters($stove_return)) { // translate registers to jeedom values, return true if successful
+                  log::add(__CLASS__, 'debug', 'cron socket has returned =' . $stove_return);
+                  break;
+                } else {
+                  log::add(__CLASS__, 'debug', 'cron socket has returned which is not unpackable =' . $stove_return);
+                }
+              }
+              sleep(3);
+              $attempts++;
+            } while ($attempts < 3);
           }
         }
       } else
