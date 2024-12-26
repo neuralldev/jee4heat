@@ -22,7 +22,7 @@ try {
     if (!isConnect('admin')) {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
-    log::add(__CLASS__, 'debug', ' action request =  '.init('action'));
+    log::add('jee4heat', 'debug', ' action request =  '.init('action'));
 
     if (init('action') == 'getStove') {
         $stove = jee4heat::byId(init('id'));
@@ -57,6 +57,6 @@ try {
     if (version_compare(jeedom::version(), '4.4', '>=')) {
         ajax::error(displayException($e), $e->getCode());
     } else {
-        ajax::error(displayExeption($e), $e->getCode());
+        ajax::error(displayException($e), $e->getCode());
     }
 }

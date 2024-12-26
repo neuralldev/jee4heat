@@ -402,37 +402,34 @@ class jee4heat extends eqLogic
   public function AddAction($_actionName, $_actionTitle, $_template = null, $_generic_type = null, $_visible = 1, $_SubType = 'other', $_min = null, $_max = null, $_step = null)
   {
     log::add(__CLASS__, 'debug', ' add action ' . $_actionName);
-    $createCmd = true;
     $command = $this->getCmd(null, $_actionName);
-    if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
+    if ($createCmd=!is_object($command)) { // check if action is already defined, if yes avoid duplicating
       $command = cmd::byEqLogicIdCmdName($this->getId(), $_actionTitle);
-      if (is_object($command))
-        $createCmd = false;
-    }
-    if ($createCmd) { // only if action is not yet defined
-      if (!is_object($command)) {
-        $command = new jee4heatCmd();
-        $command->setLogicalId($_actionName);
-        $command->setIsVisible($_visible);
-        $command->setName($_actionTitle);
+      $createCmd |= is_object($command);
+      if ($createCmd) { // only if action is not yet defined
+          $command = new jee4heatCmd();
+          $command->setLogicalId($_actionName);
+          $command->setIsVisible($_visible);
+          $command->setName($_actionTitle);
       }
-      if ($_template != null) {
-        $command->setTemplate('dashboard', $_template);
-        $command->setTemplate('mobile', $_template);
-      }
-      $command->setType('action');
-      $command->setSubType($_SubType);
-      $command->setEqLogic_id($this->getId());
-      if ($_generic_type != null)
-        $command->setGeneric_type($_generic_type);
-      if ($_min != null)
-        $command->setConfiguration('minValue', $_min);
-      if ($_max != null)
-        $command->setConfiguration('maxValue', $_max);
-      if ($_step != null)
-        $command->setDisplay('step', $_step);
-      $command->save();
     }
+    if ($_template != null) {
+      $command->setTemplate('dashboard', $_template);
+      $command->setTemplate('mobile', $_template);
+    }
+    $command->setType('action');
+    $command->setSubType($_SubType);
+    $command->setEqLogic_id($this->getId());
+    if ($_generic_type != null)
+      $command->setGeneric_type($_generic_type);
+    if ($_min != null)
+      $command->setConfiguration('minValue', $_min);
+    if ($_max != null)
+      $command->setConfiguration('maxValue', $_max);
+    if ($_step != null)
+      $command->setDisplay('step', $_step);
+    $command->save();
+  
   }
   /*
   this function create an information based on stove registers
@@ -464,83 +461,58 @@ class jee4heat extends eqLogic
     $_danger = null,
     $_invert = 0
   ) {
-
-    // dump args
-    /*  $f = new ReflectionMethod("jee4heat","AddCommand");
-      $funcnames = array();
-      foreach ($f->getParameters() as $param) {
-          $funcnames[] = $param->name;   
-      }
-      $numargs = func_num_args();
-      $arg_list = func_get_args();
-      for ($i = 0; $i < $numargs; $i++) {
-        log::add(__CLASS__, 'debug', "$funcnames[$i]=" . $arg_list[$i]);
-      }  */
-
-
-    $createCmd = true;
-    $Command = $this->getCmd(null, $_logicalId);
-    if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
-      $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
-      if (is_object($Command)) {
-        $createCmd = false;
-        log::add(__CLASS__, 'debug', ' command already exists ');
-      }
+ 
+    log::add(__CLASS__, 'debug', ' add record for ' . $Name);
+ 
+    $command = $this->getCmd(null, $_logicalId);
+    if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
+      $Command = new jee4heatCmd();
+      // $Command->setId(null);
+      $Command->setLogicalId($_logicalId);
+      $Command->setEqLogic_id($this->getId());
+      $Command->setName($Name);
+      $Command->setType($Type);
+      $Command->setSubType($SubType);
     }
-
-    if ($createCmd) {
-      log::add(__CLASS__, 'debug', ' add record for ' . $Name);
-      if (!is_object($Command)) {
-        // basic settings
-        $Command = new jee4heatCmd();
-        // $Command->setId(null);
-        $Command->setLogicalId($_logicalId);
-        $Command->setEqLogic_id($this->getId());
-        $Command->setName($Name);
-        $Command->setType($Type);
-        $Command->setSubType($SubType);
-      }
-
-      $Command->setIsVisible($IsVisible);
-      if ($IsHistorized != null)
-        $Command->setIsHistorized(strval($IsHistorized));
-      if ($Template != null) {
-        $Command->setTemplate('dashboard', $Template);
-        $Command->setTemplate('mobile', $Template);
-      }
-      if ($unite != null && $SubType == 'numeric')
-        $Command->setUnite($unite);
-      if ($icon != 'default')
-        $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
-      if ($forceLineB != 'default')
-        $Command->setdisplay('forceReturnLineBefore', 1);
-      if ($_iconname != 'default')
-        $Command->setdisplay('showIconAndNamedashboard', 1);
-      if ($_noiconname != null)
-        $Command->setdisplay('showNameOndashboard', 0);
-      if ($_calculValueOffset != null)
-        $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
-      if ($_historizeRound != null)
-        $Command->setConfiguration('historizeRound', $_historizeRound);
-      if ($generic_type != null)
-        $Command->setGeneric_type($generic_type);
-      if ($repeatevent == true && $Type == 'info')
-        $Command->setConfiguration('repeatEventManagement', 'never');
-      if ($valuemin != 'default')
-        $Command->setConfiguration('minValue', $valuemin);
-      if ($valuemax != 'default')
-        $Command->setConfiguration('maxValue', $valuemax);
-      if ($_warning != null)
-        $Command->setDisplay("warningif", $_warning);
-      if ($_order != null)
-        $Command->setOrder($_order);
-      if ($_danger != null)
-        $Command->setDisplay("dangerif", $_danger);
-      if ($_invert != null)
-        $Command->setDisplay('invertBinary', $_invert);
-      $Command->save();
-      log::add(__CLASS__, 'debug', 'command saved');
+    
+    $Command->setIsVisible($IsVisible);
+    if ($IsHistorized != null)
+      $Command->setIsHistorized(strval($IsHistorized));
+    if ($Template != null) {
+      $Command->setTemplate('dashboard', $Template);
+      $Command->setTemplate('mobile', $Template);
     }
+    if ($unite != null && $SubType == 'numeric')
+      $Command->setUnite($unite);
+    if ($icon != 'default')
+      $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
+    if ($forceLineB != 'default')
+      $Command->setdisplay('forceReturnLineBefore', 1);
+    if ($_iconname != 'default')
+      $Command->setdisplay('showIconAndNamedashboard', 1);
+    if ($_noiconname != null)
+      $Command->setdisplay('showNameOndashboard', 0);
+    if ($_calculValueOffset != null)
+      $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+    if ($_historizeRound != null)
+      $Command->setConfiguration('historizeRound', $_historizeRound);
+    if ($generic_type != null)
+      $Command->setGeneric_type($generic_type);
+    if ($repeatevent == true && $Type == 'info')
+      $Command->setConfiguration('repeatEventManagement', 'never');
+    if ($valuemin != 'default')
+      $Command->setConfiguration('minValue', $valuemin);
+    if ($valuemax != 'default')
+      $Command->setConfiguration('maxValue', $valuemax);
+    if ($_warning != null)
+      $Command->setDisplay("warningif", $_warning);
+    if ($_order != null)
+      $Command->setOrder($_order);
+    if ($_danger != null)
+      $Command->setDisplay("dangerif", $_danger);
+    if ($_invert != null)
+      $Command->setDisplay('invertBinary', $_invert);
+    $Command->save();
     log::add(__CLASS__, 'debug', ' addcommand end');
     return $Command;
   }
@@ -578,9 +550,7 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', 'command on sent, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30253000000000000"]
     }
-    // $this->toggleVisible('jee4heat_on', 0);
-    //$this->toggleVisible('jee4heat_off', 1);
-    $this->getInformations();
+    if ($stove_return !="ERROR") $this->getInformations();
   }
 
   /**
@@ -602,7 +572,7 @@ class jee4heat extends eqLogic
         $stove_return = $this->getStoveValue($ip, SOCKET_PORT, OFF_CMD);
       }
       log::add(__CLASS__, 'debug', 'command off sent, socket has returned =' . $stove_return);
-      $this->getInformations();
+      if ($stove_return !="ERROR") $this->getInformations();
     }
   }
   /**
@@ -617,13 +587,14 @@ class jee4heat extends eqLogic
     $v = $_options["slider"];
     log::add(__CLASS__, 'debug', 'slider value=' . $v);
     //find setpoint value and store it on stove as it after slider move
-    if ($v > 0)
+    if ($v > 0) {
       $this->updatesetpoint($v, true);
+      // now refresh display  
+      $this->getInformations();
+    }
     else
       log::add(__CLASS__, 'debug', 'cannot find jee4heat_slider command in eq=' . $this->getId());
     log::add(__CLASS__, 'debug', 'set setpoint end');
-    // now refresh display  
-    $this->getInformations();
   }
 
   /**
@@ -648,7 +619,7 @@ class jee4heat extends eqLogic
       }
       log::add(__CLASS__, 'debug', 'unblock called, socket has returned =' . $stove_return);
       // expected return "I" ["SEC","1","I30255000000000000"]
-      $this->getInformations();
+      if ($stove_return !="ERROR") $this->getInformations();
     }
   }
 
@@ -664,8 +635,6 @@ class jee4heat extends eqLogic
     $logicalid = $this->getLogicalId();
     $ip = $this->getConfiguration('ip');
     $_generic_type = 'THERMOSTAT_SETPOINT';
-    $_type = '';
-    $_multiple = '';
 
     $cmds = cmd::byGenericType($_generic_type, null, false);
 
@@ -701,6 +670,7 @@ class jee4heat extends eqLogic
           sleep(3);
           $r = $this->setStoveValue($ip, $register, $v, $prefix);
         }
+        if ($r !="ERROR") $this->getInformations();
         log::add(__CLASS__, 'debug', "setpoint : stove return " . $r);
       }
     }
@@ -714,10 +684,10 @@ class jee4heat extends eqLogic
   public function linksetpoint($_slider)
   {
     $Command = cmd::byEqLogicIdAndLogicalId($this->getId(), $_slider);
-    if ($Command != null) {
-      // search for setpoint
-    } else
+    if (!(is_object($Command))) {
       log::add(__CLASS__, 'debug', 'cannot find jee4heat_slider command in eq=' . $this->getId());
+      return;
+    }
     $id = $this->getId();
     $_generic_type = 'THERMOSTAT_SETPOINT';
     $cmds = cmd::byGenericType($_generic_type, null, false);
@@ -785,6 +755,7 @@ class jee4heat extends eqLogic
           $item['type'],
           $item['subtype'],
           (!isset($item['template']) ? 'tile' : $item['template']),
+          // $item['template'] ?? 'tile',
           (!array_key_exists('unit', $item) ? '' : $item['unit']),
           (!array_key_exists('generictype', $item) ? '' : $item['generictype']),
           (!array_key_exists('visible', $item) ? '1' : $item['visible']),
@@ -848,13 +819,6 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
-  public function preRemove()
-  {
-  }
-
-  public function postRemove()
-  {
-  }
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
