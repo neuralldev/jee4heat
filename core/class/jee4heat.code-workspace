@@ -7,5 +7,7 @@
 			"path": "../../../../core"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"php.version": "7.4"
+	}
 }

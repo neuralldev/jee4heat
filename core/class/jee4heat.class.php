@@ -120,16 +120,16 @@ class jee4heat extends eqLogic
     $return = array();
     foreach (eqLogic::byType('jee4heat') as $jee4heat) {
       foreach ($jee4heat->getCmd() as $cmd) {
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('modele', ''), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __('jee4heat', __FILE__) . ' ' . $jee4heat->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
-          }
-        }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('ip', ''), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __('jee4heat', __FILE__) . ' ' . $jee4heat->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('IP', __FILE__), 'who' => '#' . $cmd_id . '#');
+        foreach (['modele', 'ip'] as $config) {
+          preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration($config, ''), $matches);
+          foreach ($matches[1] as $cmd_id) {
+            if (!cmd::byId($cmd_id)) {
+              $return[] = array(
+                'detail' => __('jee4heat', __FILE__) . ' ' . $jee4heat->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(),
+                'help' => __($config, __FILE__),
+                'who' => '#' . $cmd_id . '#'
+              );
+            }
           }
         }
       }
@@ -146,7 +146,7 @@ class jee4heat extends eqLogic
    * @param mixed $_prefix
    * @return bool|string
    */
-  private function setStoveValue($_ip, $_register, $_value, $_prefix = null)
+  private function setStoveValue($_ip, $_register, $_value, $_prefix = 'J')
   {
     log::add(__CLASS__, 'debug', 'set value ' . $_register . '=' . $_value);
     $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -161,11 +161,9 @@ class jee4heat extends eqLogic
         return ("ERROR");
       }
       // prepare value; this is necessary for register set point to multiply the value because it expects temperature this way (4 digits)
-      $v = $_value * 100;
-      $szV = strval($v);
-      $padded = str_pad($szV, 12, '0', STR_PAD_LEFT);
+      $padded = str_pad(strval($_value * 100), 12, '0', STR_PAD_LEFT);
       // format write command as ["SEC","1","<prefix>RRRRRVVVVVVVVVVVV"]
-      $command = '["SEC","1","' . ($_prefix == null ? 'J' : $_prefix) . $_register . $padded . '"]';
+      $command = '["SEC","1","' .$_prefix . $_register . $padded . '"]';
       log::add(__CLASS__, 'debug', 'command=' . $command);
       if (!socket_send($socket, $command, strlen($command), 0)) {
         log::add(__CLASS__, 'debug', ' error sending = ' . socket_strerror(socket_last_error($socket)));
@@ -335,12 +333,8 @@ class jee4heat extends eqLogic
     if ($nargs <= 2)
       return false; // check for message consistency
 
-    $_state = $this->getConfiguration("state_register");
-    if ($_state == '')
-      $_state = STATE_REGISTER;
-    $_error = $this->getConfiguration("error_register");
-    if ($_error = '')
-      $_error = ERROR_REGISTER;
+    $_state = $this->getConfiguration("state_register") ?: STATE_REGISTER;
+    $_error = $this->getConfiguration("error_register") ?: ERROR_REGISTER;
     for ($i = 2; $i < $nargs + 2; $i++) { // extract all parameters
       $prefix = substr($ret[$i], 0, 1);
       $register = substr($ret[$i], 1, 5); // extract register number from value
@@ -541,16 +535,20 @@ class jee4heat extends eqLogic
     $ip = $this->getConfiguration('ip');
     log::add(__CLASS__, 'debug', "on : ID=" . $id);
     log::add(__CLASS__, 'debug', "on : IP du poele=" . $ip);
+
     if ($ip != '') {
+      $attempts = 0;
+      do {
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
-      for ($i = 0; $i < 3 && ($stove_return == "ERROR"); $i++) {
-        sleep(3);
-        $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+      if ($stove_return != "ERROR") {
+        log::add(__CLASS__, 'debug', 'command on sent, socket has returned =' . $stove_return);
+        $this->getInformations();
+        break;
       }
-      log::add(__CLASS__, 'debug', 'command on sent, socket has returned =' . $stove_return);
-      // expected return "I" ["SEC","1","I30253000000000000"]
+      sleep(3);
+      $attempts++;
+      } while ($attempts < 3);
     }
-    if ($stove_return !="ERROR") $this->getInformations();
   }
 
   /**
@@ -566,13 +564,17 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', "off : IP du poele=" . $ip);
 
     if ($ip != '') {
+      $attempts = 0;
+      do {
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, OFF_CMD);
-      for ($i = 0; $i < 3 && ($stove_return == "ERROR"); $i++) {
-        sleep(3);
-        $stove_return = $this->getStoveValue($ip, SOCKET_PORT, OFF_CMD);
+      if ($stove_return != "ERROR") {
+        log::add(__CLASS__, 'debug', 'command off sent, socket has returned =' . $stove_return);
+        $this->getInformations();
+        break;
       }
-      log::add(__CLASS__, 'debug', 'command off sent, socket has returned =' . $stove_return);
-      if ($stove_return !="ERROR") $this->getInformations();
+      sleep(3);
+      $attempts++;
+      } while ($attempts < 3);
     }
   }
   /**
@@ -613,13 +615,16 @@ class jee4heat extends eqLogic
 
     if ($ip != '') {
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, UNBLOCK_CMD);
-      for ($i = 0; $i < 3 && ($stove_return == "ERROR"); $i++) {
-        sleep(3);
-        $stove_return = $this->getStoveValue($ip, SOCKET_PORT, UNBLOCK_CMD);
+      $attempts = 0;
+      while ($stove_return == "ERROR" && $attempts < 3) {
+      sleep(3);
+      $stove_return = $this->getStoveValue($ip, SOCKET_PORT, UNBLOCK_CMD);
+      $attempts++;
       }
       log::add(__CLASS__, 'debug', 'unblock called, socket has returned =' . $stove_return);
-      // expected return "I" ["SEC","1","I30255000000000000"]
-      if ($stove_return !="ERROR") $this->getInformations();
+      if ($stove_return != "ERROR") {
+      $this->getInformations();
+      }
     }
   }
 
@@ -656,21 +661,20 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', "setpoint : command not found");
     else {
       log::add(__CLASS__, 'debug', "setpoint : command found!");
-      if ($_absolute)
-        $v = (floatval($_value));
-      else
-        $v = (floatval($cmd->execCmd()) + $_value);
+      $v = $_absolute ? floatval($_value) : floatval($cmd->execCmd()) + $_value;
       log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
       if ($v > 0) {
         $register = substr($setpoint, -5);
         $prefix = $cmd->getConfiguration("jee4heat_prefix");
         log::add(__CLASS__, 'debug', "setpoint : trim logical ID" . $setpoint . ' to ' . $register);
-        $r = $this->setStoveValue($ip, $register, $v, $prefix);
-        for ($i = 0; $i < 3 && ($r == "ERROR"); $i++) {
-          sleep(3);
+        for ($i = 0; $i < 3; $i++) {
           $r = $this->setStoveValue($ip, $register, $v, $prefix);
+          if ($r != "ERROR") {
+            $this->getInformations();
+            break;
+          }
+          sleep(3);
         }
-        if ($r !="ERROR") $this->getInformations();
         log::add(__CLASS__, 'debug', "setpoint : stove return " . $r);
       }
     }
