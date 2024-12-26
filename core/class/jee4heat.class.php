@@ -241,39 +241,40 @@ class jee4heat extends eqLogic
    */
   private function getInformationFomStove($_jee4heat)
   {
-    if ($_jee4heat->getIsEnable()) {
-      if (($modele = $_jee4heat->getConfiguration('modele')) != '') {
-        /* lire les infos de l'équipement ici */
-        $ip = $_jee4heat->getConfiguration('ip');
-        $id = $_jee4heat->getId();
-        log::add(__CLASS__, 'debug', "refresh : ID=" . $id);
-        log::add(__CLASS__, 'debug', "refresh : IP du poele=" . $ip);
-        log::add(__CLASS__, 'debug', "refresh : modele=" . $modele);
-        // add iteration to catch random socket errors 
-        $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
-        for ($i = 0; $i < 3 && ($stove_return == "ERROR"); $i++) {
-          sleep(3);
-          $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
-        }
-        // end iteration
-        if ($stove_return != "ERROR") {
-          if ($_jee4heat->readregisters($stove_return)) {// translate registers to jeedom values, return true if successful
-            log::add(__CLASS__, 'debug', 'refresh socket has returned =' . $stove_return);
-            return TRUE;
-          } else {
-            log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable =' . $stove_return);
-            return FALSE;
-          }
-        } else {
-          // connection succeeds but fetching information failed
-          log::add(__CLASS__, 'debug', 'getInformationFomStove: error reading information from stove');
-          return FALSE;
-        }
-      }
+    if (!$_jee4heat->getIsEnable()) {
+      log::add(__CLASS__, 'debug', 'getInformationFomStove: equipment is not enabled in Jeedom');
+      return true;
     }
-    // if jeedom equipment is not eanbled, then do nothing but do not return an error
-    log::add(__CLASS__, 'debug', 'getInformationFomStove: equipment is not enabled in Jeedom');
-    return TRUE;
+
+    $modele = $_jee4heat->getConfiguration('modele');
+    if ($modele == '') {
+      return false;
+    }
+
+    $ip = $_jee4heat->getConfiguration('ip');
+    $id = $_jee4heat->getId();
+    log::add(__CLASS__, 'debug', "refresh : ID=" . $id);
+    log::add(__CLASS__, 'debug', "refresh : IP du poele=" . $ip);
+    log::add(__CLASS__, 'debug', "refresh : modele=" . $modele);
+
+    $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+    for ($i = 0; $i < 3 && $stove_return == "ERROR"; $i++) {
+      sleep(3);
+      $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+    }
+
+    if ($stove_return == "ERROR") {
+      log::add(__CLASS__, 'debug', 'getInformationFomStove: error reading information from stove');
+      return false;
+    }
+
+    if ($_jee4heat->readregisters($stove_return)) {
+      log::add(__CLASS__, 'debug', 'refresh socket has returned =' . $stove_return);
+      return true;
+    } else {
+      log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable =' . $stove_return);
+      return false;
+    }
   }
 
   /**
