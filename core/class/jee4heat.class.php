@@ -706,8 +706,6 @@ class jee4heat extends eqLogic
     $cmds = cmd::byGenericType($_generic_type, null, false);
     $n = 0;
     foreach ($cmds as $cmd) {
-      //$setpoint = $cmd->getLogicalId();
-      //$cmdID = $cmd->getId();
       $n++;
       if ($cmd->getEqLogic_id()== $id)
         break;
@@ -723,12 +721,15 @@ class jee4heat extends eqLogic
   }
   public function refresh()
   {
+    log::add(__CLASS__, 'debug', 'refresh triggers cron');
+    self::cron();
+    /*
     foreach ($this->getCmd() as $cmd) {
       $s = print_r($cmd, 1);
-      log::add(__CLASS__, 'debug', 'refresh  cmd: ' . $s);
       $cmd->execute();
-      // check for error
+      // force cron();
     }
+    */
   }
 
   public function postSave()
@@ -816,8 +817,6 @@ class jee4heat extends eqLogic
   public function preUpdate()
   {
     log::add(__CLASS__, 'debug', 'preupdate start');
-    //    if (!$this->getIsEnable())
-//      throw new Exception(__((__("L'équipement est désactivé, impossible de régler ", __FILE__)) . $this->getName(), __FILE__));
 
     if ($this->getConfiguration('ip') == '') {
       throw new Exception(__((__('Le champ IP ne peut être vide pour l\'équipement ', __FILE__)) . $this->getName(), __FILE__));
@@ -825,12 +824,6 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'preupdate stop');
   }
 
-  public function postUpdate()
-  {
-    log::add(__CLASS__, 'debug', 'postupdate start');
-    //self::cron($this->getId());
-    log::add(__CLASS__, 'debug', 'postupdate stop');
-  }
 
   public function getInformations()
   {
@@ -932,7 +925,7 @@ class jee4heatCmd extends cmd
       case "jee4heat_unblock":
         $this->getEqLogic()->unblock();
       default:
-        log::add(__CLASS__, 'debug', 'action to execute not found');
+        log::add(__CLASS__, 'warning', 'action to execute not found');
     }
     return;
   }
