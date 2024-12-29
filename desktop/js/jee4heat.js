@@ -20,64 +20,6 @@
 $("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 /*
-* Fonction Spécifique Plugin
-*/
-$('#div_pageContainer').off('click','.listCmdActionOther').on('click','.listCmdActionOther', function () {
-	var el = $(this);
-	jeedom.cmd.getSelectModal({cmd: {type: 'info',subType : 'numeric'}}, function (result) {
-	  el.closest('.input-group').find('input').value(result.human);
-	});
-});
-
-$('#bt_autoDEL_eq').on('click', function () {
-	var dialog_title = '{{Recréer les commandes}}';
-	var dialog_message = '<form class="form-horizontal onsubmit="return false;">';
-	dialog_title = '{{Recréer les commandes}}';
-	dialog_message += '<label class="lbl lbl-warning" for="name">{{Attention, cela va supprimer les commandes existantes.}}</label> ';
-	dialog_message += '</form>';
-	domutils.dialog({
-		title: dialog_title,
-		message: dialog_message,
-		buttons: {
-			"{{Annuler}}": {
-				className: "btn-danger",
-				callback: function () {}
-			},
-			success: {
-				label: "{{Démarrer}}",
-				className: "btn-success",
-				callback: function () {
-					domutils.confirm('{{Etes-vous sûr de vouloir récréer toutes les commandes ? Cela va supprimer les commandes existantes}}', function (result) {
-						if (result) {
-							domutils.ajax({
-								type: "POST",
-								url: "plugins/jee4heat/core/ajax/jee4heat.ajax.php",
-								data: {
-									action: "autoDEL_eq",
-									id: $('.eqLogicAttr[data-l1key=id]').value(),
-								},
-								dataType: 'json',
-								error: function (request, status, error) {
-									handleAjaxError(request, status, error);
-								},
-								success: function (data) {
-									$('.eqLogicDisplayCard[data-eqLogic_id=' + $('.eqLogicAttr[data-l1key=id]').value() + ']').click();
-									$('#div_alert').showAlert({
-										message: '{{Opération réalisée avec succès}}',
-										level: 'success'
-									});
-								}
-							});
-						}
-					});
-				}
-			},
-		}
-	});
-});
-
-
-/*
 * Fonction permettant l'affichage des commandes dans l'équipement
 */
 function addCmdToTable(_cmd) {

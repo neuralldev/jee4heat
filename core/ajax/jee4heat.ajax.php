@@ -39,18 +39,6 @@ try {
         ajax::success($return);
     }
 
-    if (init('action') == 'autoDEL_eq') {
-        $eqLogic = jee4heat::byId(init('id'));
-        if (!is_object($eqLogic)) {
-            throw new Exception(__('jee4heat eqLogic non trouvé : ', __FILE__) . init('id'));
-        }
-        foreach ($eqLogic->getCmd() as $cmd) {
-            $cmd->remove();
-            $cmd->save();
-        }
-        ajax::success();
-    }
-
     throw new Exception(__('{{Aucune méthode correspondante à}} : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
