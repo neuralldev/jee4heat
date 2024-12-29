@@ -23,7 +23,7 @@ try {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
     log::add('jee4heat', 'debug', ' action request =  '.init('action'));
-
+/*
     if (init('action') == 'getStove') {
         $stove = jee4heat::byId(init('id'));
         if (!is_object($stove)) {
@@ -38,6 +38,7 @@ try {
         }
         ajax::success($return);
     }
+*/
 
     throw new Exception(__('{{Aucune méthode correspondante à}} : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */

@@ -250,11 +250,11 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', "refresh : IP du poele=" . $ip);
     log::add(__CLASS__, 'debug', "refresh : modele=" . $modele);
 
-    $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+    $stove_return = $this->getStoveValue($ip, SOCKET_PORT, DATA_QUERY);
     $attempts = 0;
     while ($attempts < 3 && $stove_return == "ERROR") {
       sleep(3);
-      $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
+      $stove_return = $this->getStoveValue($ip, SOCKET_PORT, DATA_QUERY);
       $attempts++;
     }
 
