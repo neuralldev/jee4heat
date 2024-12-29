@@ -753,14 +753,16 @@ class jee4heat extends eqLogic
     }
 
     $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat', '', 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
+    $Equipement->AddCommand(__('Mode', __FILE__), 'jee4heat_mode', "info", "string", 'heat', '', 'THERMOSTAT_MODE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
     $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'jee4heat::mylocked', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 1);
     $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
     $Equipement->setConfiguration('jee4heat_stovestate', $device['configuration']['state']);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
     /* create on, off, unblock and refresh actions */
-    $Equipement->AddAction("jee4heat_on", "ON");
-    $Equipement->AddAction("jee4heat_off", "OFF");
+    $Equipement->AddAction("jee4heat_on", "ON","default", "THERMOSTAT_MODE", 1);
+    $Equipement->AddAction("jee4heat_auto", "Aucun","default", "THERMOSTAT_MODE", 1);
+    $Equipement->AddAction("jee4heat_off", "OFF","default", "THERMOSTAT_MODE", 1);
     $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), "jee4heat::mylock");
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
     $Equipement->AddAction("jee4heat_stepup", "+", null, null, 0);
