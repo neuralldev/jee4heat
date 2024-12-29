@@ -521,6 +521,7 @@ class jee4heat extends eqLogic
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, ON_CMD);
       if ($stove_return != "ERROR") {
         log::add(__CLASS__, 'debug', 'command on sent, socket has returned =' . $stove_return);
+        $this->checkAndUpdateCmd('jee4heat_mode', 'heat');
         $this->getInformations();
         break;
       }
@@ -548,6 +549,7 @@ class jee4heat extends eqLogic
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, OFF_CMD);
       if ($stove_return != "ERROR") {
         log::add(__CLASS__, 'debug', 'command off sent, socket has returned =' . $stove_return);
+        $this->checkAndUpdateCmd('jee4heat_mode', 'off');
         $this->getInformations();
         break;
       }
@@ -870,7 +872,8 @@ class jee4heatCmd extends cmd
         $this->getEqLogic()->getInformations();
         break;
       case 'jee4heat_on':
-        $this->getEqLogic()->state_on();
+      case 'jee4heat_auto':
+          $this->getEqLogic()->state_on();
         break;
       case 'jee4heat_off':
         $this->getEqLogic()->state_off();
