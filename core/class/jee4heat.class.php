@@ -326,8 +326,10 @@ class jee4heat extends eqLogic
         if ($register == $_state) { // regular stove state feedback storage
           // update state information according to value
           $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
-          if (is_object($cmdState))
+          if (is_object($cmdState)) {
             $cmdState->event($registervalue != 0);
+            $this->checkAndUpdateCmd('jee4heat_mode', $registervalue == 0 ? 'off' : 'heat');
+          }
           $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
           if (is_object($cmdMessage))
             $cmdMessage->event(MODE_NAMES[$registervalue]);
