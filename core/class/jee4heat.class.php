@@ -764,9 +764,9 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
     /* create on, off, unblock and refresh actions */
-    $Equipement->AddAction("jee4heat_on", "ON","default", "THERMOSTAT_MODE", 1);
+    $Equipement->AddAction("jee4heat_on", "heat","default", "THERMOSTAT_MODE", 1);
     $Equipement->AddAction("jee4heat_auto", "Auto","default", "THERMOSTAT_MODE", 0);
-    $Equipement->AddAction("jee4heat_off", "OFF","default", "THERMOSTAT_MODE", 1);
+    $Equipement->AddAction("jee4heat_off", "off","default", "THERMOSTAT_MODE", 1);
     $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), "jee4heat::mylock");
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
     $Equipement->AddAction("jee4heat_stepup", "+", null, null, 0);
