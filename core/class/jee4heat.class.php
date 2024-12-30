@@ -761,7 +761,6 @@ class jee4heat extends eqLogic
     $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'jee4heat::mylocked', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 1);
     $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
     $Equipement->setConfiguration('jee4heat_stovestate', $device['configuration']['state']);
-    log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
     /* create on, off, unblock and refresh actions */
     $Equipement->AddAction("jee4heat_on", "heat","default", "THERMOSTAT_MODE", 1);
