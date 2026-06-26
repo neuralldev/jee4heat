@@ -320,8 +320,10 @@ class jee4heat extends eqLogic
     if ($nargs <= 2)
       return false; // check for message consistency
 
-    $_state = $this->getConfiguration("state_register") ?: STATE_REGISTER;
-    $_error = $this->getConfiguration("error_register") ?: ERROR_REGISTER;
+    // registers are read from the model JSON (single source of truth)
+    $cfg = self::getDeviceDefinition($this->getConfiguration('modele'))['configuration'] ?? array();
+    $_state = $cfg['state'] ?? STATE_REGISTER;
+    $_error = $cfg['error'] ?? ERROR_REGISTER;
     for ($i = 2; $i < $nargs + 2; $i++) { // extract all parameters
       $prefix = substr($ret[$i], 0, 1);
       $register = substr($ret[$i], 1, 5); // extract register number from value
@@ -705,6 +707,35 @@ class jee4heat extends eqLogic
     self::cron();
   }
 
+  /**
+   * Load and cache the decoded device definition for a given model.
+   * The model JSON (config/devices/<model>.json) is the single source of
+   * truth for state/error registers and command list, so nothing is
+   * denormalized into the eqLogic configuration.
+   * @param string $_modele
+   * @return array decoded device definition, or empty array if missing/invalid
+   */
+  private static function getDeviceDefinition($_modele)
+  {
+    static $cache = array();
+    if ($_modele === null || $_modele === '') {
+      return array();
+    }
+    if (array_key_exists($_modele, $cache)) {
+      return $cache[$_modele];
+    }
+    $file = __DIR__ . DIRECTORY_DEVICELIST . $_modele . '.json';
+    if (!is_file($file)) {
+      return $cache[$_modele] = array();
+    }
+    $content = file_get_contents($file);
+    if (!is_json($content)) {
+      return $cache[$_modele] = array();
+    }
+    $device = json_decode($content, true);
+    return $cache[$_modele] = (is_array($device) ? $device : array());
+  }
+
   public function postSave()
   {
     log::add(__CLASS__, 'debug', 'postsave start');
@@ -713,34 +744,21 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'info', 'Sauvegarde de l\'équipement [postSave()] : ' . $_eqName);
     $order = 1;
 
-    if (!is_file(__DIR__ . DIRECTORY_DEVICELIST . $this->getConfiguration('modele') . '.json')) {
-      log::add(__CLASS__, 'debug', 'postsave no file found for ' . $_eqName . ', then do nothing');
+    // the model JSON is the single source of truth: nothing is denormalized
+    // into the eqLogic configuration here (registers are read from the JSON
+    // at runtime by readregisters)
+    $device = self::getDeviceDefinition($this->getConfiguration('modele'));
+    if (empty($device) || !isset($device['commands'])) {
+      log::add(__CLASS__, 'debug', 'postsave no usable device definition for ' . $_eqName . ', then do nothing');
       return;
     }
-    $content = file_get_contents(__DIR__ . DIRECTORY_DEVICELIST . $this->getConfiguration('modele') . '.json');
-    if (!is_json($content)) {
-      log::add(__CLASS__, 'debug', 'postsave content is not json ' . $this->getConfiguration('modele'));
-      return;
-    }
-    $device = json_decode($content, true);
-    if (!is_array($device) || !isset($device['commands'])) {
-      log::add(__CLASS__, 'debug', 'postsave array cannot be decoded ');
-      return true;
-    }
-    $Equipement = eqlogic::byId($this->getId());
-    // guard against a device JSON without a 'configuration' block (hand-edited files)
-    $deviceConfig = (isset($device['configuration']) && is_array($device['configuration'])) ? $device['configuration'] : array();
-    $stateRegister = $deviceConfig['state'] ?? STATE_REGISTER;
-    $errorRegister = $deviceConfig['error'] ?? ERROR_REGISTER;
-    $Equipement->setConfiguration('state_register', $stateRegister);
-    $Equipement->setConfiguration('error_register', $errorRegister);
     $order = 0;
     log::add(__CLASS__, 'debug', 'postsave add commands on ID ' . $this->getId());
     foreach ($device['commands'] as $item) {
       log::add(__CLASS__, 'debug', 'postsave found commands array name=' . json_encode($item));
       // item name must match to json structure table items names, if not it takes null
       if (!empty($item['name']) && !empty($item['logicalId'])) {
-        $Equipement->AddCommand(
+        $this->AddCommand(
           $item['name'],
           'jee4heat_' . $item['logicalId'],
           $item['type'] ?? 'info',
@@ -769,23 +787,22 @@ class jee4heat extends eqLogic
       }
     }
 
-    $Equipement->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat', '', 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
-    $Equipement->AddCommand(__('Mode', __FILE__), 'jee4heat_mode', "info", "string", 'heat', '', 'THERMOSTAT_MODE', 0, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
-    $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'jee4heat::mylocked', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 1);
-    $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
-    $Equipement->setConfiguration('jee4heat_stovestate', $stateRegister);
+    $this->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat', '', 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
+    $this->AddCommand(__('Mode', __FILE__), 'jee4heat_mode', "info", "string", 'heat', '', 'THERMOSTAT_MODE', 0, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
+    $this->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'jee4heat::mylocked', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 1);
+    $this->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
 
     /* create on, off, unblock and refresh actions */
-    $Equipement->AddAction("jee4heat_on", "heat","default", "THERMOSTAT_MODE", 1);
-    $Equipement->AddAction("jee4heat_auto", "Auto","default", "THERMOSTAT_MODE", 0);
-    $Equipement->AddAction("jee4heat_off", "off","default", "THERMOSTAT_MODE", 1);
-    $Equipement->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), "jee4heat::mylock");
-    $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
-    $Equipement->AddAction("jee4heat_stepup", "+", null, null, 0);
-    $Equipement->AddAction("jee4heat_stepdown", "-", null, null, 0);
-    $Equipement->AddAction("jee4heat_slider", "Régler consigne", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 10, 25, 0.5);
-    $Equipement->linksetpoint("jee4heat_slider");
-    //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
+    $this->AddAction("jee4heat_on", "heat","default", "THERMOSTAT_MODE", 1);
+    $this->AddAction("jee4heat_auto", "Auto","default", "THERMOSTAT_MODE", 0);
+    $this->AddAction("jee4heat_off", "off","default", "THERMOSTAT_MODE", 1);
+    $this->AddAction("jee4heat_unblock", __('Débloquer', __FILE__), "jee4heat::mylock");
+    $this->AddAction("refresh", __('Rafraichir', __FILE__));
+    $this->AddAction("jee4heat_stepup", "+", null, null, 0);
+    $this->AddAction("jee4heat_stepdown", "-", null, null, 0);
+    $this->AddAction("jee4heat_slider", "Régler consigne", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 10, 25, 0.5);
+    $this->linksetpoint("jee4heat_slider");
+    //$this->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
     // now refresh
