@@ -236,9 +236,10 @@ class jee4heat extends eqLogic
   /**
    * Slecture des informations pour l'équipement donné en paramètre
    * @param jee4heat $_jee4heat
+   * @param bool $_retry whether to retry on error (false = single best-effort attempt)
    * @return bool
    */
-  private function getInformationFomStove($_jee4heat)
+  private function getInformationFomStove($_jee4heat, $_retry = true)
   {
     if (!$_jee4heat->getIsEnable()) {
       log::add(__CLASS__, 'debug', 'getInformationFomStove: equipment is not enabled in Jeedom');
@@ -258,7 +259,8 @@ class jee4heat extends eqLogic
 
     $stove_return = $this->getStoveValue($ip, SOCKET_PORT, DATA_QUERY);
     $attempts = 0;
-    while ($attempts < 3 && $stove_return == "ERROR") {
+    // best-effort callers (e.g. postSave) skip retries; the cron will catch up later
+    while ($_retry && $attempts < 3 && $stove_return == "ERROR") {
       sleep(3);
       $stove_return = $this->getStoveValue($ip, SOCKET_PORT, DATA_QUERY);
       $attempts++;
@@ -805,8 +807,9 @@ class jee4heat extends eqLogic
     //$this->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
-    // now refresh
-    $this->getInformations();
+    // best-effort refresh so saving never blocks on an unreachable stove;
+    // the cron will retry within a minute and the next read refreshes the display
+    $this->getInformations(false);
   }
 
   public function preUpdate()
@@ -820,10 +823,10 @@ class jee4heat extends eqLogic
   }
 
 
-  public function getInformations()
+  public function getInformations($_retry = true)
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-    $this->getInformationFomStove($this);
+    $this->getInformationFomStove($this, $_retry);
     log::add(__CLASS__, 'debug', 'getinformation stop');
   }
 
