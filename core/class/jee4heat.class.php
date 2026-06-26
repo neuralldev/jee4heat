@@ -310,8 +310,8 @@ class jee4heat extends eqLogic
     //  log::add(__CLASS__, 'debug', 'unpack $ret ='.$ret[0]);
     if (($ret[0] != "SEL") && ($ret[0] != "SEC"))
       return false; // check for message consistency
-    $nargs = intval($ret[1]);
-    log::add(__CLASS__, 'debug', 'number of registers returned =' . $ret[1]);
+    $nargs = intval($ret[1] ?? 0);
+    log::add(__CLASS__, 'debug', 'number of registers returned =' . ($ret[1] ?? ''));
     if ($ret[0] == "SEC") {
       log::add(__CLASS__, 'debug', 'SEC status returned');
       // no register storage required  
@@ -630,20 +630,20 @@ class jee4heat extends eqLogic
     $_generic_type = 'THERMOSTAT_SETPOINT';
 
     $cmds = cmd::byGenericType($_generic_type, null, false);
-    $n = 0;
+    $found = false;
     foreach ($cmds as $cmd) {
-      $name = $cmd->getName();
+      // only consider the setpoint command belonging to THIS equipment,
+      // otherwise we would target another stove when this one has no setpoint
+      if ($cmd->getEqLogic_id() != $id)
+        continue;
       $setpoint = $cmd->getLogicalId();
-      $eqID = $cmd->getEqLogic_id();
-      $ip = $this->getConfiguration('ip');
-      log::add(__CLASS__, 'debug', "setpoint : name found=" . $name);
+      log::add(__CLASS__, 'debug', "setpoint : name found=" . $cmd->getName());
       log::add(__CLASS__, 'debug', "setpoint : logicalID found=" . $setpoint);
-      log::add(__CLASS__, 'debug', "setpoint : parent ID found=" . $eqID);
-      $n++;
-      if ($eqID == $id)
-        break;
+      log::add(__CLASS__, 'debug', "setpoint : parent ID found=" . $cmd->getEqLogic_id());
+      $found = true;
+      break;
     }
-    if ($n == 0)
+    if (!$found)
       log::add(__CLASS__, 'debug', "setpoint : command not found");
     else {
       log::add(__CLASS__, 'debug', "setpoint : command found!");
@@ -681,13 +681,15 @@ class jee4heat extends eqLogic
     $id = $this->getId();
     $_generic_type = 'THERMOSTAT_SETPOINT';
     $cmds = cmd::byGenericType($_generic_type, null, false);
-    $n = 0;
+    $found = false;
     foreach ($cmds as $cmd) {
-      $n++;
-      if ($cmd->getEqLogic_id()== $id)
+      // only link the setpoint command belonging to THIS equipment
+      if ($cmd->getEqLogic_id() == $id) {
+        $found = true;
         break;
+      }
     }
-    if ($n == 0)
+    if (!$found)
       log::add(__CLASS__, 'debug', "setpoint : command not found");
     else {
       log::add(__CLASS__, 'debug', "setpoint : command found!");
@@ -819,7 +821,7 @@ class jee4heat extends eqLogic
       'test' => array(
         array('operation' => '#value# == 0', 'state_light' => 'Arrêt', 'state_dark' => 'Arrêt'),
         array('operation' => '#value# >= 1 && #value# <= 9', 'state_light' => '#value#', 'state_dark' => '#value#'),
-        array('operation' => '#value# == 10 && #value# <= 5', 'state_light' => 'extinction', 'state_dark' => 'extinction'),
+        array('operation' => '#value# == 10', 'state_light' => 'extinction', 'state_dark' => 'extinction'),
         array('operation' => '#value# == 255', 'state_light' => 'Allumage', 'state_dark' => 'Allumage')
       )
     );
