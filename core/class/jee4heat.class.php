@@ -653,6 +653,7 @@ class jee4heat extends eqLogic
         $register = substr($setpoint, -5);
         $prefix = $cmd->getConfiguration("jee4heat_prefix");
         log::add(__CLASS__, 'debug', "setpoint : trim logical ID" . $setpoint . ' to ' . $register);
+        $r="";
         for ($i = 0; $i < 3; $i++) {
           $r = $this->setStoveValue($ip, $register, $v, $prefix);
           if ($r != "ERROR") {
@@ -727,19 +728,23 @@ class jee4heat extends eqLogic
       return true;
     }
     $Equipement = eqlogic::byId($this->getId());
-    $Equipement->setConfiguration('state_register', $device['configuration']['state']);
-    $Equipement->setConfiguration('error_register', $device['configuration']['error']);
+    // guard against a device JSON without a 'configuration' block (hand-edited files)
+    $deviceConfig = (isset($device['configuration']) && is_array($device['configuration'])) ? $device['configuration'] : array();
+    $stateRegister = $deviceConfig['state'] ?? STATE_REGISTER;
+    $errorRegister = $deviceConfig['error'] ?? ERROR_REGISTER;
+    $Equipement->setConfiguration('state_register', $stateRegister);
+    $Equipement->setConfiguration('error_register', $errorRegister);
     $order = 0;
     log::add(__CLASS__, 'debug', 'postsave add commands on ID ' . $this->getId());
     foreach ($device['commands'] as $item) {
       log::add(__CLASS__, 'debug', 'postsave found commands array name=' . json_encode($item));
       // item name must match to json structure table items names, if not it takes null
-      if ($item['name'] != '' && $item['logicalId'] != '') {
+      if (!empty($item['name']) && !empty($item['logicalId'])) {
         $Equipement->AddCommand(
           $item['name'],
           'jee4heat_' . $item['logicalId'],
-          $item['type'],
-          $item['subtype'],
+          $item['type'] ?? 'info',
+          $item['subtype'] ?? 'string',
           (!isset($item['template']) ? 'tile' : $item['template']),
           // $item['template'] ?? 'tile',
           (!array_key_exists('unit', $item) ? '' : $item['unit']),
@@ -768,7 +773,7 @@ class jee4heat extends eqLogic
     $Equipement->AddCommand(__('Mode', __FILE__), 'jee4heat_mode', "info", "string", 'heat', '', 'THERMOSTAT_MODE', 0, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
     $Equipement->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'jee4heat::mylocked', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 1);
     $Equipement->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
-    $Equipement->setConfiguration('jee4heat_stovestate', $device['configuration']['state']);
+    $Equipement->setConfiguration('jee4heat_stovestate', $stateRegister);
 
     /* create on, off, unblock and refresh actions */
     $Equipement->AddAction("jee4heat_on", "heat","default", "THERMOSTAT_MODE", 1);
