@@ -155,6 +155,9 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'error', 'setstovevalue: error opening socket setting stove value');
       return "ERROR";
     }
+    // avoid the socket (and therefore the cron) hanging forever if the stove is unreachable
+    socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 5, 'usec' => 0]);
+    socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, ['sec' => 5, 'usec' => 0]);
     if (!socket_connect($socket, $_ip, SOCKET_PORT)) {
       log::add(__CLASS__, 'debug', 'error connecting socket on ' . $_ip);
       log::add(__CLASS__, 'error', ' error = ' . socket_strerror(socket_last_error($socket)));
@@ -206,6 +209,9 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'error', 'error opening socket');
       return "ERROR";
     }
+    // avoid the socket (and therefore the cron) hanging forever if the stove is unreachable
+    socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 5, 'usec' => 0]);
+    socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, ['sec' => 5, 'usec' => 0]);
     if (!socket_connect($socket, $_ip, $_port)) {
       log::add(__CLASS__, 'error', 'getstovevalue: error connecting socket on ' . $_ip);
       log::add(__CLASS__, 'debug', ' error = ' . socket_strerror(socket_last_error($socket)));
@@ -332,7 +338,7 @@ class jee4heat extends eqLogic
           }
           $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
           if (is_object($cmdMessage))
-            $cmdMessage->event(MODE_NAMES[$registervalue]);
+            $cmdMessage->event(MODE_NAMES[$registervalue] ?? '-');
           // if state == 9, the stove is in blocked mode, so we set the binary indicator to TRUE else FALSE
           $cmdBlocked = $this->getCmd(null, 'jee4heat_stoveblocked');
           if (is_object($cmdBlocked))
@@ -346,8 +352,8 @@ class jee4heat extends eqLogic
         if (($register == $_error) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
           // update error information according to value
           $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-          if (!is_object($cmdMessage))
-            $cmdMessage->event("Erreur : " . ERROR_NAMES[$registervalue]);
+          if (is_object($cmdMessage))
+            $cmdMessage->event("Erreur : " . (ERROR_NAMES[$registervalue] ?? ('code ' . $registervalue)));
         }
         $Command->setConfiguration('jee4heat_prefix', $prefix);
         $Command->save();
@@ -378,10 +384,9 @@ class jee4heat extends eqLogic
   {
     log::add(__CLASS__, 'debug', ' add action ' . $_actionName);
     $command = $this->getCmd(null, $_actionName);
-    if ($createCmd=!is_object($command)) { // check if action is already defined, if yes avoid duplicating
+    if (!is_object($command)) { // check if action is already defined by logicalId, if yes avoid duplicating
       $command = cmd::byEqLogicIdCmdName($this->getId(), $_actionTitle);
-      $createCmd |= is_object($command);
-      if ($createCmd) { // only if action is not yet defined
+      if (!is_object($command)) { // also avoid duplicating an action with the same name
           $command = new jee4heatCmd();
           $command->setLogicalId($_actionName);
           $command->setIsVisible($_visible);
@@ -440,6 +445,7 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', ' add record for ' . $Name);
  
     $command = $this->getCmd(null, $_logicalId);
+    $Command = $command; // default return value when the command already exists
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
       $Command = new jee4heatCmd();
       // $Command->setId(null);
@@ -569,7 +575,7 @@ class jee4heat extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');
     log::add(__CLASS__, 'debug', 'options from execute=' . json_encode($_options));
-    $v = $_options["slider"];
+    $v = is_array($_options) && isset($_options["slider"]) ? $_options["slider"] : 0;
     log::add(__CLASS__, 'debug', 'slider value=' . $v);
     //find setpoint value and store it on stove as it after slider move
     if ($v > 0) {
@@ -771,7 +777,7 @@ class jee4heat extends eqLogic
     $Equipement->AddAction("jee4heat_stepup", "+", null, null, 0);
     $Equipement->AddAction("jee4heat_stepdown", "-", null, null, 0);
     $Equipement->AddAction("jee4heat_slider", "Régler consigne", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 10, 25, 0.5);
-    $Equipement->linksetpoint("jee4heatslider");
+    $Equipement->linksetpoint("jee4heat_slider");
     //$Equipement->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
 
     log::add(__CLASS__, 'debug', 'postsave stop');
@@ -885,6 +891,7 @@ class jee4heatCmd extends cmd
         break;
       case "jee4heat_unblock":
         $this->getEqLogic()->unblock();
+        break;
       default:
         log::add(__CLASS__, 'warning', 'action to execute not found');
     }

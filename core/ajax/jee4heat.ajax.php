@@ -43,9 +43,5 @@ try {
     throw new Exception(__('{{Aucune méthode correspondante à}} : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
-    if (version_compare(jeedom::version(), '4.4', '>=')) {
-        ajax::error(displayException($e), $e->getCode());
-    } else {
-        ajax::error(displayException($e), $e->getCode());
-    }
+    ajax::error(displayException($e), $e->getCode());
 }
