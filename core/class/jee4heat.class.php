@@ -327,9 +327,14 @@ class jee4heat extends eqLogic
     $_state = $cfg['state'] ?? STATE_REGISTER;
     $_error = $cfg['error'] ?? ERROR_REGISTER;
     for ($i = 2; $i < $nargs + 2; $i++) { // extract all parameters
-      $prefix = substr($ret[$i], 0, 1);
-      $register = substr($ret[$i], 1, 5); // extract register number from value
-      $registervalue = intval(substr($ret[$i], -12)); // convert string to int to remove leading 'O'
+      $item = $ret[$i] ?? ''; // guard against a truncated/short buffer (partial TCP read)
+      if ($item === '') {
+        log::add(__CLASS__, 'debug', "readregisters: missing item at index $i, message likely truncated");
+        continue;
+      }
+      $prefix = substr($item, 0, 1);
+      $register = substr($item, 1, 5); // extract register number from value
+      $registervalue = intval(substr($item, -12)); // convert string to int to remove leading 'O'
       log::add(__CLASS__, 'debug', "cron : register (prefix $prefix) $register=$registervalue");
       $Command = $this->getCmd(null, 'jee4heat_' . $register); // now set value of jeedom object
       if (is_object($Command)) {
