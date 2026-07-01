@@ -22,11 +22,9 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 const DIRECTORY_DEVICELIST = '/../config/devices/';
 const STATE_REGISTER = 30001;
 const ERROR_REGISTER = 30002;
-const COMMANDS = [30253, 30254];
 const BUFFER_SIZE = 2048;
 const SOCKET_PORT = 80;
 const DATA_QUERY = '["SEL","0"]';
-const ERROR_QUERY = '["SEC","1","I30002000000000000"]';
 const UNBLOCK_CMD = '["SEC","1","J30255000000000001"]'; // Unblock
 const OFF_CMD = '["SEC","1","J30254000000000001"]'; // OFF
 const ON_CMD = '["SEC","1","J30253000000000001"]'; // O
@@ -289,9 +287,11 @@ class jee4heat extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'cron start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
-      if ($jee4heat->getIsEnable()) 
-        $jee4heat->getInformationFomStove($jee4heat);
-      else 
+      if ($jee4heat->getIsEnable())
+        // best-effort: an unreachable stove must not delay the read of
+        // other equipments; the next cron tick retries anyway
+        $jee4heat->getInformationFomStove($jee4heat, false);
+      else
         log::add(__CLASS__, 'debug', 'equipment is disabled, cron skipped');
     }
     log::add(__CLASS__, 'debug', 'cron end');
@@ -505,19 +505,6 @@ class jee4heat extends eqLogic
     
       log::add(__CLASS__, 'debug', ' addcommand end');
     return $Command;
-  }
-
-  private function toggleVisible($_logicalId, $state)
-  {
-    $Command = $this->getCmd(null, $_logicalId);
-    if (is_object($Command)) {
-      log::add(__CLASS__, 'debug', 'toggle visible state of ' . $_logicalId . " to " . $state);
-      // basic settings
-      $Command->setIsVisible($state);
-      $Command->save();
-      return true;
-    }
-    return false;
   }
 
   /**
