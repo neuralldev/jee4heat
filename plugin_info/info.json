@@ -1,7 +1,7 @@
 {
 	"id" : "jee4heat",
 	"name" : "Jee4Heat",
-	"description" : "Ce plugin permet de se connecter via le cloud TiEmme Elettronica",
+	"description" : "Ce plugin permet de piloter en réseau local les poêles à granulés équipés d'un module 4Heat / TiEmme Elettronica (Godin Artemis, générique)",
 	"licence" : "AGPL",
 	"author" : "neuralldev",
 	"require" : "4.5",

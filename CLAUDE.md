@@ -32,6 +32,10 @@ Target: Jeedom 4.5 and 4.6 (PHP 8.2+).
   on port 80 (`SOCKET_PORT`), NOT HTTP. PHP `socket_*` API is used
   directly. Sockets now set `SO_RCVTIMEO`/`SO_SNDTIMEO` (5 s) so an
   unreachable stove can't hang the cron.
+  All exchanges go through `getStoveValue()`: per-stove `flock` (cron vs
+  user action), and `recv` loops until the closing `]` (replies can span
+  several TCP segments). `readregisters()` drops any item that isn't
+  exactly prefix + 5 + 12 chars.
 - Message format: `["SEL","<n items>","ITEM1",...,"ITEMn"]`.
   Each register item is `<prefix><RRRRR><VVVVVVVVVVVV>` — 1 prefix char
   (e.g. `J`), 5-digit register number, 12-digit value (leading zeros).
@@ -59,4 +63,4 @@ Target: Jeedom 4.5 and 4.6 (PHP 8.2+).
   edit the JSON; `postSave` reads it and creates the commands.
 - `desktop/php/jee4heat.php` + `desktop/js/jee4heat.js` — config UI.
 - `core/ajax/jee4heat.ajax.php` — ajax endpoint (currently no live action).
-- `plugin_info/info.json` — `require: 4.4` (min version; covers 4.5/4.6).
+- `plugin_info/info.json` — `require: 4.5` (min version; covers 4.5/4.6).
