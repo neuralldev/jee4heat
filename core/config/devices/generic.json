@@ -10,7 +10,7 @@
   },
   "commands": [
     {"name": "Heating power", "type": "info", "subtype": "string",  "logicalId": "20801"},
-    {"name": "Service Time", "type": "info", "subtype": "numeric",  "logicalId": "20118", "unit": "h"},
+    {"name": "Service Time", "type": "info", "subtype": "numeric",  "logicalId": "20118", "widget": "service", "unit": "h"},
     {"name": "Combustion", "type": "info", "subtype": "numeric",  "logicalId": "20364"},
     {"name": "Room temperature set", "type": "info", "subtype": "numeric",  "logicalId": "20493", "unit" : "°C"},
     {"name": "Heat Power", "type": "info", "subtype": "string",  "logicalId": "20575"},
@@ -24,7 +24,7 @@
     {"name": "Temperature foyer", "type": "info", "subtype": "numeric",  "logicalId": "30026", "unit" : "°C"},
     {"name": "Dépression fumées", "type": "info", "subtype": "string",  "logicalId": "30033"},
     {"name": "Contraste télécommande", "type": "info", "subtype": "numeric",  "logicalId": "30142"},
-    {"name": "Température ambiante", "type": "info", "subtype": "numeric",  "logicalId": "50006", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "#value#/100"},
+    {"name": "Température ambiante", "type": "info", "subtype": "numeric",  "logicalId": "50006", "widget": "ambient", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "#value#/100"},
     {"name": "Thermostat Consigne", "type": "info", "subtype": "numeric",  "logicalId": "50138", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT", "offset": "#value#/100"},
     {"name": "INCONNU  30012", "type": "info", "subtype": "numeric",  "logicalId": "30012", "unit" : "°C"},
     {"name": "INCONNU  20119", "type": "info", "subtype": "string",  "logicalId": "20119"},

@@ -9,8 +9,6 @@
 	"category": "wellness",
 	"language" : ["fr_FR"],
 	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile","v4"],
-    "display": "panel",
-    "mobile": "panel",
     "changelog" : "tbd",
     "documentation" : "tbd"
 }

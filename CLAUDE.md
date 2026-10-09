@@ -46,11 +46,28 @@ Target: Jeedom 4.5 and 4.6 (PHP 8.2+).
 - Commands (no meaningful reply, fire-and-forget): `ON_CMD`, `OFF_CMD`,
   `UNBLOCK_CMD`, and `setStoveValue()` for the setpoint (value `*100`,
   zero-padded to 12 chars).
-- State register (`STATE_REGISTER` 30001) drives `jee4heat_stovestate`,
-  `jee4heat_mode`, `jee4heat_stovemessage`, `jee4heat_stoveblocked`.
-  State `9` = blocked (e.g. out of pellets / door open) → exposes the
-  unblock action. Error register `ERROR_REGISTER` (30002) → message via
-  `ERROR_NAMES`.
+- State register (`STATE_REGISTER` 30001) drives `jee4heat_stovestate`
+  (THERMOSTAT_STATE = starting/heating only), `jee4heat_mode`,
+  `jee4heat_stovemessage`, `jee4heat_stoveblocked`. State `9` = blocked
+  (e.g. out of pellets / door open) → exposes the unblock action. Error
+  register `ERROR_REGISTER` (30002) → `jee4heat_errormessage` via
+  `ERROR_NAMES`; the combined `jee4heat_stovemessage` shows the error if any.
+  Derived after the whole reply is decoded (`applyStoveState`), so register
+  order in the reply doesn't matter.
+- Visual state (`jee4heat_visualstate`, widget-only): `VISUAL_STATES` maps
+  the state code to off/starting/heating/stopping/standby/fault/unknown;
+  overridden by `offline` (`OFFLINE_AFTER_FAILURES` consecutive failed reads)
+  and `pending_on`/`pending_off`. Precedence: offline > fault > pending > state.
+- Pending user commands (eqLogic cache `pendingState`/`pendingSetpoint`,
+  expire after `PENDING_TIMEOUT`): on/off keep the optimistic mode until the
+  stove reaches it (off = state 0 or 7); the setpoint keeps the requested
+  value only while the stove still reports its pre-write value (any other
+  value is accepted as the stove's truth), so +/- bursts build on the
+  requested value.
+- Schema version: `configuration.schemaVersion` per eqLogic. Changes to
+  existing commands go in a new idempotent `migrateSchemaV<n>()` + bump
+  `SCHEMA_VERSION`; run from `postSave` and `jee4heat_update()`.
+  `createCommands()` only creates missing commands.
 - Polling: `cron()` runs every minute per enabled eqLogic. Stove-side
   propagation lag is 1–5 min (longer through the vendor cloud), so don't
   expect immediate feedback after a write.
@@ -61,6 +78,14 @@ Target: Jeedom 4.5 and 4.6 (PHP 8.2+).
 - `core/config/devices/*.json` — per-model register maps
   (`generic.json`, `godin_artemis.json`). To add a register/attribute,
   edit the JSON; `postSave` reads it and creates the commands.
+- `core/template/dashboard/jee4heat.html` — desktop equipment widget
+  (`toHtml`; mobile and "widget template off" fall back to core). Data is
+  passed as a JSON blob (ids/values/levels) rendered by the template's JS,
+  which also handles live updates. Commands are bound by role: the
+  `"widget"` key in the model JSON (ambient/power/pellets/service), setpoint
+  via `getSetpointCmd()`. A role absent from the JSON is hidden; secondary
+  metrics also follow the command's "Afficher" checkbox. +/- setpoint
+  clicks are debounced client-side into one absolute `jee4heat_slider` call.
 - `desktop/php/jee4heat.php` + `desktop/js/jee4heat.js` — config UI.
 - `core/ajax/jee4heat.ajax.php` — ajax endpoint (currently no live action).
 - `plugin_info/info.json` — `require: 4.5` (min version; covers 4.5/4.6).

@@ -29,6 +29,9 @@ const MAX_REPLY_SIZE = 16384; // hard cap on a stove reply
 const COMMAND_ATTEMPTS = 3; // tries for a write before giving up
 const SETPOINT_MIN = 10; // fallback setpoint clamp when the slider has no range
 const SETPOINT_MAX = 25;
+const SCHEMA_VERSION = 1; // bump together with a new migrateSchemaV<n>() step
+const PENDING_TIMEOUT = 300; // seconds a user command may take to show up in the registers
+const OFFLINE_AFTER_FAILURES = 3; // consecutive failed reads before the stove is shown offline
 const DATA_QUERY = '["SEL","0"]';
 const UNBLOCK_CMD = '["SEC","1","J30255000000000001"]'; // Unblock
 const OFF_CMD = '["SEC","1","J30254000000000001"]'; // OFF
@@ -53,26 +56,44 @@ const MODE_NAMES = [
   34 => "-"
 ];
 
+// stove state code -> visual state shown by the widget; unlisted codes
+// (30-34, undocumented) map to 'unknown'. Derived states that don't come
+// from this register: 'offline', 'pending_on', 'pending_off'.
+const VISUAL_STATES = [
+  0 => 'off',
+  1 => 'starting',
+  2 => 'starting',
+  3 => 'starting',
+  4 => 'starting',
+  5 => 'heating',
+  6 => 'heating',
+  7 => 'stopping',
+  8 => 'fault',
+  9 => 'fault',
+  10 => 'starting', // recovery after a power cut: the stove relights
+  11 => 'standby'
+];
+
 const ERROR_NAMES = [
-  0 => "No error",
-  1 => "Safety Thermostat HV1 => signalled also in case of Stove OFF",
-  2 => "Safety PressureSwitch HV2 => signalled with Combustion Fan ON",
-  3 => "Extinguishing for Exhausting Temperature lowering",
-  4 => "Extinguishing for water over Temperature",
-  5 => "Extinguishing for Exhausting over Temperature",
-  6 => "unknown",
-  7 => "Encoder Error => No Encoder Signal (in case of P25=1 or 2)",
-  8 => "Encoder Error => Combustion Fan regulation failed (in case of P25=1 or 2)",
-  9 => "Low pressure in to the Boiler",
-  10 => "High pressure in to the Boiler Error",
-  11 => "DAY and TIME not correct due to prolonged absence of Power Supply",
-  12 => "Failed Ignition",
-  13 => "Ignition",
-  14 => "Ignition",
-  15 => "Lack of Voltage Supply",
-  16 => "Ignition",
-  17 => "Ignition",
-  18 => "Lack of Voltage Supply"
+  0 => "Aucune erreur",
+  1 => "Thermostat de sécurité HV1 (signalé aussi poêle éteint)",
+  2 => "Pressostat de sécurité HV2 (ventilateur de combustion en marche)",
+  3 => "Extinction : baisse de la température des fumées",
+  4 => "Extinction : surchauffe de l'eau",
+  5 => "Extinction : surchauffe des fumées",
+  6 => "Erreur inconnue",
+  7 => "Encodeur : pas de signal",
+  8 => "Encodeur : régulation du ventilateur de combustion en échec",
+  9 => "Pression basse dans la chaudière",
+  10 => "Pression haute dans la chaudière",
+  11 => "Date et heure incorrectes après une longue coupure de courant",
+  12 => "Échec de l'allumage",
+  13 => "Défaut d'allumage",
+  14 => "Défaut d'allumage",
+  15 => "Coupure d'alimentation",
+  16 => "Défaut d'allumage",
+  17 => "Défaut d'allumage",
+  18 => "Coupure d'alimentation"
 ];
 
 class jee4heat extends eqLogic
@@ -240,6 +261,7 @@ class jee4heat extends eqLogic
 
     if ($stove_return == "ERROR") {
       log::add(__CLASS__, 'debug', 'getInformationFomStove: error reading information from stove');
+      $_jee4heat->recordReadFailure();
       return false;
     }
 
@@ -248,8 +270,174 @@ class jee4heat extends eqLogic
       return true;
     } else {
       log::add(__CLASS__, 'debug', 'refresh socket has returned a message which is not unpackable =' . $stove_return);
+      $_jee4heat->recordReadFailure();
       return false;
     }
+  }
+
+  /**
+   * Count a failed read; past OFFLINE_AFTER_FAILURES the stove is shown offline.
+   * The counter is reset by a successful readregisters().
+   */
+  private function recordReadFailure()
+  {
+    $this->setCache('readFailures', intval($this->getCache('readFailures', 0)) + 1);
+    $this->refreshVisualState();
+  }
+
+  /**
+   * Start tracking a user command that the stove has not reflected yet.
+   * @param string $_key cache key ('pendingState' or 'pendingSetpoint')
+   * @param array $_data what was requested
+   */
+  private function setPending($_key, $_data)
+  {
+    $_data['until'] = time() + PENDING_TIMEOUT;
+    $this->setCache($_key, $_data);
+  }
+
+  private function clearPending($_key)
+  {
+    $this->setCache($_key, null);
+  }
+
+  /**
+   * @param string $_key
+   * @param string $_field field the caller relies on; an entry without it is dropped
+   * @return array|null the pending request, or null if none, malformed or expired
+   */
+  private function getPending($_key, $_field)
+  {
+    $pending = $this->getCache($_key, null);
+    if (!is_array($pending)) {
+      return null;
+    }
+    if (!isset($pending[$_field])) {
+      $this->clearPending($_key);
+      return null;
+    }
+    if (intval($pending['until'] ?? 0) < time()) {
+      log::add(__CLASS__, 'warning', $this->getName() . ' : commande non prise en compte par le poêle après ' . PENDING_TIMEOUT . ' s (' . json_encode($pending) . ')');
+      $this->clearPending($_key);
+      return null;
+    }
+    return $pending;
+  }
+
+  /**
+   * Whether the stove state register reflects a pending on/off request.
+   * @param string $_target 'on' or 'off'
+   * @param int $_state stove state register value
+   * @return bool
+   */
+  private static function pendingStateReached($_target, $_state)
+  {
+    return $_target == 'off' ? self::isStopped($_state) : !self::isStopped($_state);
+  }
+
+  /**
+   * Off or stopping: what an OFF request leads to, and what maps to mode 'off'.
+   * @param int $_state stove state register value
+   * @return bool
+   */
+  private static function isStopped($_state)
+  {
+    return $_state == 0 || $_state == 7;
+  }
+
+  /**
+   * Current value of the state register, or null if never read.
+   * @return int|null
+   */
+  private function getStoveStateValue()
+  {
+    $cfg = self::getDeviceDefinition($this->getConfiguration('modele'))['configuration'] ?? array();
+    $cmd = $this->getCmd('info', 'jee4heat_' . ($cfg['state'] ?? STATE_REGISTER));
+    if (!is_object($cmd)) {
+      return null;
+    }
+    $value = $cmd->execCmd();
+    return ($value === '' || $value === null) ? null : intval($value);
+  }
+
+  /**
+   * Visual state shown by the widget. Precedence:
+   * offline > fault > pending user command > stove state.
+   * @param int|null $_state stove state register value, null if never read
+   * @return string
+   */
+  private function computeVisualState($_state)
+  {
+    if (intval($this->getCache('readFailures', 0)) >= OFFLINE_AFTER_FAILURES) {
+      return 'offline';
+    }
+    $visual = ($_state === null) ? 'unknown' : (VISUAL_STATES[$_state] ?? 'unknown');
+    if ($visual == 'fault') {
+      return $visual;
+    }
+    $pending = $this->getPending('pendingState', 'target');
+    if ($pending !== null) {
+      return 'pending_' . $pending['target'];
+    }
+    return $visual;
+  }
+
+  /**
+   * @param int|null $_state state register value when the caller has it,
+   *   null to read it from the state command
+   */
+  private function refreshVisualState($_state = null)
+  {
+    $state = $_state ?? $this->getStoveStateValue();
+    $this->checkAndUpdateCmd('jee4heat_visualstate', $this->computeVisualState($state));
+  }
+
+  /**
+   * Derive the state-dependent commands from the state and error registers
+   * once the whole reply is decoded, so the result doesn't depend on the
+   * order of the registers in the reply.
+   * @param int|null $_state state register value (null if absent from the reply)
+   * @param int|null $_error error register value (null if absent from the reply)
+   */
+  private function applyStoveState($_state, $_error)
+  {
+    if ($_state !== null) {
+      // "heating" in the THERMOSTAT_STATE sense: flame lit or lighting
+      $visual = VISUAL_STATES[$_state] ?? 'unknown';
+      $this->checkAndUpdateCmd('jee4heat_stovestate', in_array($visual, array('starting', 'heating')) ? 1 : 0);
+      // keep the optimistic mode set by state_on/state_off until the stove catches up
+      $pending = $this->getPending('pendingState', 'target');
+      if ($pending === null || self::pendingStateReached($pending['target'], $_state)) {
+        if ($pending !== null) {
+          $this->clearPending('pendingState');
+        }
+        $this->checkAndUpdateCmd('jee4heat_mode', self::isStopped($_state) ? 'off' : 'heat');
+      }
+      $this->checkAndUpdateCmd('jee4heat_stoveblocked', $_state == 9 ? 1 : 0);
+      $cmdUnblock = $this->getCmd(null, 'jee4heat_unblock');
+      $unblockVisible = ($_state == 9 ? 1 : 0);
+      if (is_object($cmdUnblock) && $cmdUnblock->getIsVisible() != $unblockVisible) {
+        $cmdUnblock->setIsVisible($unblockVisible);
+        $cmdUnblock->save();
+      }
+    }
+    if ($_error !== null) {
+      $this->checkAndUpdateCmd('jee4heat_errormessage', $_error > 0 ? (ERROR_NAMES[$_error] ?? ('Erreur ' . $_error)) : '');
+    }
+    if ($_state === null && $_error === null) {
+      return;
+    }
+    // legacy combined message: the error, if any, wins over the state label
+    $error = $_error ?? 0;
+    $state = $_state ?? $this->getStoveStateValue();
+    if ($error > 0) {
+      $message = "Erreur : " . (ERROR_NAMES[$error] ?? ('code ' . $error));
+    } else {
+      $message = ($state === null) ? '-' : (MODE_NAMES[$state] ?? '-');
+    }
+    $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
+    if (is_object($cmdMessage))
+      $cmdMessage->event($message);
   }
 
   /**
@@ -301,6 +489,10 @@ class jee4heat extends eqLogic
     $cfg = self::getDeviceDefinition($this->getConfiguration('modele'))['configuration'] ?? array();
     $_state = $cfg['state'] ?? STATE_REGISTER;
     $_error = $cfg['error'] ?? ERROR_REGISTER;
+    $setpointCmd = $this->getSetpointCmd();
+    $setpointId = is_object($setpointCmd) ? $setpointCmd->getLogicalId() : '';
+    $stateValue = null;
+    $errorValue = null;
     for ($i = 2; $i < $nargs + 2; $i++) { // extract all parameters
       $item = $ret[$i] ?? ''; // guard against a truncated/short buffer (partial TCP read)
       // strict shape check: prefix + 5-digit register + 12-char value;
@@ -315,44 +507,55 @@ class jee4heat extends eqLogic
       log::add(__CLASS__, 'debug', "cron : register (prefix $prefix) $register=$registervalue");
       $Command = $this->getCmd(null, 'jee4heat_' . $register); // now set value of jeedom object
       if (is_object($Command)) {
-        if ($register == $_state) { // regular stove state feedback storage
-          // update state information according to value
-          $cmdState = $this->getCmd(null, 'jee4heat_stovestate');
-          if (is_object($cmdState)) {
-            $cmdState->event($registervalue != 0);
-            $this->checkAndUpdateCmd('jee4heat_mode', $registervalue == 0 ? 'off' : 'heat');
-          }
-          $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-          if (is_object($cmdMessage))
-            $cmdMessage->event(MODE_NAMES[$registervalue] ?? '-');
-          // if state == 9, the stove is in blocked mode, so we set the binary indicator to TRUE else FALSE
-          $cmdBlocked = $this->getCmd(null, 'jee4heat_stoveblocked');
-          if (is_object($cmdBlocked))
-            $cmdBlocked->event(($registervalue == 9));
-          $cmdUnblock = $this->getCmd(null, 'jee4heat_unblock');
-          $unblockVisible = ($registervalue == 9 ? 1 : 0);
-          if (is_object($cmdUnblock) && $cmdUnblock->getIsVisible() != $unblockVisible) {
-            $cmdUnblock->setIsVisible($unblockVisible);
-            $cmdUnblock->save();
-          }
-        }
-        if (($register == $_error) && ($registervalue > 0)) { // in the case of ERROR query set feddback in message field and overwrite default stove state message
-          // update error information according to value
-          $cmdMessage = $this->getCmd(null, 'jee4heat_stovemessage');
-          if (is_object($cmdMessage))
-            $cmdMessage->event("Erreur : " . (ERROR_NAMES[$registervalue] ?? ('code ' . $registervalue)));
-        }
+        if ($register == $_state)
+          $stateValue = $registervalue;
+        if ($register == $_error)
+          $errorValue = $registervalue;
         // persist the prefix only when it changes (avoids a DB write per register per read)
         if ($Command->getConfiguration('jee4heat_prefix') !== $prefix) {
           $Command->setConfiguration('jee4heat_prefix', $prefix);
           $Command->save();
+        }
+        if ($Command->getLogicalId() === $setpointId && $this->holdPendingSetpoint($registervalue)) {
+          continue; // keep showing the requested setpoint until the stove reports it
         }
         $Command->event($registervalue);
       } else {
         log::add(__CLASS__, 'debug', 'could not find command ' . $register);
       }
     }
+    if (intval($this->getCache('readFailures', 0)) !== 0) {
+      $this->setCache('readFailures', 0);
+    }
+    $this->applyStoveState($stateValue, $errorValue);
+    $this->refreshVisualState($stateValue);
     return true;
+  }
+
+  /**
+   * Hold the requested setpoint only while the stove still reports the value
+   * it had before the write (propagation lag). Any other value (requested
+   * one, rounded/clamped by the stove, changed on the panel or vendor app)
+   * is the stove's truth and ends the wait.
+   * @param int $_registervalue raw setpoint read from the stove (x100)
+   * @return bool true if a pending setpoint request is still waiting for the stove
+   */
+  private function holdPendingSetpoint($_registervalue)
+  {
+    $pending = $this->getPending('pendingSetpoint', 'value');
+    if ($pending === null) {
+      return false;
+    }
+    if (isset($pending['previous']) && intval($pending['previous']) === $_registervalue
+      && intval($pending['value']) !== $_registervalue) {
+      log::add(__CLASS__, 'debug', 'setpoint : stove still reports ' . $_registervalue . ', waiting for ' . $pending['value']);
+      return true;
+    }
+    if (intval($pending['value']) !== $_registervalue) {
+      log::add(__CLASS__, 'info', $this->getName() . ' : consigne demandée ' . $pending['value'] . ', le poêle a retenu ' . $_registervalue);
+    }
+    $this->clearPending('pendingSetpoint');
+    return false;
   }
  
   /**
@@ -525,7 +728,9 @@ class jee4heat extends eqLogic
   public function state_on()
   {
     if ($this->sendStoveCommand(ON_CMD, 'on')) {
+      $this->setPending('pendingState', array('target' => 'on'));
       $this->checkAndUpdateCmd('jee4heat_mode', 'heat');
+      $this->refreshVisualState();
       $this->getInformations(false);
     }
   }
@@ -538,7 +743,9 @@ class jee4heat extends eqLogic
   public function state_off()
   {
     if ($this->sendStoveCommand(OFF_CMD, 'off')) {
+      $this->setPending('pendingState', array('target' => 'off'));
       $this->checkAndUpdateCmd('jee4heat_mode', 'off');
+      $this->refreshVisualState();
       $this->getInformations(false);
     }
   }
@@ -629,6 +836,16 @@ class jee4heat extends eqLogic
     for ($attempt = 1; $attempt <= COMMAND_ATTEMPTS; $attempt++) {
       if ($this->setStoveValue($ip, $register, $v, $prefix)) {
         log::add(__CLASS__, 'debug', "setpoint : acknowledged by stove");
+        // show the requested value right away (raw x100, calculValueOffset
+        // applies) and keep it until the stove reports it; relative +/-
+        // steps then build on it instead of the stale stove value
+        $raw = (int) round($v * 100);
+        // 'previous' is the last value the stove itself reported: kept from
+        // an earlier pending request, since the command shows the optimistic one
+        $earlier = $this->getPending('pendingSetpoint', 'value');
+        $previous = $earlier['previous'] ?? (int) round(floatval($cmd->execCmd()) * 100);
+        $this->setPending('pendingSetpoint', array('value' => $raw, 'previous' => $previous));
+        $cmd->event($raw);
         $this->getInformations(false);
         return;
       }
@@ -734,16 +951,133 @@ class jee4heat extends eqLogic
   public function postSave()
   {
     log::add(__CLASS__, 'debug', 'postsave start');
+    log::add(__CLASS__, 'info', 'Sauvegarde de l\'équipement [postSave()] : ' . $this->getName());
+    if (!$this->createCommands()) {
+      return;
+    }
+    $this->upgradeSchema();
+    log::add(__CLASS__, 'debug', 'postsave stop');
+    // best-effort refresh so saving never blocks on an unreachable stove;
+    // the cron will retry within a minute and the next read refreshes the display
+    $this->getInformations(false);
+  }
 
+  /**
+   * Setpoint range declared on the setpoint register in the model JSON,
+   * falling back to SETPOINT_MIN/SETPOINT_MAX.
+   * @return array ['min' => float, 'max' => float]
+   */
+  private function getSetpointRange()
+  {
+    $device = self::getDeviceDefinition($this->getConfiguration('modele'));
+    $setpoint = (string) ($device['configuration']['setpoint'] ?? '');
+    foreach ($device['commands'] ?? array() as $item) {
+      if ($setpoint !== '' && (string) ($item['logicalId'] ?? '') === $setpoint) {
+        return array(
+          'min' => is_numeric($item['min'] ?? null) ? floatval($item['min']) : SETPOINT_MIN,
+          'max' => is_numeric($item['max'] ?? null) ? floatval($item['max']) : SETPOINT_MAX
+        );
+      }
+    }
+    return array('min' => SETPOINT_MIN, 'max' => SETPOINT_MAX);
+  }
+
+  /**
+   * Bring the equipment up to SCHEMA_VERSION, one migrateSchemaV<n>() step
+   * at a time. Steps must be idempotent: a new equipment runs them all on
+   * its first save, over freshly created commands.
+   * Called from postSave and from jee4heat_update() (plugin update).
+   * @return void
+   */
+  public function upgradeSchema()
+  {
+    $from = intval($this->getConfiguration('schemaVersion', 0));
+    if ($from >= SCHEMA_VERSION) {
+      return;
+    }
+    for ($version = $from + 1; $version <= SCHEMA_VERSION; $version++) {
+      log::add(__CLASS__, 'info', 'Migration de ' . $this->getName() . ' vers le schéma v' . $version);
+      $this->{'migrateSchemaV' . $version}();
+    }
+    $this->setConfiguration('schemaVersion', SCHEMA_VERSION);
+    $this->save(true); // direct: no pre/postSave, so no recursion nor stove refresh
+  }
+
+  /**
+   * v1: fixes from the pre-schema releases, plus the visual state groundwork.
+   */
+  private function migrateSchemaV1()
+  {
+    foreach ($this->getCmd('info') as $cmd) {
+      $changed = false;
+      foreach (array('dashboard', 'mobile') as $version) {
+        $template = $cmd->getTemplate($version, '');
+        // widget names were declared with a single colon, which core never resolves
+        if (in_array($template, array('jee4heat:mypower', 'jee4heat:mypellets'))) {
+          $cmd->setTemplate($version, str_replace('jee4heat:', 'jee4heat::', $template));
+          $changed = true;
+        }
+        // 'heat' never existed in core: make the silent fallback explicit
+        if (in_array($template, array('heat', 'core::heat'))) {
+          $cmd->setTemplate($version, 'default');
+          $changed = true;
+        }
+      }
+      // generic model exposed raw temperatures (x100) for ambient and setpoint
+      if ($this->getConfiguration('modele') == 'generic'
+        && in_array($cmd->getLogicalId(), array('jee4heat_50006', 'jee4heat_50138'))
+        && $cmd->getConfiguration('calculValueOffset', '') == '') {
+        $cmd->setConfiguration('calculValueOffset', '#value#/100');
+        $changed = true;
+      }
+      if ($changed) {
+        $cmd->save();
+      }
+    }
+    // slider range was hardcoded to 10-25 instead of following the model JSON
+    $this->syncSliderRange(true);
+  }
+
+  /**
+   * Align the setpoint slider range with the model JSON.
+   * @param bool $_onlyIfLegacy only replace the pre-v1 hardcoded 10-25 range,
+   *   leaving a range the user customized untouched
+   */
+  private function syncSliderRange($_onlyIfLegacy)
+  {
+    $slider = $this->getCmd('action', 'jee4heat_slider');
+    if (!is_object($slider)) {
+      return;
+    }
+    $min = $slider->getConfiguration('minValue');
+    $max = $slider->getConfiguration('maxValue');
+    if ($_onlyIfLegacy && !(is_numeric($min) && floatval($min) == 10 && is_numeric($max) && floatval($max) == 25)) {
+      return;
+    }
+    $range = $this->getSetpointRange();
+    if (!is_numeric($min) || floatval($min) != $range['min'] || !is_numeric($max) || floatval($max) != $range['max']) {
+      $slider->setConfiguration('minValue', $range['min']);
+      $slider->setConfiguration('maxValue', $range['max']);
+      $slider->save();
+    }
+  }
+
+  /**
+   * Create the commands declared by the model JSON plus the plugin's own
+   * commands. Existing commands are left untouched (except after a model
+   * change); later changes to existing commands go through upgradeSchema().
+   * @return bool false when the model has no usable device definition
+   */
+  public function createCommands()
+  {
     $_eqName = $this->getName();
-    log::add(__CLASS__, 'info', 'Sauvegarde de l\'équipement [postSave()] : ' . $_eqName);
     // the model JSON is the single source of truth: nothing is denormalized
     // into the eqLogic configuration here (registers are read from the JSON
     // at runtime by readregisters)
     $device = self::getDeviceDefinition($this->getConfiguration('modele'));
     if (empty($device) || !isset($device['commands'])) {
       log::add(__CLASS__, 'debug', 'postsave no usable device definition for ' . $_eqName . ', then do nothing');
-      return;
+      return false;
     }
     $order = 0;
     log::add(__CLASS__, 'debug', 'postsave add commands on ID ' . $this->getId());
@@ -784,10 +1118,13 @@ class jee4heat extends eqLogic
       }
     }
 
-    $this->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", 'heat', '', 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, 2, null, null, null, 0);
-    $this->AddCommand(__('Mode', __FILE__), 'jee4heat_mode', "info", "string", 'heat', '', 'THERMOSTAT_MODE', 0, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, 2, null, null, null, 0);
+    $this->AddCommand(__('Etat', __FILE__), 'jee4heat_stovestate', "info", "binary", null, '', 'THERMOSTAT_STATE', 1, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, 2, null, null, null, 0);
+    $this->AddCommand(__('Mode', __FILE__), 'jee4heat_mode', "info", "string", null, '', 'THERMOSTAT_MODE', 0, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, 2, null, null, null, 0);
     $this->AddCommand(__('Bloqué', __FILE__), 'jee4heat_stoveblocked', "info", "binary", 'jee4heat::mylocked', '', '', 1, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, 2, null, null, null, 1);
     $this->AddCommand(__('Message', __FILE__), 'jee4heat_stovemessage', "info", "string", 'line', '', '', 1, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, 2, null, null, null, 0);
+    // widget-only: see VISUAL_STATES / computeVisualState()
+    $this->AddCommand(__('Etat visuel', __FILE__), 'jee4heat_visualstate', "info", "string", null, '', '', 0, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, null, null, null, null, 0);
+    $this->AddCommand(__('Libellé erreur', __FILE__), 'jee4heat_errormessage', "info", "string", null, '', '', 0, 'default', 'default', 'default', 'default', $order++, '0', true, 'default', null, null, null, null, null, 0);
 
     /* create on, off, unblock and refresh actions */
     $this->AddAction("jee4heat_on", "heat","default", "THERMOSTAT_MODE", 1);
@@ -797,14 +1134,13 @@ class jee4heat extends eqLogic
     $this->AddAction("refresh", __('Rafraichir', __FILE__));
     $this->AddAction("jee4heat_stepup", "+", null, null, 0);
     $this->AddAction("jee4heat_stepdown", "-", null, null, 0);
-    $this->AddAction("jee4heat_slider", "Régler consigne", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 10, 25, 0.5);
+    $range = $this->getSetpointRange();
+    $this->AddAction("jee4heat_slider", "Régler consigne", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $range['min'], $range['max'], 0.5);
+    if ($this->_modelChanged) {
+      $this->syncSliderRange(false);
+    }
     $this->linksetpoint("jee4heat_slider");
-    //$this->AddAction("jee4heat_setvalue", "VV",  null, 'THERMOST_SET_SETPOINT', "slider");
-
-    log::add(__CLASS__, 'debug', 'postsave stop');
-    // best-effort refresh so saving never blocks on an unreachable stove;
-    // the cron will retry within a minute and the next read refreshes the display
-    $this->getInformations(false);
+    return true;
   }
 
   public function preUpdate()
@@ -823,6 +1159,86 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'getinformation start');
     $this->getInformationFomStove($this, $_retry);
     log::add(__CLASS__, 'debug', 'getinformation stop');
+  }
+
+  /**
+   * Info command bound to a widget role ("widget" key in the model JSON).
+   * @param string $_role ambient, power, pellets or service
+   * @return jee4heatCmd|null
+   */
+  private function getWidgetCmd($_role)
+  {
+    $device = self::getDeviceDefinition($this->getConfiguration('modele'));
+    foreach ($device['commands'] ?? array() as $item) {
+      if (($item['widget'] ?? '') === $_role && !empty($item['logicalId'])) {
+        $cmd = $this->getCmd('info', 'jee4heat_' . $item['logicalId']);
+        return is_object($cmd) ? $cmd : null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Desktop widget (core/template/dashboard/jee4heat.html). Mobile, and the
+   * core's per-equipment widget template option when turned off
+   * (display widgetTmpl=0, handled in core template_replace), fall back to
+   * the core rendering, which shows every visible command.
+   * Initial values go through a JSON blob so the template's JS renders the
+   * first paint and live updates with the same code.
+   * @param string $_version
+   * @return string
+   */
+  public function toHtml($_version = 'dashboard')
+  {
+    if (jeedom::versionAlias($_version) != 'dashboard') {
+      return parent::toHtml($_version);
+    }
+    $replace = $this->preToHtml($_version);
+    if (!is_array($replace)) {
+      return $replace;
+    }
+    $version = jeedom::versionAlias($_version);
+    $replace['#eqLogic_class#'] = 'eqLogic_layout_default';
+    if ($this->getDisplay('width', 'auto') == 'auto') {
+      $replace['#width#'] = '250px';
+    }
+
+    $infos = array(
+      'visual' => $this->getCmd('info', 'jee4heat_visualstate'),
+      'message' => $this->getCmd('info', 'jee4heat_stovemessage'),
+      'blocked' => $this->getCmd('info', 'jee4heat_stoveblocked'),
+      'ambient' => $this->getWidgetCmd('ambient'),
+      'setpoint' => $this->getSetpointCmd(),
+      'power' => $this->getWidgetCmd('power'),
+      'pellets' => $this->getWidgetCmd('pellets'),
+      'service' => $this->getWidgetCmd('service')
+    );
+    // secondary metrics follow the command's own "Afficher" checkbox
+    foreach (array('power', 'pellets', 'service') as $role) {
+      if (is_object($infos[$role]) && $infos[$role]->getIsVisible() != 1) {
+        $infos[$role] = null;
+      }
+    }
+    $data = array('ids' => array(), 'values' => array(), 'levels' => array());
+    foreach ($infos as $role => $cmd) {
+      $data['ids'][$role] = is_object($cmd) ? $cmd->getId() : '';
+      $data['values'][$role] = is_object($cmd) ? $cmd->execCmd() : '';
+      $data['levels'][$role] = is_object($cmd) ? $cmd->getCache('alertLevel', 'none') : 'none';
+    }
+    foreach (array('on' => 'jee4heat_on', 'off' => 'jee4heat_off', 'unblock' => 'jee4heat_unblock', 'slider' => 'jee4heat_slider') as $role => $logicalId) {
+      $cmd = $this->getCmd('action', $logicalId);
+      $data['ids'][$role] = is_object($cmd) ? $cmd->getId() : '';
+    }
+    $slider = $this->getCmd('action', 'jee4heat_slider');
+    $range = $this->getSetpointRange();
+    $data['min'] = is_object($slider) && is_numeric($slider->getConfiguration('minValue')) ? floatval($slider->getConfiguration('minValue')) : $range['min'];
+    $data['max'] = is_object($slider) && is_numeric($slider->getConfiguration('maxValue')) ? floatval($slider->getConfiguration('maxValue')) : $range['max'];
+    $data['step'] = 0.5;
+    $replace['#jee4heat_data#'] = json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
+
+    $template = getTemplate('core', $version, 'jee4heat', __CLASS__);
+    $template = translate::exec($template, 'plugins/' . __CLASS__ . '/core/template/' . $version . '/jee4heat.html');
+    return $this->postToHtml($_version, template_replace($replace, $template));
   }
 
 

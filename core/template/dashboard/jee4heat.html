@@ -1,0 +1,276 @@
+<div class="eqLogic eqLogic-widget allowResize jee4heat-widget #custom_layout# #eqLogic_class# #class# #category#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" data-state="unknown" style="width: #width#;height: #height#;#style#">
+  <div class="widget-name">
+    <span style="color:#background-color#" title="#alert_name#">
+      <i class='#alert_icon#'></i>
+    </span>
+    <span class="cmd refresh pull-right cursor" data-cmd_id="#refresh_id#">
+      <i class="fas fa-sync"></i>
+    </span>
+    <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+    <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
+  </div>
+  <div class="j4h-body">
+    <div class="j4h-status">
+      <span class="j4h-icon"><i class="fas fa-fire"></i></span>
+      <span class="j4h-status-text">
+        <span class="j4h-label"></span>
+        <span class="j4h-message"></span>
+      </span>
+      <button type="button" class="btn btn-xs btn-default j4h-power" title="">
+        <i class="fas fa-power-off"></i> <span class="j4h-power-label"></span>
+      </button>
+    </div>
+    <div class="j4h-main">
+      <div class="j4h-ambient">
+        <span class="j4h-ambient-value">--</span><span class="j4h-ambient-unit">°C</span>
+      </div>
+      <div class="j4h-setpoint">
+        <span class="j4h-setpoint-label">{{Consigne}}</span>
+        <button type="button" class="btn btn-xs btn-default j4h-step" data-step="-1" title="{{Baisser la consigne}}"><i class="fas fa-minus"></i></button>
+        <span class="j4h-setpoint-value">--</span>
+        <button type="button" class="btn btn-xs btn-default j4h-step" data-step="1" title="{{Monter la consigne}}"><i class="fas fa-plus"></i></button>
+      </div>
+      <button type="button" class="btn btn-xs btn-danger j4h-unblock"><i class="fas fa-unlock"></i> {{Débloquer}}</button>
+      <div class="j4h-metrics">
+        <div class="j4h-metric" data-role="power">
+          <span class="j4h-metric-label">{{Puissance}}</span>
+          <span class="j4h-gauge"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="j4h-metric-value"></span>
+        </div>
+        <div class="j4h-metric" data-role="pellets">
+          <span class="j4h-metric-label">{{Pellets}}</span>
+          <span class="j4h-metric-value"></span>
+        </div>
+        <div class="j4h-metric" data-role="service">
+          <span class="j4h-metric-label">{{Entretien dans}}</span>
+          <span class="j4h-metric-value"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  #divGraphInfo#
+  <script type="application/json" class="j4h-data">#jee4heat_data#</script>
+  <style>
+    .jee4heat-widget { --j4h-accent: rgba(128, 128, 128, 0.8); }
+    .jee4heat-widget[data-state="heating"] { --j4h-accent: var(--cat-heating-color, #e8590c); }
+    .jee4heat-widget[data-state="starting"],
+    .jee4heat-widget[data-state="pending_on"] { --j4h-accent: var(--al-warning-color, #f0ad4e); }
+    .jee4heat-widget[data-state="stopping"],
+    .jee4heat-widget[data-state="pending_off"],
+    .jee4heat-widget[data-state="standby"] { --j4h-accent: var(--al-info-color, #5bc0de); }
+    .jee4heat-widget[data-state="fault"] { --j4h-accent: var(--al-danger-color, #d9534f); }
+    .jee4heat-widget .j4h-body { padding: 2px 8px 8px; text-align: left; }
+    .jee4heat-widget .j4h-status { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-left: 3px solid var(--j4h-accent); border-radius: var(--border-radius, 4px); background: rgba(128, 128, 128, 0.08); background: color-mix(in srgb, var(--j4h-accent) 14%, transparent); }
+    .jee4heat-widget .j4h-icon { color: var(--j4h-accent); font-size: 1.3em; width: 1.2em; text-align: center; }
+    .jee4heat-widget .j4h-status-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+    .jee4heat-widget .j4h-label { font-weight: bold; color: var(--j4h-accent); }
+    .jee4heat-widget .j4h-message { font-size: 0.85em; opacity: 0.75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .jee4heat-widget[data-state="fault"] .j4h-message { opacity: 1; white-space: normal; }
+    .jee4heat-widget .j4h-power { flex: none; }
+    .jee4heat-widget .j4h-ambient { text-align: center; margin: 8px 0 2px; line-height: 1; }
+    .jee4heat-widget .j4h-ambient-value { font-size: 2.4em; font-weight: 300; }
+    .jee4heat-widget .j4h-ambient-unit { font-size: 1.1em; opacity: 0.7; margin-left: 2px; vertical-align: top; }
+    .jee4heat-widget .j4h-setpoint { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px 0; }
+    .jee4heat-widget .j4h-setpoint-label { opacity: 0.75; margin-right: 2px; }
+    .jee4heat-widget .j4h-setpoint-value { min-width: 4.2em; text-align: center; font-weight: bold; }
+    .jee4heat-widget .j4h-setpoint-value.j4h-dirty { font-style: italic; opacity: 0.7; }
+    .jee4heat-widget .j4h-unblock { display: none; width: 100%; margin: 4px 0; }
+    .jee4heat-widget.j4h-blocked .j4h-unblock { display: block; }
+    .jee4heat-widget .j4h-metrics { border-top: 1px solid rgba(128, 128, 128, 0.25); padding-top: 4px; }
+    .jee4heat-widget .j4h-metric.j4h-absent { display: none; }
+    .jee4heat-widget .j4h-metric { display: flex; align-items: center; gap: 6px; font-size: 0.9em; padding: 1px 0; }
+    .jee4heat-widget .j4h-metric-label { flex: 1; opacity: 0.75; }
+    .jee4heat-widget .j4h-metric-value { font-weight: bold; }
+    .jee4heat-widget .j4h-metric[data-level="warning"] .j4h-metric-value { color: var(--al-warning-color, #f0ad4e); }
+    .jee4heat-widget .j4h-metric[data-level="danger"] .j4h-metric-value { color: var(--al-danger-color, #d9534f); }
+    .jee4heat-widget .j4h-gauge { display: inline-flex; gap: 2px; }
+    .jee4heat-widget .j4h-gauge i { width: 5px; height: 10px; border-radius: 1px; background: rgba(128, 128, 128, 0.3); }
+    .jee4heat-widget .j4h-gauge i.j4h-on { background: var(--j4h-accent); }
+    .jee4heat-widget[data-state="offline"] .j4h-main { opacity: 0.45; }
+    .jee4heat-widget button:disabled { cursor: not-allowed; }
+    @keyframes j4h-flicker { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.12) translateY(-1px); opacity: 0.8; } }
+    @keyframes j4h-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .jee4heat-widget[data-state="heating"] .j4h-icon i,
+    .jee4heat-widget[data-state="starting"] .j4h-icon i { display: inline-block; animation: j4h-flicker 1.6s ease-in-out infinite; }
+    .jee4heat-widget[data-state^="pending_"] .j4h-icon i { animation: j4h-pulse 1.2s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .jee4heat-widget .j4h-icon i { animation: none !important; } }
+  </style>
+  <script>
+    (function() {
+      const root = document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"]')
+      if (!root) return
+      let data
+      try {
+        data = JSON.parse(root.querySelector('.j4h-data').textContent)
+      } catch (e) {
+        return
+      }
+      const LABELS = {
+        off: '{{Arrêt}}', starting: '{{Allumage}}', heating: '{{Chauffe}}', stopping: '{{Extinction}}',
+        standby: '{{Veille}}', fault: '{{Défaut}}', unknown: '{{Inconnu}}', offline: '{{Hors ligne}}',
+        pending_on: '{{Allumage demandé…}}', pending_off: '{{Extinction demandée…}}'
+      }
+      const ICONS = { off: 'fas fa-fire', offline: 'fas fa-plug', fault: 'fas fa-exclamation-triangle', standby: 'fas fa-moon', unknown: 'fas fa-question' }
+      // states in which the power button stops the stove; in 'fault' it is
+      // hidden (the stove refuses OFF while an error is raised)
+      const RUNNING = ['starting', 'heating', 'standby', 'pending_on']
+      const SETPOINT_DEBOUNCE = 1000
+      const values = data.values
+      const levels = data.levels
+      const q = function(sel) { return root.querySelector(sel) }
+      let busy = false
+      let localSetpoint = null
+      let setpointTimer = null
+
+      const toNumber = function(v) {
+        const n = parseFloat(String(v).replace(',', '.'))
+        return isNaN(n) ? null : n
+      }
+      const fmtTemp = function(v) {
+        const n = toNumber(v)
+        return n === null ? '--' : n.toFixed(1)
+      }
+      const fmtPower = function(v) {
+        const n = toNumber(v)
+        if (n === null) return '--'
+        if (n === 0) return '{{Arrêt}}'
+        if (n === 7) return '{{Auto}}'
+        return n + '/6'
+      }
+      const fmtPellets = function(v) {
+        const n = toNumber(v)
+        if (n === null) return '--'
+        if (n === 0) return '{{Arrêt}}'
+        if (n === 10) return '{{Extinction}}'
+        if (n === 255) return '{{Allumage}}'
+        return String(n)
+      }
+      const fmtHours = function(v) {
+        const n = toNumber(v)
+        return n === null ? '--' : Math.round(n) + ' h'
+      }
+
+      const renderMetric = function(role, text, level) {
+        const el = q('.j4h-metric[data-role="' + role + '"]')
+        if (!el) return
+        el.classList.toggle('j4h-absent', data.ids[role] === '')
+        el.setAttribute('data-level', level || 'none')
+        el.querySelector('.j4h-metric-value').textContent = text
+      }
+
+      const render = function() {
+        const state = LABELS[values.visual] ? values.visual : 'unknown'
+        root.setAttribute('data-state', state)
+        q('.j4h-label').textContent = LABELS[state]
+        q('.j4h-message').textContent = values.message || ''
+        q('.j4h-icon i').className = ICONS[state] || 'fas fa-fire'
+        root.classList.toggle('j4h-blocked', String(values.blocked) === '1' && data.ids.unblock !== '')
+
+        const offline = (state === 'offline')
+        const power = q('.j4h-power')
+        const running = RUNNING.indexOf(state) !== -1
+        power.style.display = (state === 'fault' || data.ids.on === '' || data.ids.off === '') ? 'none' : ''
+        power.disabled = busy || offline
+        power.classList.toggle('btn-warning', running)
+        power.classList.toggle('btn-success', !running)
+        q('.j4h-power-label').textContent = running ? '{{Éteindre}}' : '{{Allumer}}'
+        power.setAttribute('data-target', running ? 'off' : 'on')
+
+        q('.j4h-ambient-value').textContent = fmtTemp(values.ambient)
+        q('.j4h-ambient').style.display = data.ids.ambient === '' ? 'none' : ''
+
+        const sp = q('.j4h-setpoint-value')
+        sp.textContent = fmtTemp(localSetpoint !== null ? localSetpoint : values.setpoint) + ' °C'
+        sp.classList.toggle('j4h-dirty', localSetpoint !== null)
+        q('.j4h-setpoint').style.display = (data.ids.setpoint === '' || data.ids.slider === '') ? 'none' : ''
+        root.querySelectorAll('.j4h-step').forEach(function(b) { b.disabled = offline })
+        q('.j4h-unblock').disabled = busy || offline
+
+        renderMetric('power', fmtPower(values.power), 'none')
+        const lit = toNumber(values.power)
+        root.querySelectorAll('.j4h-gauge i').forEach(function(seg, i) {
+          seg.classList.toggle('j4h-on', lit !== null && lit >= 1 && lit <= 6 && i < lit)
+        })
+        q('.j4h-gauge').style.display = (lit === 7) ? 'none' : ''
+        renderMetric('pellets', fmtPellets(values.pellets), 'none')
+        renderMetric('service', fmtHours(values.service), levels.service)
+        q('.j4h-metrics').style.display = (data.ids.power + data.ids.pellets + data.ids.service === '') ? 'none' : ''
+      }
+
+      const refresh = q('.widget-name .refresh')
+      if ('#refresh_id#' !== '') {
+        refresh.addEventListener('click', function() { jeedom.cmd.execute({ id: '#refresh_id#' }) })
+      } else {
+        refresh.remove()
+      }
+
+      const execute = function(id, value, done) {
+        if (id === '') return
+        const params = {
+          id: id,
+          notify: false,
+          success: function() { if (done) done() },
+          error: function(error) {
+            jeedomUtils.showAlert({ message: error.message, level: 'danger' })
+            if (done) done()
+          }
+        }
+        if (value !== undefined) params.value = value
+        jeedom.cmd.execute(params)
+      }
+
+      const runAction = function(id) {
+        busy = true
+        render()
+        execute(id, undefined, function() {
+          busy = false
+          render()
+        })
+      }
+
+      q('.j4h-power').addEventListener('click', function() {
+        runAction(this.getAttribute('data-target') === 'off' ? data.ids.off : data.ids.on)
+      })
+      q('.j4h-unblock').addEventListener('click', function() {
+        runAction(data.ids.unblock)
+      })
+      // +/- clicks are accumulated locally and sent as one absolute setpoint
+      root.querySelectorAll('.j4h-step').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const base = localSetpoint !== null ? localSetpoint : toNumber(values.setpoint)
+          if (base === null) return
+          const next = Math.round((base + parseInt(this.getAttribute('data-step')) * data.step) / data.step) * data.step
+          localSetpoint = Math.min(data.max, Math.max(data.min, next))
+          render()
+          clearTimeout(setpointTimer)
+          setpointTimer = setTimeout(function() {
+            const target = localSetpoint
+            execute(data.ids.slider, { slider: target }, function() {
+              // keep the local value if the user kept clicking meanwhile
+              if (localSetpoint === target) localSetpoint = null
+              render()
+            })
+          }, SETPOINT_DEBOUNCE)
+        })
+      })
+
+      root.j4h = {
+        update: function(role, options) {
+          values[role] = options.value
+          if (options.alertLevel !== undefined) levels[role] = options.alertLevel
+          render()
+        }
+      }
+      // the handler text embeds this render's uid, so core's per-cmd dedup
+      // (by function source) never drops the handler of a re-rendered widget
+      Object.keys(values).forEach(function(role) {
+        if (data.ids[role] === '') return
+        jeedom.cmd.addUpdateFunction(data.ids[role], function(_options) {
+          const widget = document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"]')
+          if (widget && widget.j4h) widget.j4h.update(role, _options)
+        })
+      })
+      render()
+    })()
+  </script>
+</div>
