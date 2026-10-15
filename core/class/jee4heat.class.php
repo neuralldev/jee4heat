@@ -27,6 +27,9 @@ const SOCKET_PORT = 80;
 const SOCKET_TIMEOUT = 5; // seconds, for connect/send/recv
 const MAX_REPLY_SIZE = 16384; // hard cap on a stove reply
 const COMMAND_ATTEMPTS = 3; // tries for a write before giving up
+const READ_ATTEMPTS = 4; // tries for an explicit refresh
+const CRON_READ_ATTEMPTS = 2; // tries per cron tick: the module often refuses a first connection
+const READ_RETRY_DELAY = 3; // seconds between two read attempts
 const SETPOINT_MIN = 10; // fallback setpoint clamp when the slider has no range
 const SETPOINT_MAX = 25;
 const SCHEMA_VERSION = 1; // bump together with a new migrateSchemaV<n>() step
@@ -230,10 +233,10 @@ class jee4heat extends eqLogic
   /**
    * Slecture des informations pour l'équipement donné en paramètre
    * @param jee4heat $_jee4heat
-   * @param bool $_retry whether to retry on error (false = single best-effort attempt)
+   * @param int $_attempts number of tries on transport error (1 = single best-effort attempt)
    * @return bool
    */
-  private function getInformationFomStove($_jee4heat, $_retry = true)
+  private function getInformationFomStove($_jee4heat, $_attempts = READ_ATTEMPTS)
   {
     if (!$_jee4heat->getIsEnable()) {
       log::add(__CLASS__, 'debug', 'getInformationFomStove: equipment is not enabled in Jeedom');
@@ -252,12 +255,11 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', "refresh : modele=" . $modele);
 
     $stove_return = $this->getStoveValue($ip, DATA_QUERY);
-    $attempts = 0;
-    // best-effort callers (e.g. postSave) skip retries; the cron will catch up later
-    while ($_retry && $attempts < 3 && $stove_return == "ERROR") {
-      sleep(3);
+    // best-effort callers (e.g. postSave) use a single attempt; the cron will catch up later
+    for ($attempt = 2; $attempt <= $_attempts && $stove_return == "ERROR"; $attempt++) {
+      sleep(READ_RETRY_DELAY);
+      log::add(__CLASS__, 'debug', 'getInformationFomStove: retry ' . $attempt . '/' . $_attempts);
       $stove_return = $this->getStoveValue($ip, DATA_QUERY);
-      $attempts++;
     }
 
     if ($stove_return == "ERROR") {
@@ -455,9 +457,9 @@ class jee4heat extends eqLogic
     log::add(__CLASS__, 'debug', 'cron start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4heat) {
       if ($jee4heat->getIsEnable())
-        // best-effort: an unreachable stove must not delay the read of
-        // other equipments; the next cron tick retries anyway
-        $jee4heat->getInformationFomStove($jee4heat, false);
+        // one quick retry absorbs the module's sporadic refusals, while an
+        // unreachable stove delays other equipments by ~13 s at most
+        $jee4heat->getInformationFomStove($jee4heat, CRON_READ_ATTEMPTS);
       else
         log::add(__CLASS__, 'debug', 'equipment is disabled, cron skipped');
     }
@@ -1166,7 +1168,7 @@ class jee4heat extends eqLogic
   public function getInformations($_retry = true)
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-    $this->getInformationFomStove($this, $_retry);
+    $this->getInformationFomStove($this, $_retry ? READ_ATTEMPTS : 1);
     log::add(__CLASS__, 'debug', 'getinformation stop');
   }
 
