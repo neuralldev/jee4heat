@@ -158,8 +158,9 @@ class jee4heat extends eqLogic
       socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => SOCKET_TIMEOUT, 'usec' => 0]);
       socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, ['sec' => SOCKET_TIMEOUT, 'usec' => 0]);
       if (!@socket_connect($socket, $_ip, SOCKET_PORT)) {
-        log::add(__CLASS__, 'error', 'getstovevalue: error connecting socket on ' . $_ip);
-        log::add(__CLASS__, 'debug', ' error = ' . socket_strerror(socket_last_error($socket)));
+        // transient refusals are common (module busy with the vendor cloud,
+        // WiFi power saving): only the offline transition is reported
+        log::add(__CLASS__, 'debug', 'getstovevalue: error connecting socket on ' . $_ip . ' : ' . socket_strerror(socket_last_error($socket)));
         socket_close($socket);
         return "ERROR";
       }
@@ -281,7 +282,11 @@ class jee4heat extends eqLogic
    */
   private function recordReadFailure()
   {
-    $this->setCache('readFailures', intval($this->getCache('readFailures', 0)) + 1);
+    $failures = intval($this->getCache('readFailures', 0)) + 1;
+    $this->setCache('readFailures', $failures);
+    if ($failures === OFFLINE_AFTER_FAILURES) {
+      log::add(__CLASS__, 'error', $this->getName() . ' : poêle injoignable (' . $this->getConfiguration('ip') . ') après ' . $failures . ' lectures en échec');
+    }
     $this->refreshVisualState();
   }
 
@@ -524,7 +529,11 @@ class jee4heat extends eqLogic
         log::add(__CLASS__, 'debug', 'could not find command ' . $register);
       }
     }
-    if (intval($this->getCache('readFailures', 0)) !== 0) {
+    $failures = intval($this->getCache('readFailures', 0));
+    if ($failures !== 0) {
+      if ($failures >= OFFLINE_AFTER_FAILURES) {
+        log::add(__CLASS__, 'info', $this->getName() . ' : poêle de nouveau joignable');
+      }
       $this->setCache('readFailures', 0);
     }
     $this->applyStoveState($stateValue, $errorValue);
